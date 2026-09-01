@@ -1,0 +1,170 @@
+js\app.js:370: ['0x2600', '0x1f319'] in /* ─── Theme Toggle (Icon Only ☀️ / 🌙) ───────────────────────── */
+js\app.js:406: ['0x1f50a', '0x1f507'] in /* ─── Sound Toggle (Icon Only 🔊 / 🔇) ───────────────────────── */
+js\app.js:447: ['0x2713'] in ${isDone ? '<span style="color:#10b981;font-size:0.75rem">✓</span>' : '<span sty
+js\app.js:1572: ['0x2713'] in if (dotIntro) { dotIntro.textContent = "✓"; dotIntro.style.color = "#10b981"; }
+js\app.js:1579: ['0x2713'] in if (dotColl) { dotColl.textContent = "✓"; dotColl.style.color = "#10b981"; }
+js\app.js:1619: ['0x2713'] in ${isDone ? '✓ Completed' : '○ ' + statusText}
+js\app.js:1789: ['0x26a1'] in <div class="tm-card-icon-box">${lvl.svgIcon || '⚡'}</div>
+js\app.js:1791: ['0x2713'] in ${isDone ? '✓ COMPLETED' : `LEVEL ${lvl.id}`}
+js\applications-video-engine.js:24: ['0x1f4e1'] in icon: "📡",
+js\applications-video-engine.js:28: ['0x1f5a5'] in { id: "S0", label: "Source Server", ip: "192.168.1.1", level: 0, x: 80,  y: 135,
+js\applications-video-engine.js:29: ['0x1f5a7'] in { id: "R1", label: "Switch Alpha",  ip: "10.0.1.10",    level: 1, x: 220, y: 70,
+js\applications-video-engine.js:30: ['0x1f5a7'] in { id: "R2", label: "Switch Beta",   ip: "10.0.1.20",    level: 1, x: 220, y: 200
+js\applications-video-engine.js:31: ['0x1f4bb'] in { id: "W1", label: "Node Office A", ip: "10.0.2.11",    level: 2, x: 370, y: 40,
+js\applications-video-engine.js:32: ['0x1f4bb'] in { id: "W2", label: "Node Office B", ip: "10.0.2.12",    level: 2, x: 370, y: 115
+js\applications-video-engine.js:33: ['0x1f5b3'] in { id: "W3", label: "Node Datacenter",ip: "10.0.2.21",   level: 2, x: 370, y: 220
+js\applications-video-engine.js:34: ['0x1f4f1'] in { id: "T1", label: "Terminal X",    ip: "172.16.0.5",   level: 3, x: 500, y: 80,
+js\applications-video-engine.js:35: ['0x1f4f1'] in { id: "T2", label: "Terminal Y",    ip: "172.16.0.6",   level: 3, x: 500, y: 160
+js\applications-video-engine.js:78: ['0x2794'] in queueAction: "PROCESS S0 ➔ ENQUEUE R1, R2"
+js\applications-video-engine.js:82: ['0x2794'] in title: "4. Dequeue Alpha ➔ Broadcast to Level 2 (Office A & B)",
+js\applications-video-engine.js:89: ['0x2794'] in queueAction: "PROCESS R1 ➔ ENQUEUE W1, W2"
+js\applications-video-engine.js:93: ['0x2794'] in title: "5. Dequeue Beta ➔ Broadcast to Level 2 (Datacenter)",
+js\applications-video-engine.js:100: ['0x2794'] in queueAction: "PROCESS R2 ➔ ENQUEUE W3"
+js\applications-video-engine.js:104: ['0x2794'] in title: "6. Dequeue Office B ➔ Broadcast to Level 3 (Terminals X & Y)",
+js\applications-video-engine.js:111: ['0x2794'] in queueAction: "PROCESS W2 ➔ ENQUEUE T1, T2"
+js\applications-video-engine.js:131: ['0x1f3ae'] in icon: "🎮",
+js\applications-video-engine.js:136: ['0x1f3c3'] in start: { r: 1, c: 0, label: "START 🏃" },
+js\applications-video-engine.js:137: ['0x1f48e'] in goal:  { r: 3, c: 6, label: "GOAL 💎" },
+js\applications-video-engine.js:209: ['0x1f3c1'] in queueAction: "VICTORY AT GOAL 🏁"
+js\applications-video-engine.js:218: ['0x1f5fa'] in icon: "🗺️",
+js\applications-video-engine.js:222: ['0x1f4cd'] in { id: "SEA", label: "Seattle (START)",  level: 0, x: 70,  y: 135, icon: "📍" },
+js\applications-video-engine.js:223: ['0x1f3d4'] in { id: "DEN", label: "Denver",           level: 1, x: 200, y: 75,  icon: "🏔️" },
+js\applications-video-engine.js:224: ['0x1f309'] in { id: "SF",  label: "San Francisco",    level: 1, x: 200, y: 205, icon: "🌉" },
+js\applications-video-engine.js:225: ['0x1f3d9'] in { id: "CHI", label: "Chicago",          level: 2, x: 340, y: 75,  icon: "🏙️" },
+js\applications-video-engine.js:226: ['0x1f334'] in { id: "LA",  label: "Los Angeles",      level: 2, x: 340, y: 205, icon: "🌴" },
+js\applications-video-engine.js:227: ['0x1f920'] in { id: "DAL", label: "Dallas",           level: 3, x: 420, y: 205, icon: "🤠" },
+js\applications-video-engine.js:228: ['0x1f3af'] in { id: "NYC", label: "New York (DEST)",  level: 3, x: 490, y: 75,  icon: "🎯" }
+js\applications-video-engine.js:263: ['0x2794', '0x2794'] in desc: "Dequeue Denver ➔ discovers Chicago (CHI, Dist 2). Dequeue SF ➔ discovers 
+js\applications-video-engine.js:273: ['0x2794'] in desc: "Dequeue Chicago ➔ discovers New York (NYC) at Distance 3! Since it's BFS,
+js\applications-video-engine.js:283: ['0x2794', '0x2794', '0x2794'] in desc: "Path: Seattle ➔ Denver ➔ Chicago ➔ New York (3 steps) vs Southern route (
+js\applications-video-engine.js:297: ['0x1f465'] in icon: "👥",
+js\applications-video-engine.js:301: ['0x1f464'] in { id: "YOU",   label: "You",       degree: 0, x: 80,  y: 135, icon: "👤", role: "
+js\applications-video-engine.js:302: ['0x1f468', '0x1f4bb'] in { id: "ALEX",  label: "Alex",      degree: 1, x: 210, y: 70,  icon: "👨‍💻", role:
+js\applications-video-engine.js:303: ['0x1f469', '0x1f52c'] in { id: "MAYA",  label: "Maya",      degree: 1, x: 210, y: 200, icon: "👩‍🔬", role:
+js\applications-video-engine.js:304: ['0x1f3a8'] in { id: "LIAM",  label: "Liam",      degree: 2, x: 350, y: 40,  icon: "🎨", role: "
+js\applications-video-engine.js:305: ['0x1f4ca'] in { id: "CHLOE", label: "Chloe",     degree: 2, x: 350, y: 110, icon: "📊", role: "
+js\applications-video-engine.js:306: ['0x1f680'] in { id: "NOAH",  label: "Noah",      degree: 2, x: 350, y: 210, icon: "🚀", role: "
+js\applications-video-engine.js:307: ['0x1f310'] in { id: "SOPH",  label: "Sophia",    degree: 3, x: 490, y: 75,  icon: "🌐", role: "
+js\applications-video-engine.js:308: ['0x1f4bc'] in { id: "ETHAN", label: "Ethan",     degree: 3, x: 490, y: 175, icon: "💼", role: "
+js\applications-video-engine.js:341: ['0x2794'] in desc: "Dequeue Alex & Maya ➔ discovers Liam, Chloe, and Noah (Distance = 2 hops)
+js\applications-video-engine.js:350: ['0x2794'] in desc: "Dequeue Chloe & Noah ➔ discovers Sophia and Ethan (Distance = 3 hops). Al
+js\applications-video-engine.js:780: ['0x1f9f1'] in svg += `<text x="${x + cellSize/2 - 1}" y="${y + cellSize/2 + 4}" text-anchor="m
+js\applications-video-engine.js:782: ['0x1f3c3'] in svg += `<text x="${x + cellSize/2 - 1}" y="${y + cellSize/2 + 4}" text-anchor="m
+js\applications-video-engine.js:784: ['0x1f48e'] in svg += `<text x="${x + cellSize/2 - 1}" y="${y + cellSize/2 + 4}" text-anchor="m
+js\applications-video-engine.js:813: ['0x1f3c3'] in <text x="${px}" y="${py + 4}" text-anchor="middle" font-size="11">🏃</text>
+js\applications-video-engine.js:828: ['0x1f3c3'] in <text x="16" y="104" font-size="12">🏃</text>
+js\applications-video-engine.js:831: ['0x1f48e'] in <text x="16" y="128" font-size="12">💎</text>
+js\applications-video-engine.js:834: ['0x1f9f1'] in <text x="16" y="152" font-size="12">🧱</text>
+js\demo-player.js:85: ['0x2794', '0x2794'] in desc = "The 3-Step BFS Heartbeat: Dequeue Front ➔ Explore Doors ➔ Enqueue New Ne
+js\demo-player.js:159: ['0x2794'] in <div class="v-arrow-pulse">➔</div>
+js\demo-player.js:293: ['0x1f9ed'] in if (explorerSlot) explorerSlot.innerHTML = `<span style="color:#b45309; font-wei
+js\drag-drop.js:88: ['0x1f9ed'] in this.ghostEl.innerHTML = `<span>🧭 ${nodeId}</span>`;
+js\drag-drop.js:123: ['0x26a0'] in title: "⚠️ FIFO Queue Rule",
+js\game-engine.js:175: ['0x26a0'] in title: "⚠️ Unreachable Component Node",
+js\game-engine.js:189: ['0x26a0'] in title: "⚠️ Visited Set Guard Active",
+js\game-engine.js:220: ['0x26a0'] in title: "⚠️ Start at the Source Node",
+js\game-engine.js:230: ['0x26a1'] in this.showToast("⚡ Dequeue the front node first before adding new neighbors!", "i
+js\game-engine.js:242: ['0x26a0'] in title: "⚠️ Not an Adjacent Neighbor",
+js\game-engine.js:284: ['0x2794'] in text: `Discovered '${nodeId}' via '${parentNode}' ➔ Added Tree Edge (${parentNod
+js\game-engine.js:331: ['0x2794'] in text: `Dequeued '${nextNode}' from FRONT ➔ Current Explorer Node (Level ${this._
+js\game-engine.js:350: ['0x1f3af'] in this.showToast(`🎯 Goal reached at '${nodeId}'! Shortest path discovered.`, "succ
+js\game-engine.js:465: ['0x2794', '0x2794'] in fix: "Follow the 3-step loop: Dequeue from FRONT ➔ Discover unvisited neighbors 
+js\game-engine.js:511: ['0x2794'] in ${idx < orderList.length - 1 ? '<span class="vic-seq-arrow">➔</span>' : ''}
+js\game-engine.js:546: ['0x2794'] in pathBox.innerHTML = `<strong>Shortest Path:</strong> ${shortestPath.join(" ➔ ")}
+js\game-engine.js:619: ['0x2794'] in orderText.textContent = this.bfsOrder.join(" ➔ ") || startNode;
+js\game-engine.js:862: ['0x2794'] in if (nextMoveBtn) nextMoveBtn.textContent = `Single Step: ${nextAction.buttonText
+js\guided-solve.js:77: ['0x2794'] in buttonText: `Step: Finish '${current}' ➔ Dequeue '${nextNode}'`,
+js\guided-solve.js:173: ['0x26a0'] in title: "⚠️ Cycle / Re-discovery Mistake",
+js\guided-solve.js:180: ['0x26a0'] in title: "⚠️ Duplicate Queue Mistake",
+js\guided-solve.js:189: ['0x26a0'] in title: "⚠️ Disconnected Node Mistake",
+js\guided-solve.js:199: ['0x26a0'] in title: "⚠️ Empty Queue Mistake",
+js\guided-solve.js:206: ['0x26a0'] in title: "⚠️ Traversal Mistake",
+js\guided-solve.js:208: ['0x2794', '0x2794'] in fix: `Remember the 3-step rhythm: Dequeue front ➔ Explore connected doors ➔ Enqu
+js\quiz-data.js:72: ['0x2794', '0x2794'] in { id: "A", text: "Enqueue neighbors ➔ Explore ➔ Dequeue front", correct: false }
+js\quiz-data.js:73: ['0x2794', '0x2794'] in { id: "B", text: "Dequeue front ➔ Explore connected edges ➔ Enqueue unvisited ne
+js\quiz-data.js:74: ['0x2794', '0x2794'] in { id: "C", text: "Explore all nodes ➔ Dequeue everything ➔ Mark root visited", c
+js\quiz-data.js:75: ['0x2794', '0x2794'] in { id: "D", text: "Dequeue front ➔ Clear visited set ➔ Repeat", correct: false }
+js\quiz-engine.js:150: ['0x2794', '0x2794'] in ${this.currentIndex === totalQ - 1 ? 'Finish Quiz ➔' : 'Next Question ➔'}
+js\spanning-tree-studio.js:211: ['0x2794'] in title: `Step ${stepCount}: Discovered Neighbor '${v}' via '${u}' ➔ Add Tree Edge
+js\spanning-tree-studio.js:222: ['0x2794'] in headline: `Node '${v}' discovered for the first time via edge (${u} ➔ ${v}).`,
+js\spanning-tree-studio.js:226: ['0x1f333', '0x2794'] in `🌳 Spanning Tree: Added Discovery Edge (${u} ➔ ${v}) at Level ${uLevel + 1}.`
+js\spanning-tree-studio.js:235: ['0x2794'] in title: `Step ${stepCount}: Inspect Neighbor '${v}' ➔ Already Discovered (Non-Tre
+js\spanning-tree-studio.js:248: ['0x2794'] in `Edge (${u} ➔ ${v}) is a Cross/Back edge.`,
+js\spanning-tree-studio.js:278: ['0x2794'] in `Final BFS Traversal Order: ${bfsOrder.join(' ➔ ')}`,
+js\spanning-tree-studio.js:401: ['0x1f333'] in <div class="st-icon-pill">🌳</div>
+js\spanning-tree-studio.js:427: ['0x1f4cd'] in <h4>📍 Original Graph Topology</h4>
+js\spanning-tree-studio.js:449: ['0x1f333'] in <h4>🌳 BFS Spanning Tree (Discovery Tree)</h4>
+js\spanning-tree-studio.js:468: ['0x1f4e5'] in <span class="st-q-icon">📥</span>
+js\spanning-tree-studio.js:474: ['0x2794'] in <span class="st-q-arrow">➔</span>
+js\spanning-tree-studio.js:485: ['0x2794'] in <span class="st-q-arrow">➔</span>
+js\spanning-tree-studio.js:491: ['0x2794'] in <span class="order-seq">${step.bfsOrder.length > 0 ? step.bfsOrder.join(' ➔ ') :
+js\spanning-tree-studio.js:521: ['0x1f504'] in 🔄 Restart
+js\theory-bfs-demo.js:63: ['0x2794'] in subtitle: "Level 0 ➔ Level 1",
+js\theory-bfs-demo.js:75: ['0x2794'] in subtitle: "Level 1 ➔ Level 2",
+js\theory-bfs-demo.js:87: ['0x2794'] in subtitle: "Level 1 ➔ Level 2",
+js\theory-bfs-demo.js:124: ['0x2794', '0x2794', '0x2794', '0x2794', '0x2794'] in narration: "Pop F from front of Queue. Queue is empty! Traversal order: A ➔ B ➔ 
+js\theory-bfs-demo.js:130: ['0x2713'] in actionTag: "COMPLETE ✓",
+js\theory-bfs-demo.js:175: ['0x2794'] in subtitle: "Level 0 ➔ Level 1",
+js\theory-bfs-demo.js:187: ['0x2794'] in subtitle: "Level 1 ➔ Level 2",
+js\theory-bfs-demo.js:199: ['0x2794'] in subtitle: "Level 1 ➔ Level 2",
+js\theory-bfs-demo.js:211: ['0x2794'] in subtitle: "Level 1 ➔ Level 2",
+js\theory-bfs-demo.js:247: ['0x2794'] in subtitle: "Level 2 ➔ Level 3",
+js\theory-bfs-demo.js:272: ['0x2794', '0x2794', '0x2794', '0x2794', '0x2794', '0x2794', '0x2794', '0x2794'] in narration: "Pop I from Queue. Queue is empty! Traversal: A ➔ B ➔ C ➔ D ➔ E ➔ F ➔
+js\theory-bfs-demo.js:278: ['0x2713'] in actionTag: "COMPLETE ✓",
+js\theory-bfs-demo.js:326: ['0x2794'] in subtitle: "Level 0 ➔ Level 1",
+js\theory-bfs-demo.js:338: ['0x2794'] in subtitle: "Level 1 ➔ Level 2",
+js\theory-bfs-demo.js:350: ['0x2794'] in subtitle: "Level 1 ➔ Level 2",
+js\theory-bfs-demo.js:374: ['0x2794'] in subtitle: "Level 2 ➔ Level 3",
+js\theory-bfs-demo.js:398: ['0x2794'] in subtitle: "Level 2 ➔ Level 3",
+js\theory-bfs-demo.js:441: ['0x2713'] in actionTag: "COMPLETE ✓",
+js\theory-bfs-demo.js:452: ['0x2794', '0x2794'] in description: "Binary Search Tree where Left < Root < Right. BFS traverses the tr
+js\theory-bfs-demo.js:483: ['0x2794'] in subtitle: "Level 0 ➔ Level 1 (BST Children)",
+js\theory-bfs-demo.js:495: ['0x2794'] in subtitle: "Level 1 ➔ Level 2",
+js\theory-bfs-demo.js:507: ['0x2794'] in subtitle: "Level 1 ➔ Level 2",
+js\theory-bfs-demo.js:555: ['0x2794', '0x2794', '0x2794', '0x2794', '0x2794', '0x2794'] in subtitle: "BST Traversal: 50 ➔ 30 ➔ 70 ➔ 20 ➔ 40 ➔ 60 ➔ 80",
+js\theory-bfs-demo.js:556: ['0x2794', '0x2794'] in narration: "Pop 80 from Queue. Queue is empty! BFS visits BST in level-order: Ro
+js\theory-bfs-demo.js:562: ['0x2713'] in actionTag: "COMPLETE ✓",
+js\theory-bfs-demo.js:604: ['0x2794'] in subtitle: "Level 0 ➔ Level 1 (Full Level)",
+js\theory-bfs-demo.js:616: ['0x2794'] in subtitle: "Level 1 ➔ Level 2 (Left Children)",
+js\theory-bfs-demo.js:628: ['0x2794'] in subtitle: "Level 1 ➔ Level 2 (Right Children)",
+js\theory-bfs-demo.js:676: ['0x2794', '0x2794', '0x2794', '0x2794', '0x2794', '0x2794'] in subtitle: "Sequential order: A ➔ B ➔ C ➔ D ➔ E ➔ F ➔ G",
+js\theory-bfs-demo.js:683: ['0x2713'] in actionTag: "COMPLETE ✓",
+js\theory-bfs-demo.js:725: ['0x2794'] in subtitle: "Level 0 ➔ Level 1 (BF = 0)",
+js\theory-bfs-demo.js:737: ['0x2794'] in subtitle: "Level 1 ➔ Level 2",
+js\theory-bfs-demo.js:749: ['0x2794'] in subtitle: "Level 1 ➔ Level 2",
+js\theory-bfs-demo.js:804: ['0x2713'] in actionTag: "COMPLETE ✓",
+js\theory-bfs-demo.js:842: ['0x2794'] in subtitle: "Level 0 ➔ Level 1",
+js\theory-bfs-demo.js:854: ['0x2794'] in subtitle: "Level 1 ➔ Level 2",
+js\theory-bfs-demo.js:866: ['0x2794'] in subtitle: "Level 2 ➔ Level 3",
+js\theory-bfs-demo.js:878: ['0x2794'] in subtitle: "Level 3 ➔ Level 4",
+js\theory-bfs-demo.js:890: ['0x2794', '0x2794', '0x2794', '0x2794'] in subtitle: "Traversal: A ➔ B ➔ C ➔ D ➔ E",
+js\theory-bfs-demo.js:897: ['0x2713'] in actionTag: "COMPLETE ✓",
+js\theory-bfs-demo.js:939: ['0x2794'] in subtitle: "Level 0 ➔ Level 1 (High Breadth)",
+js\theory-bfs-demo.js:963: ['0x2794'] in subtitle: "Level 1 ➔ Level 2",
+js\theory-bfs-demo.js:1023: ['0x2794', '0x2794'] in subtitle: "Level order: A ➔ B, C, D, E, F ➔ G, H",
+js\theory-bfs-demo.js:1030: ['0x2713'] in actionTag: "COMPLETE ✓",
+js\theory-bfs-demo.js:1301: ['0x2605'] in <span class="legend-circle legend-current">★</span>
+js\theory-bfs-demo.js:1305: ['0x2713'] in <span class="legend-circle legend-visited">✓</span>
+js\theory-bfs-demo.js:1449: ['0x1f389'] in ${step.done ? '🎉 Queue empty • BFS Traversal successfully completed!' : 'Queue i
+js\theory-bfs-demo.js:1455: ['0x2794'] in <span class="dir-arrow">➔</span>
+js\theory-bfs-demo.js:1471: ['0x2794'] in <span class="dir-arrow">➔</span>
+js\theory-bfs-demo.js:1531: ['0x2713'] in badgeIcon = "✓";
+js\theory-bfs-demo.js:1534: ['0x2605'] in badgeIcon = "★";
+js\theory-bfs-demo.js:1540: ['0x2713'] in badgeIcon = "✓";
+js\theory-data.js:37: ['0x2794'] in { label: "Node A", val: "➔ [B, C]", active: true },
+js\theory-data.js:38: ['0x2794'] in { label: "Node B", val: "➔ [D]", active: false },
+js\theory-data.js:39: ['0x2794'] in { label: "Node C", val: "➔ []", active: false },
+js\theory-data.js:40: ['0x2794'] in { label: "Node D", val: "➔ []", active: false }
+js\theory-data.js:68: ['0x2794', '0x2794'] in step2Val: "Level 0 ➔ Level 1 ➔ Level 2",
+js\theory-data.js:72: ['0x2794', '0x2794', '0x2794', '0x2794'] in step4Val: "A ➔ B ➔ C ➔ D ➔ E",
+js\theory-data.js:100: ['0x2794', '0x2794'] in "Maintains the BFS 3-step engine loop: Dequeue Front ➔ Explore Adjacent Neighbor
+js\theory-data.js:107: ['0x2794'] in step2Val: "Pop A ➔ Explore",
+js\theory-data.js:112: ['0x2794'] in trayLabel: "FIFO QUEUE WAITING LINE (FRONT ➔ REAR):",
+js\theory-data.js:181: ['0x2794'] in step1Val: "Edge (B ➔ C)",
+js\theory-data.js:219: ['0x2794'] in step1Val: "A ➔ B (New Branch)",
+js\theory-data.js:221: ['0x2794'] in step2Val: "A ➔ C (New Branch)",
+js\theory-data.js:223: ['0x2794'] in step3Val: "B ➔ C (Same Level 1)",
+js\theory-data.js:299: ['0x2794', '0x2794'] in step3Val: "T ➔ B ➔ S",
+js\theory-data.js:301: ['0x2794', '0x2794'] in step4Val: "S ➔ B ➔ T (Cost: 2 hops)",
+js\theory-data.js:333: ['0x2794'] in step1Val: "Source A ➔ {A, B, C}",
+js\theory-data.js:337: ['0x2794'] in step3Val: "Source D ➔ {D, E}",

@@ -1,0 +1,1848 @@
+/**
+ * AlgoLearn - Main Application Coordinator
+ * Interactive Breadth First Search (BFS) Traversal & Graph Algorithms Suite
+ * Presentation Reference Layouts: Sidebar Drawer, Overview, Learn (12 Chapters), Visualize (Cinema Studio), Progress (Modules FN-01 to FN-10)
+ */
+
+class AppController {
+  constructor() {
+    this.activeTab = "overview";
+    this.activeChapterId = "graph-foundations";
+    this.activeLesson = "intro"; // 'intro' | 'shortest_path'
+    this.activeFilter = "all";   // 'all' | 'foundation' | 'technique' | 'analysis' | 'examination'
+    this.currentTheme = localStorage.getItem("algolearn_theme") || "light";
+    this.soundEnabled = localStorage.getItem("algolearn_sound") !== "false";
+
+    // Video Player State
+    this.isVideoPlaying = true;
+    this.videoTime = 1;
+    this.videoDuration = 30;
+    this.videoSpeed = 1.0;
+    this.videoVolume = 0.8;
+    this.videoTimer = null;
+    this.animFrameId = null;
+
+    // Completed chapters / activities tracker
+    this.completedChapters = new Set(JSON.parse(localStorage.getItem("algolearn_completed_chapters") || "[]"));
+    this.completedActivities = new Set(JSON.parse(localStorage.getItem("algolearn_completed_activities") || "[]"));
+    this.completedVideos = new Set(JSON.parse(localStorage.getItem("algolearn_completed_videos") || "[]"));
+
+    // 10 BFS Curriculum Modules Data (FN-01 to FN-10)
+    this.modulesData = [
+      {
+        id: "FN-01",
+        code: "FN-01",
+        category: "foundation",
+        categoryLabel: "FOUNDATION",
+        title: "GRAPH FOUNDATIONS & ADJACENCY STRUCTURES",
+        desc: "Master vertices, directed/undirected edges, adjacency lists, and O(V + E) vs O(V²) matrix representations.",
+        criteria: "Criteria: Read Chapter 01 and understand node-edge mapping in graph traversal.",
+        progress: 0,
+        status: "Not Started",
+        tabTarget: "theory",
+        chapterTarget: "graph-foundations"
+      },
+      {
+        id: "FN-02",
+        code: "FN-02",
+        category: "foundation",
+        categoryLabel: "FOUNDATION",
+        title: "BFS LEVEL-BY-LEVEL EXPLORATION",
+        desc: "Explore graph nodes in expanding concentric wave rings starting from source root vertex.",
+        criteria: "Criteria: Complete Chapter 02 and observe the distance-based discovery order.",
+        progress: 0,
+        status: "Not Started",
+        tabTarget: "theory",
+        chapterTarget: "what-is-bfs"
+      },
+      {
+        id: "FN-03",
+        code: "FN-03",
+        category: "technique",
+        categoryLabel: "TECHNIQUE",
+        title: "THE FIFO QUEUE ENGINE (LEVEL 1)",
+        desc: "First-In, First-Out waiting line mechanics maintaining strict proximity order (O(1) Enqueue & Dequeue).",
+        criteria: "Criteria: Complete Level 1 in the game by enqueuing and dequeuing nodes in FIFO order.",
+        progress: 0,
+        status: "Not Started",
+        tabTarget: "game",
+        chapterTarget: "fifo-queue-engine"
+      },
+      {
+        id: "FN-04",
+        code: "FN-04",
+        category: "technique",
+        categoryLabel: "TECHNIQUE",
+        title: "VISITED SET & CYCLE PREVENTION (LEVEL 2)",
+        desc: "Maintain a boolean visited array to prevent duplicate queue insertions and infinite loop traps.",
+        criteria: "Criteria: Complete Level 2/3 by correctly tracking visited status and skipping cycle edges.",
+        progress: 0,
+        status: "Not Started",
+        tabTarget: "game",
+        chapterTarget: "visited-tracking"
+      },
+      {
+        id: "FN-05",
+        code: "FN-05",
+        category: "technique",
+        categoryLabel: "TECHNIQUE",
+        title: "DISCOVERY EDGES VS CROSS EDGES (LEVEL 4)",
+        desc: "Classify graph edges during BFS traversal into tree branches (discovery) and lateral links (cross edges).",
+        criteria: "Criteria: Read Chapter 06 and complete Level 4 edge classification challenge.",
+        progress: 0,
+        status: "Not Started",
+        tabTarget: "theory",
+        chapterTarget: "edge-classification"
+      },
+      {
+        id: "FN-06",
+        code: "FN-06",
+        category: "technique",
+        categoryLabel: "TECHNIQUE",
+        title: "BFS SPANNING TREE STUDIO (LEVEL 5)",
+        desc: "Construct the rooted acyclic BFS spanning tree containing exactly |V| - 1 discovery edges.",
+        criteria: "Criteria: Form the complete BFS spanning tree in the interactive spanning tree workspace.",
+        progress: 0,
+        status: "Not Started",
+        tabTarget: "game",
+        chapterTarget: "spanning-tree"
+      },
+      {
+        id: "FN-07",
+        code: "FN-07",
+        category: "analysis",
+        categoryLabel: "ANALYSIS",
+        title: "SHORTEST PATH IN UNWEIGHTED GRAPHS",
+        desc: "Prove mathematical optimality of BFS shortest paths and backtrack using parent pointers.",
+        criteria: "Criteria: Study Chapter 08 and watch the shortest path route playback video.",
+        progress: 0,
+        status: "Not Started",
+        tabTarget: "theory",
+        chapterTarget: "shortest-path"
+      },
+      {
+        id: "FN-08",
+        code: "FN-08",
+        category: "analysis",
+        categoryLabel: "ANALYSIS",
+        title: "CONNECTED COMPONENTS & MULTI-SOURCE BFS",
+        desc: "Traverse disconnected graph clusters and execute simultaneous multi-source frontier expansion.",
+        criteria: "Criteria: Read Chapter 09 and identify all disconnected graph island partitions.",
+        progress: 0,
+        status: "Not Started",
+        tabTarget: "theory",
+        chapterTarget: "connected-components"
+      },
+      {
+        id: "FN-09",
+        code: "FN-09",
+        category: "analysis",
+        categoryLabel: "ANALYSIS",
+        title: "TIME & SPACE COMPLEXITY ANALYSIS O(V+E)",
+        desc: "Derive O(V + E) time bound using aggregate analysis and analyze peak queue auxiliary memory O(V).",
+        criteria: "Criteria: Review Chapter 11 complexity bounds and comparative BFS vs DFS metrics.",
+        progress: 0,
+        status: "Not Started",
+        tabTarget: "theory",
+        chapterTarget: "complexity-analysis"
+      },
+      {
+        id: "FN-10",
+        code: "FN-10",
+        category: "examination",
+        categoryLabel: "EXAMINATION",
+        title: "BFS GRAPH MASTERY EXAMINATION",
+        desc: "Comprehensive examination covering queue mechanics, graph traversals, shortest path, and complexity.",
+        criteria: "Criteria: Score at least 80% on the BFS mastery examination.",
+        progress: 0,
+        status: "Not Started",
+        tabTarget: "quiz",
+        chapterTarget: null
+      }
+    ];
+  }
+
+  init() {
+    this.initTheme();
+    this.initSound();
+    this.bindEvents();
+
+    // Initialize Game Engine if elements are present
+    const svgEl = document.getElementById("graph-svg");
+    const containerEl = document.getElementById("graph-canvas-container");
+    if (typeof GameEngine !== "undefined" && svgEl && containerEl) {
+      window.game = new GameEngine();
+      window.game.init(svgEl, containerEl);
+    }
+
+    // Render Initial Views
+    this.renderTOC();
+    this.renderActiveChapter();
+    this.renderProgressModules();
+    this.updateProgressStats();
+    this.initVideoPlayer();
+
+    // Render Game Hub Grid
+    this.renderLevelsGrid();
+
+    // Start on Overview
+    this.switchTab("overview");
+  }
+
+  /* ─── Event Binding ─────────────────────────────────────────── */
+
+  bindEvents() {
+    // Topbar Menu Toggle (Open/Close Sidebar Drawer)
+    const toggleBtn = document.getElementById("topbar-menu-toggle");
+    if (toggleBtn) {
+      toggleBtn.addEventListener("click", () => this.toggleSidebar());
+    }
+
+    // Sidebar Close Button
+    const closeBtn = document.getElementById("sidebar-close-btn");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => this.closeSidebar());
+    }
+
+    // Sidebar Backdrop Click
+    const backdrop = document.getElementById("sidebar-backdrop");
+    if (backdrop) {
+      backdrop.addEventListener("click", () => this.closeSidebar());
+    }
+
+    // Nav Menu Buttons
+    document.querySelectorAll(".sidebar-nav-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const tab = btn.dataset.tab;
+        if (tab) {
+          this.switchTab(tab);
+          if (window.innerWidth <= 768) {
+            this.closeSidebar();
+          }
+        }
+      });
+    });
+
+    // Theme Toggle
+    const themeBtn = document.getElementById("theme-toggle-btn");
+    if (themeBtn) {
+      themeBtn.addEventListener("click", () => this.toggleTheme());
+    }
+
+    // Sound Toggle
+    const soundBtn = document.getElementById("sound-toggle-btn");
+    if (soundBtn) {
+      soundBtn.addEventListener("click", () => this.toggleSound());
+    }
+
+    // Interactive Game Mode Buttons
+    const dequeueBtn = document.getElementById("action-dequeue-btn");
+    if (dequeueBtn) {
+      dequeueBtn.addEventListener("click", () => {
+        if (window.game) window.game.handleDequeueExplore();
+      });
+    }
+
+    const resetLevelBtn = document.getElementById("restart-level-btn");
+    if (resetLevelBtn) {
+      resetLevelBtn.addEventListener("click", () => {
+        if (window.game) window.game.restartLevel();
+      });
+    }
+
+    const autoPlayBtn = document.getElementById("guided-autoplay-btn");
+    if (autoPlayBtn) {
+      autoPlayBtn.addEventListener("click", () => {
+        if (window.game && window.game.guidedEngine) window.game.guidedEngine.toggleAutoPlay();
+      });
+    }
+
+    const nextStepBtn = document.getElementById("guided-next-btn");
+    if (nextStepBtn) {
+      nextStepBtn.addEventListener("click", () => {
+        if (window.game && window.game.guidedEngine) window.game.guidedEngine.performSingleStep();
+      });
+    }
+
+    const closeGuidanceBtn = document.getElementById("close-guidance-btn");
+    const gotGuidanceBtn = document.getElementById("got-guidance-btn");
+    const guidanceModal = document.getElementById("guidance-modal");
+    const hideGuidance = () => {
+      if (guidanceModal) {
+        guidanceModal.classList.add("hidden");
+        guidanceModal.classList.remove("flex");
+      }
+    };
+    if (closeGuidanceBtn) closeGuidanceBtn.addEventListener("click", hideGuidance);
+    if (gotGuidanceBtn) gotGuidanceBtn.addEventListener("click", hideGuidance);
+
+    const openDemoBtn = document.getElementById("open-demo-btn");
+    if (openDemoBtn) {
+      openDemoBtn.addEventListener("click", () => {
+        if (window.demoPlayer && window.game) {
+          window.demoPlayer.openDemo(window.game.currentLevelIndex);
+        }
+      });
+    }
+
+    const closeDemoBtn = document.getElementById("close-demo-modal-btn");
+    if (closeDemoBtn) {
+      closeDemoBtn.addEventListener("click", () => {
+        if (window.demoPlayer) window.demoPlayer.closeDemo();
+      });
+    }
+  }
+
+  /* ─── Sidebar Drawer ────────────────────────────────────────── */
+
+  toggleSidebar() {
+    if (document.body.classList.contains("sidebar-open")) {
+      this.closeSidebar();
+    } else {
+      this.openSidebar();
+    }
+  }
+
+  openSidebar() {
+    document.body.classList.add("sidebar-open");
+    this.playSound("pop");
+  }
+
+  closeSidebar() {
+    document.body.classList.remove("sidebar-open");
+  }
+
+  /* ─── Tab Switching ─────────────────────────────────────────── */
+
+  switchTab(tabName) {
+    this.activeTab = tabName;
+
+    // Update Sidebar Navigation Buttons
+    document.querySelectorAll(".sidebar-nav-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.tab === tabName);
+    });
+
+    // Update Topbar Subtitle
+    const subviewEl = document.getElementById("topbar-subview-name");
+    const labels = {
+      overview: "Overview",
+      theory: "Learn",
+      visualize: "Visualize",
+      game: "Game Challenges",
+      quiz: "Mastery Quiz",
+      progress: "Progress Tracker"
+    };
+    if (subviewEl && labels[tabName]) {
+      subviewEl.textContent = labels[tabName];
+    }
+
+    // Switch View Containers
+    const views = {
+      overview: document.getElementById("view-overview"),
+      theory: document.getElementById("view-theory"),
+      visualize: document.getElementById("view-visualize"),
+      game: document.getElementById("view-game"),
+      quiz: document.getElementById("view-quiz"),
+      progress: document.getElementById("view-progress")
+    };
+
+    Object.entries(views).forEach(([key, el]) => {
+      if (!el) return;
+      if (key === tabName) {
+        el.classList.remove("hidden");
+        el.style.display = "block";
+      } else {
+        el.classList.add("hidden");
+        el.style.display = "none";
+      }
+    });
+
+    // Sub-view updates
+    if (tabName === "theory") {
+      this.renderTOC();
+      this.renderActiveChapter();
+    } else if (tabName === "visualize") {
+      this.startVideoPlayback();
+    } else if (tabName === "game") {
+      this.renderLevelsGrid();
+    } else if (tabName === "progress") {
+      this.updateProgressStats();
+      this.renderProgressModules();
+    } else if (tabName === "quiz" && window.quizEngine) {
+      const quizMount = document.getElementById("quiz-mount-point");
+      if (quizMount) window.quizEngine.init(quizMount);
+    }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    this.playSound("pop");
+  }
+
+  /* ─── Theme Toggle (Icon Only ☀️ / 🌙) ───────────────────────── */
+
+  initTheme() {
+    document.documentElement.setAttribute("data-theme", this.currentTheme);
+    document.body.classList.toggle("dark-theme", this.currentTheme === "dark");
+    this._updateThemeIcon();
+  }
+
+  toggleTheme() {
+    this.currentTheme = this.currentTheme === "dark" ? "light" : "dark";
+    localStorage.setItem("algolearn_theme", this.currentTheme);
+    document.documentElement.setAttribute("data-theme", this.currentTheme);
+    document.body.classList.toggle("dark-theme", this.currentTheme === "dark");
+    this._updateThemeIcon();
+    
+    // Re-render Graph Canvas and Spanning Tree with theme-specific lighting & gradients
+    if (window.game) {
+      window.game.render();
+      window.game.renderSpanningTree();
+    }
+
+    this.playSound("pop");
+  }
+
+  _updateThemeIcon() {
+    const btn = document.getElementById("theme-toggle-btn");
+    if (!btn) return;
+    const isDark = this.currentTheme === "dark";
+    const iconSpan = btn.querySelector(".theme-icon");
+    if (iconSpan) {
+      iconSpan.innerHTML = isDark
+        ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`
+        : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+    }
+  }
+
+  /* ─── Sound Toggle (Icon Only 🔊 / 🔇) ───────────────────────── */
+
+  initSound() {
+    this._updateSoundIcon();
+  }
+
+  toggleSound() {
+    this.soundEnabled = !this.soundEnabled;
+    localStorage.setItem("algolearn_sound", this.soundEnabled);
+    this._updateSoundIcon();
+    this.showToast(this.soundEnabled ? "Audio Effects Enabled" : "Audio Muted");
+  }
+
+  _updateSoundIcon() {
+    const box = document.getElementById("sound-icon-box");
+    if (!box) return;
+    box.innerHTML = this.soundEnabled
+      ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>`
+      : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
+  }
+
+  playSound(type) {
+    if (!this.soundEnabled) return;
+    if (window.soundManager && typeof window.soundManager.playPop === "function") {
+      window.soundManager.playPop();
+    }
+  }
+
+  /* ─── Learn Section: Table of Contents & Chapter Viewer ──────── */
+
+  renderTOC() {
+    const mount = document.getElementById("toc-chapters-list");
+    if (!mount || typeof THEORY_MODULES === "undefined") return;
+
+    mount.innerHTML = THEORY_MODULES.map((ch, index) => {
+      const isActive = ch.id === this.activeChapterId;
+      const isDone = this.completedChapters.has(ch.id);
+      const numStr = String(ch.chapterNum || (index + 1)).padStart(2, "0");
+      const cleanTitle = ch.tocTitle ? ch.tocTitle.replace(/^\d+\s*/, '') : ch.title;
+
+      return `
+        <div class="toc-chapter-item ${isActive ? "active" : ""}" onclick="app.selectChapter('${ch.id}')">
+          <div class="toc-item-left">
+            <span class="toc-item-num">${numStr}</span>
+            <span class="toc-item-name">${cleanTitle}</span>
+          </div>
+          <span class="toc-item-status">${isActive ? '<span class="toc-dot active-dot"></span>' : (isDone ? '<span class="toc-check">✓</span>' : '<span class="toc-dot empty-dot"></span>')}</span>
+        </div>
+      `;
+    }).join("");
+
+    // Progress in Header and Footer
+    const count = this.completedChapters.size;
+    const pct = Math.round((count / THEORY_MODULES.length) * 100);
+    const pill = document.getElementById("theory-progress-pill");
+    const status = document.getElementById("toc-completed-status");
+    if (pill) pill.textContent = `Progress: ${count} / ${THEORY_MODULES.length} Chapters (${pct}%)`;
+    if (status) status.textContent = `${count} / ${THEORY_MODULES.length} Completed`;
+  }
+
+  selectChapter(chapterId) {
+    this.activeChapterId = chapterId;
+    this.completedChapters.add(chapterId);
+    localStorage.setItem("algolearn_completed_chapters", JSON.stringify([...this.completedChapters]));
+    this.renderTOC();
+    this.renderActiveChapter();
+    this.updateProgressStats();
+    this.playSound("pop");
+  }
+
+  renderActiveChapter() {
+    const mount = document.getElementById("chapter-detail-mount");
+    if (!mount || typeof THEORY_MODULES === "undefined") return;
+
+    const ch = THEORY_MODULES.find(m => m.id === this.activeChapterId) || THEORY_MODULES[0];
+    if (!ch) return;
+
+    mount.innerHTML = `
+      <div class="ch-detail-card">
+        
+        <!-- Meta Badge Row -->
+        <div class="ch-meta-badge-row">
+          <span class="ch-cat-pill">CHAPTER ${ch.chapterNum} // ${ch.category}</span>
+          <span class="ch-read-time"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block;vertical-align:middle;margin-right:4px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Est. Read: ${ch.readTime}</span>
+        </div>
+
+        <!-- Chapter Title -->
+        <h2 class="ch-main-title">${ch.title}</h2>
+
+        <!-- Executive Definition -->
+        <div>
+          <div class="ch-section-tag">EXECUTIVE DEFINITION</div>
+          <p class="ch-exec-def">${ch.execDefinition}</p>
+        </div>
+
+        <!-- Core Intuition / Analogy Box -->
+        <div class="ch-analogy-box">
+          <div class="ch-analogy-tag">CORE INTUITION // ANALOGY</div>
+          <p class="ch-analogy-quote">"${ch.analogy}"</p>
+        </div>
+
+        <!-- Critical Specifications -->
+        <div>
+          <div class="ch-section-tag">CRITICAL SPECIFICATIONS</div>
+          <div class="ch-specs-list">
+            ${ch.specs.map(s => `
+              <div class="ch-spec-item">
+                <span class="ch-spec-bullet">&bull;</span>
+                <span>${s}</span>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+
+        <!-- Topic Visual Illustration Card -->
+        ${this.getTopicIllustrationCardHTML(ch.id)}
+
+        <!-- Fundamental Formula -->
+        ${ch.formula ? `
+        <div>
+          <div class="ch-section-tag">MATHEMATICAL INVARIANT &amp; FORMULA</div>
+          <div class="ch-formula-box">${ch.formula}</div>
+        </div>
+        ` : ''}
+
+        <!-- Architecture Diagram Step Flow -->
+        ${ch.diagram ? `
+        <div class="ch-arch-diagram-wrap">
+          <div class="ch-section-tag">ALGORITHM DYNAMICS // BFS TRAVERSAL FLOW</div>
+          
+          <div class="ch-diagram-flow-row">
+            <div class="ch-flow-box">
+              <span class="ch-flow-step-lbl">${ch.diagram.step1Title || '1. ROOT SOURCE'}</span>
+              <span class="ch-flow-step-val">${ch.diagram.step1Val || ''}</span>
+            </div>
+            
+            <span class="ch-flow-arrow">&rarr;</span>
+
+            <div class="ch-flow-box">
+              <span class="ch-flow-step-lbl">${ch.diagram.step2Title || '2. FIFO QUEUE'}</span>
+              <span class="ch-flow-step-val">${ch.diagram.step2Val || ''}</span>
+            </div>
+
+            <span class="ch-flow-arrow">&rarr;</span>
+
+            <div class="ch-flow-box highlight">
+              <span class="ch-flow-step-lbl">${ch.diagram.step3Title || '3. EXPANSION'}</span>
+              <span class="ch-flow-step-val">${ch.diagram.step3Val || ''}</span>
+            </div>
+
+            <span class="ch-flow-arrow">&rarr;</span>
+
+            <div class="ch-flow-box">
+              <span class="ch-flow-step-lbl">${ch.diagram.step4Title || '4. LEVEL ORDER'}</span>
+              <span class="ch-flow-step-val">${ch.diagram.step4Val || ''}</span>
+            </div>
+          </div>
+
+          <!-- Memory & Queue State Slots -->
+          <div class="ch-section-tag" style="margin-top: 14px;">${ch.diagram.trayLabel || 'TRAVERSAL STATE ARRAY:'}</div>
+          <div class="ch-memory-slots-row">
+            ${(ch.diagram.items || []).map(item => `
+              <div class="ch-slot-cell ${item.active ? "active-slot" : ""}" title="${item.label}: ${item.val}">
+                <strong>${item.label}</strong> ${item.val}
+              </div>
+            `).join("")}
+          </div>
+        </div>
+        ` : ''}
+
+      </div>
+    `;
+  }
+
+  /* ─── 12 Topic Visual Illustration Cards Generator (Attractive Diagrams) ──── */
+
+  getTopicIllustrationCardHTML(chapterId) {
+    // Shared SVG Filters and Gradients definitions (AlgoLearn Unified Brand System)
+    const svgDefs = `
+      <defs>
+        <!-- Node Drop Shadow -->
+        <filter id="nodeShadow" x="-30%" y="-30%" width="160%" height="160%">
+          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.25"/>
+        </filter>
+        
+        <!-- Unified AlgoLearn Brand Node Gradients (Electric Blue → Indigo → Violet) -->
+        <linearGradient id="gBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#2563eb"/>
+        </linearGradient>
+        <linearGradient id="gIndigo" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#4f46e5"/>
+        </linearGradient>
+        <linearGradient id="gPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#7c3aed"/>
+        </linearGradient>
+        <linearGradient id="gViolet" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#c084fc"/><stop offset="100%" stop-color="#7c3aed"/>
+        </linearGradient>
+        <linearGradient id="gCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#60a5fa"/><stop offset="100%" stop-color="#2563eb"/>
+        </linearGradient>
+        <linearGradient id="gGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#4f46e5"/>
+        </linearGradient>
+        <linearGradient id="gAmber" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#93c5fd"/><stop offset="100%" stop-color="#3b82f6"/>
+        </linearGradient>
+        <linearGradient id="gRose" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#6d28d9"/>
+        </linearGradient>
+
+        <!-- Arrow Markers -->
+        <marker id="arrGreen" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#2563eb"/>
+        </marker>
+        <marker id="arrOrange" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#4f46e5"/>
+        </marker>
+        <marker id="arrRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#7c3aed"/>
+        </marker>
+        <marker id="arrBlue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#3b82f6"/>
+        </marker>
+      </defs>
+    `;
+
+    switch (chapterId) {
+      case "graph-foundations":
+        return `
+          <div class="topic-visual-card-hero">
+            <div class="tvc-header">
+              <span class="tvc-badge blue">01 Graph Foundations</span>
+              <span class="tvc-subtitle">Where connections come to life.</span>
+            </div>
+            <div class="tvc-canvas-wrap">
+              <svg viewBox="0 0 340 180" class="tvc-svg">
+                ${svgDefs}
+                <!-- Edges -->
+                <line x1="50" y1="90" x2="110" y2="105" stroke="#94a3b8" stroke-width="2.2" opacity="0.85" />
+                <line x1="50" y1="90" x2="90" y2="150" stroke="#94a3b8" stroke-width="2.2" opacity="0.85" />
+                <line x1="50" y1="90" x2="190" y2="45" stroke="#94a3b8" stroke-width="2.2" opacity="0.85" />
+                <line x1="110" y1="105" x2="190" y2="45" stroke="#94a3b8" stroke-width="2.2" opacity="0.85" />
+                <line x1="110" y1="105" x2="200" y2="125" stroke="#94a3b8" stroke-width="2.2" opacity="0.85" />
+                <line x1="110" y1="105" x2="90" y2="150" stroke="#94a3b8" stroke-width="2.2" opacity="0.85" />
+                <line x1="90" y1="150" x2="200" y2="125" stroke="#94a3b8" stroke-width="2.2" opacity="0.85" />
+                <line x1="90" y1="150" x2="280" y2="150" stroke="#94a3b8" stroke-width="2.2" opacity="0.85" />
+                <line x1="190" y1="45" x2="280" y2="85" stroke="#94a3b8" stroke-width="2.2" opacity="0.85" />
+                <line x1="200" y1="125" x2="280" y2="85" stroke="#94a3b8" stroke-width="2.2" opacity="0.85" />
+                <line x1="200" y1="125" x2="280" y2="150" stroke="#94a3b8" stroke-width="2.2" opacity="0.85" />
+                
+                <!-- Nodes with letters A-G -->
+                <circle cx="50" cy="90" r="16" fill="url(#gBlue)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="50" y="95" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle">A</text>
+
+                <circle cx="110" cy="105" r="16" fill="url(#gIndigo)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="110" y="110" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle">B</text>
+
+                <circle cx="190" cy="45" r="16" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="190" y="50" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle">C</text>
+
+                <circle cx="90" cy="150" r="16" fill="url(#gBlue)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="90" y="155" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle">D</text>
+
+                <circle cx="200" cy="125" r="16" fill="url(#gIndigo)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="200" y="130" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle">E</text>
+
+                <circle cx="280" cy="85" r="16" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="280" y="90" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle">F</text>
+
+                <circle cx="280" cy="150" r="16" fill="url(#gBlue)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="280" y="155" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle">G</text>
+              </svg>
+            </div>
+            <div class="tvc-footer">Vertices, Edges, Directed &amp; Undirected Graphs</div>
+          </div>
+        `;
+
+      case "what-is-bfs":
+        return `
+          <div class="topic-visual-card-hero">
+            <div class="tvc-header">
+              <span class="tvc-badge blue">02 What is BFS?</span>
+              <span class="tvc-subtitle">Explore level by level.</span>
+            </div>
+            <div class="tvc-canvas-wrap">
+              <svg viewBox="0 0 340 180" class="tvc-svg">
+                ${svgDefs}
+                <!-- Level Columns in AlgoLearn palette -->
+                <rect x="105" y="15" width="40" height="140" rx="8" fill="rgba(37, 99, 235, 0.06)" stroke="rgba(37, 99, 235, 0.25)" stroke-dasharray="4,4" />
+                <rect x="185" y="15" width="40" height="140" rx="8" fill="rgba(79, 70, 229, 0.06)" stroke="rgba(79, 70, 229, 0.25)" stroke-dasharray="4,4" />
+                <rect x="265" y="15" width="40" height="140" rx="8" fill="rgba(124, 58, 237, 0.06)" stroke="rgba(124, 58, 237, 0.25)" stroke-dasharray="4,4" />
+
+                <!-- Expansion Wave Arrows -->
+                <line x1="45" y1="90" x2="112" y2="58" stroke="#2563eb" stroke-width="2.2" marker-end="url(#arrGreen)" />
+                <line x1="45" y1="90" x2="112" y2="122" stroke="#2563eb" stroke-width="2.2" marker-end="url(#arrGreen)" />
+                <line x1="125" y1="58" x2="192" y2="38" stroke="#4f46e5" stroke-width="2.2" marker-end="url(#arrOrange)" />
+                <line x1="125" y1="58" x2="192" y2="78" stroke="#4f46e5" stroke-width="2.2" marker-end="url(#arrOrange)" />
+                <line x1="125" y1="122" x2="192" y2="135" stroke="#4f46e5" stroke-width="2.2" marker-end="url(#arrOrange)" />
+                <line x1="205" y1="38" x2="272" y2="28" stroke="#7c3aed" stroke-width="2.2" marker-end="url(#arrRed)" />
+                <line x1="205" y1="78" x2="272" y2="65" stroke="#7c3aed" stroke-width="2.2" marker-end="url(#arrRed)" />
+                <line x1="205" y1="135" x2="272" y2="110" stroke="#7c3aed" stroke-width="2.2" marker-end="url(#arrRed)" />
+                <line x1="205" y1="135" x2="272" y2="148" stroke="#7c3aed" stroke-width="2.2" marker-end="url(#arrRed)" />
+                
+                <!-- Start Root Node (A) -->
+                <circle cx="45" cy="90" r="18" fill="url(#gBlue)" stroke="#ffffff" stroke-width="2" filter="url(#nodeShadow)" />
+                <text x="45" y="95" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle">A</text>
+                
+                <!-- Level 1 Nodes (B, C) -->
+                <circle cx="125" cy="58" r="14" fill="url(#gIndigo)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="125" y="63" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle">B</text>
+
+                <circle cx="125" cy="122" r="14" fill="url(#gIndigo)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="125" y="127" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle">C</text>
+
+                <!-- Level 2 Nodes (D, E, F) -->
+                <circle cx="205" cy="38" r="13" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="205" y="43" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle">D</text>
+
+                <circle cx="205" cy="78" r="13" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="205" y="83" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle">E</text>
+
+                <circle cx="205" cy="135" r="13" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="205" y="140" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle">F</text>
+
+                <!-- Level 3 Nodes (G, H, I, J) -->
+                <circle cx="285" cy="28" r="12" fill="url(#gBlue)" stroke="#ffffff" stroke-width="1.6" filter="url(#nodeShadow)" />
+                <text x="285" y="32" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">G</text>
+
+                <circle cx="285" cy="65" r="12" fill="url(#gBlue)" stroke="#ffffff" stroke-width="1.6" filter="url(#nodeShadow)" />
+                <text x="285" y="69" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">H</text>
+
+                <circle cx="285" cy="110" r="12" fill="url(#gBlue)" stroke="#ffffff" stroke-width="1.6" filter="url(#nodeShadow)" />
+                <text x="285" y="114" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">I</text>
+
+                <circle cx="285" cy="148" r="12" fill="url(#gBlue)" stroke="#ffffff" stroke-width="1.6" filter="url(#nodeShadow)" />
+                <text x="285" y="152" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">J</text>
+
+                <text x="125" y="172" font-size="10" font-weight="800" fill="#2563eb" text-anchor="middle">Level 1</text>
+                <text x="205" y="172" font-size="10" font-weight="800" fill="#4f46e5" text-anchor="middle">Level 2</text>
+                <text x="285" y="172" font-size="10" font-weight="800" fill="#7c3aed" text-anchor="middle">Level 3</text>
+              </svg>
+            </div>
+            <div class="tvc-footer">Breadth-First Search explained simply.</div>
+          </div>
+        `;
+
+      case "fifo-queue-engine":
+        return `
+          <div class="topic-visual-card-hero">
+            <div class="tvc-header">
+              <span class="tvc-badge blue">03 The FIFO Queue Engine</span>
+              <span class="tvc-subtitle">The secret behind BFS.</span>
+            </div>
+            <div class="tvc-canvas-wrap">
+              <svg viewBox="0 0 340 180" class="tvc-svg">
+                ${svgDefs}
+                <text x="45" y="38" font-size="11" font-weight="800" fill="#2563eb" text-anchor="middle">Enqueue (Node A)</text>
+                <path d="M 22 75 L 50 75 L 50 67 L 66 82 L 50 97 L 50 89 L 22 89 Z" fill="url(#gBlue)" />
+                
+                <text x="295" y="38" font-size="11" font-weight="800" fill="#7c3aed" text-anchor="middle">Dequeue (Node D)</text>
+                <path d="M 274 75 L 294 75 L 294 67 L 310 82 L 294 97 L 294 89 L 274 89 Z" fill="url(#gPurple)" />
+                
+                <!-- Queue Base Slide Container -->
+                <rect x="70" y="52" width="200" height="60" rx="8" fill="rgba(255,255,255,0.92)" stroke="rgba(203,213,225,0.8)" stroke-width="2" filter="url(#nodeShadow)" />
+                
+                <!-- Queue Items with Letters & Order Numbers -->
+                <rect x="76" y="58" width="45" height="48" rx="6" fill="url(#gBlue)" stroke="#ffffff" stroke-width="1.5" />
+                <text x="98" y="80" font-size="14" font-weight="900" fill="#ffffff" text-anchor="middle">A</text>
+                <text x="98" y="96" font-size="9" font-weight="700" fill="#dbeafe" text-anchor="middle">#5</text>
+                
+                <rect x="125" y="58" width="45" height="48" rx="6" fill="url(#gIndigo)" stroke="#ffffff" stroke-width="1.5" />
+                <text x="147" y="80" font-size="14" font-weight="900" fill="#ffffff" text-anchor="middle">B</text>
+                <text x="147" y="96" font-size="9" font-weight="700" fill="#e0e7ff" text-anchor="middle">#3</text>
+                
+                <rect x="174" y="58" width="45" height="48" rx="6" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.5" />
+                <text x="196" y="80" font-size="14" font-weight="900" fill="#ffffff" text-anchor="middle">C</text>
+                <text x="196" y="96" font-size="9" font-weight="700" fill="#f3e8ff" text-anchor="middle">#7</text>
+                
+                <rect x="223" y="58" width="42" height="48" rx="6" fill="url(#gViolet)" stroke="#ffffff" stroke-width="1.5" />
+                <text x="244" y="80" font-size="14" font-weight="900" fill="#ffffff" text-anchor="middle">D</text>
+                <text x="244" y="96" font-size="9" font-weight="700" fill="#ede9fe" text-anchor="middle">#2</text>
+                
+                <text x="98" y="134" font-size="11" font-weight="800" fill="#2563eb" text-anchor="middle">&larr; Front</text>
+                <text x="244" y="134" font-size="11" font-weight="800" fill="#7c3aed" text-anchor="middle">Rear &rarr;</text>
+              </svg>
+            </div>
+            <div class="tvc-footer">First In, First Out – The Queue in Action.</div>
+          </div>
+        `;
+
+      case "level-by-level":
+        return `
+          <div class="topic-visual-card-hero">
+            <div class="tvc-header">
+              <span class="tvc-badge blue">04 Level-by-Level Waves</span>
+              <span class="tvc-subtitle">BFS spreads like waves.</span>
+            </div>
+            <div class="tvc-canvas-wrap">
+              <svg viewBox="0 0 340 180" class="tvc-svg">
+                ${svgDefs}
+                <!-- Concentric Ripple Wave Circles in Brand Shades -->
+                <circle cx="170" cy="95" r="32" fill="rgba(37, 99, 235, 0.08)" stroke="#3b82f6" stroke-width="1.8" />
+                <circle cx="170" cy="95" r="58" fill="rgba(79, 70, 229, 0.06)" stroke="#818cf8" stroke-width="1.8" />
+                <circle cx="170" cy="95" r="82" fill="rgba(124, 58, 237, 0.04)" stroke="#a78bfa" stroke-width="1.8" stroke-dasharray="4,4" />
+                
+                <!-- Center Root Node (A) -->
+                <circle cx="170" cy="95" r="16" fill="url(#gBlue)" stroke="#ffffff" stroke-width="2" filter="url(#nodeShadow)" />
+                <text x="170" y="100" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle">A</text>
+
+                <!-- Wave 1 Nodes (B, C) -->
+                <circle cx="138" cy="50" r="14" fill="url(#gIndigo)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="138" y="55" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle">B</text>
+
+                <circle cx="106" cy="95" r="14" fill="url(#gIndigo)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="106" y="100" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle">C</text>
+
+                <!-- Wave 2 Nodes (D, E) -->
+                <circle cx="215" cy="48" r="14" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="215" y="53" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle">D</text>
+
+                <circle cx="228" cy="120" r="14" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="228" y="125" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle">E</text>
+
+                <!-- Wave 3 Nodes (F, G, H) -->
+                <circle cx="248" cy="30" r="13" fill="url(#gViolet)" stroke="#ffffff" stroke-width="1.6" filter="url(#nodeShadow)" />
+                <text x="248" y="34" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle">F</text>
+
+                <circle cx="250" cy="85" r="13" fill="url(#gViolet)" stroke="#ffffff" stroke-width="1.6" filter="url(#nodeShadow)" />
+                <text x="250" y="89" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle">G</text>
+
+                <path d="M 215 48 Q 235 34 248 30" fill="none" stroke="#7c3aed" stroke-dasharray="3,3" stroke-width="1.8" />
+              </svg>
+            </div>
+            <div class="tvc-footer">Discover the beauty of level traversal.</div>
+          </div>
+        `;
+
+      case "visited-tracking":
+        return `
+          <div class="topic-visual-card-hero">
+            <div class="tvc-header">
+              <span class="tvc-badge blue">05 Visited Set &amp; Cycles</span>
+              <span class="tvc-subtitle">Avoid repeats. Stay smart.</span>
+            </div>
+            <div class="tvc-canvas-wrap">
+              <svg viewBox="0 0 340 180" class="tvc-svg">
+                ${svgDefs}
+                <!-- Graph Cycle Edges -->
+                <line x1="120" y1="40" x2="60" y2="90" stroke="#3b82f6" stroke-width="2.5" />
+                <line x1="120" y1="40" x2="200" y2="90" stroke="#3b82f6" stroke-width="2.5" />
+                <line x1="60" y1="90" x2="105" y2="145" stroke="#7c3aed" stroke-dasharray="4,4" stroke-width="2.5" />
+                <line x1="200" y1="90" x2="200" y2="145" stroke="#3b82f6" stroke-width="2.5" />
+                <line x1="105" y1="145" x2="200" y2="145" stroke="#7c3aed" stroke-dasharray="4,4" stroke-width="2.5" />
+                
+                <!-- Nodes with Letters A, B, C, D, and E (Repeated Node) -->
+                <circle cx="120" cy="40" r="16" fill="url(#gBlue)" stroke="#ffffff" stroke-width="2" filter="url(#nodeShadow)" />
+                <text x="120" y="45" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle">A</text>
+
+                <circle cx="60" cy="90" r="16" fill="url(#gIndigo)" stroke="#ffffff" stroke-width="2" filter="url(#nodeShadow)" />
+                <text x="60" y="95" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle">B</text>
+
+                <circle cx="200" cy="90" r="16" fill="url(#gPurple)" stroke="#ffffff" stroke-width="2" filter="url(#nodeShadow)" />
+                <text x="200" y="95" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle">C</text>
+
+                <circle cx="200" cy="145" r="16" fill="url(#gBlue)" stroke="#ffffff" stroke-width="2" filter="url(#nodeShadow)" />
+                <text x="200" y="150" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle">D</text>
+
+                <!-- Repeat Node E with dashed cycle indicator -->
+                <circle cx="105" cy="145" r="18" fill="none" stroke="#7c3aed" stroke-dasharray="4,4" stroke-width="2.5" />
+                <circle cx="105" cy="145" r="15" fill="url(#gViolet)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="105" y="150" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle">E (Repeat)</text>
+
+                <!-- Shield Checkmark Icon on Right -->
+                <g transform="translate(265, 90)">
+                  <path d="M 0 -22 L 20 -15 L 20 5 Q 20 20 0 30 Q -20 20 -20 5 L -20 -15 Z" fill="url(#gBlue)" stroke="#ffffff" stroke-width="2" filter="url(#nodeShadow)" />
+                  <polyline points="-8,3 -2,9 10,-5" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                </g>
+              </svg>
+            </div>
+            <div class="tvc-footer">Visited set helps prevent infinite loops.</div>
+          </div>
+        `;
+
+      case "edge-classification":
+        return `
+          <div class="topic-visual-card-hero">
+            <div class="tvc-header">
+              <span class="tvc-badge blue">06 Edge Classification</span>
+              <span class="tvc-subtitle">Understand every edge.</span>
+            </div>
+            <div class="tvc-canvas-wrap">
+              <svg viewBox="0 0 340 180" class="tvc-svg">
+                ${svgDefs}
+                <!-- Tree Edges (Indigo solid) -->
+                <line x1="110" y1="35" x2="70" y2="90" stroke="#4f46e5" stroke-width="3" />
+                <line x1="110" y1="35" x2="150" y2="90" stroke="#4f46e5" stroke-width="3" />
+                <line x1="70" y1="90" x2="40" y2="145" stroke="#4f46e5" stroke-width="3" />
+                <line x1="70" y1="90" x2="95" y2="145" stroke="#4f46e5" stroke-width="3" />
+                <line x1="150" y1="90" x2="135" y2="145" stroke="#4f46e5" stroke-width="3" />
+                <line x1="150" y1="90" x2="185" y2="145" stroke="#4f46e5" stroke-width="3" />
+                
+                <!-- Back Edge (Violet dashed) -->
+                <path d="M 70 90 Q 110 65 110 45" fill="none" stroke="#7c3aed" stroke-dasharray="4,4" stroke-width="2.2" />
+                
+                <!-- Cross Edge (Blue dashed) -->
+                <line x1="70" y1="90" x2="150" y2="90" stroke="#2563eb" stroke-dasharray="4,4" stroke-width="2.2" />
+                
+                <!-- Forward Edge (Sky Blue dashed) -->
+                <path d="M 150 90 Q 175 115 185 145" fill="none" stroke="#3b82f6" stroke-dasharray="4,4" stroke-width="2.2" />
+                
+                <!-- Nodes with Letters A-G -->
+                <circle cx="110" cy="35" r="15" fill="url(#gBlue)" stroke="#ffffff" stroke-width="2" filter="url(#nodeShadow)" />
+                <text x="110" y="40" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle">A</text>
+
+                <circle cx="70" cy="90" r="14" fill="url(#gIndigo)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="70" y="95" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle">B</text>
+
+                <circle cx="150" cy="90" r="14" fill="url(#gIndigo)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="150" y="95" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle">C</text>
+
+                <circle cx="40" cy="145" r="13" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="40" y="149" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle">D</text>
+
+                <circle cx="95" cy="145" r="13" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="95" y="149" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle">E</text>
+
+                <circle cx="135" cy="145" r="13" fill="url(#gViolet)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="135" y="149" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle">F</text>
+
+                <circle cx="185" cy="145" r="13" fill="url(#gViolet)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="185" y="149" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle">G</text>
+
+                <!-- Legend Card on Right -->
+                <g transform="translate(225, 38)">
+                  <rect x="-8" y="-8" width="112" height="98" rx="8" fill="rgba(255,255,255,0.88)" stroke="rgba(203,213,225,0.7)" stroke-width="1.5" />
+                  <line x1="4" y1="10" x2="24" y2="10" stroke="#4f46e5" stroke-width="2.5" />
+                  <text x="32" y="14" font-size="9" font-weight="800" fill="#4f46e5">Tree Edge</text>
+                  <line x1="4" y1="30" x2="24" y2="30" stroke="#7c3aed" stroke-dasharray="3,3" stroke-width="2.5" />
+                  <text x="32" y="34" font-size="9" font-weight="800" fill="#7c3aed">Back Edge</text>
+                  <line x1="4" y1="50" x2="24" y2="50" stroke="#2563eb" stroke-dasharray="3,3" stroke-width="2.5" />
+                  <text x="32" y="54" font-size="9" font-weight="800" fill="#2563eb">Cross Edge</text>
+                  <line x1="4" y1="70" x2="24" y2="70" stroke="#3b82f6" stroke-dasharray="3,3" stroke-width="2.5" />
+                  <text x="32" y="74" font-size="9" font-weight="800" fill="#3b82f6">Forward Edge</text>
+                </g>
+              </svg>
+            </div>
+            <div class="tvc-footer">Tree, Back, Forward &amp; Cross edges.</div>
+          </div>
+        `;
+
+      case "spanning-tree":
+        return `
+          <div class="topic-visual-card-hero">
+            <div class="tvc-header">
+              <span class="tvc-badge blue">07 BFS Spanning Tree</span>
+              <span class="tvc-subtitle">Build a tree from BFS.</span>
+            </div>
+            <div class="tvc-canvas-wrap">
+              <svg viewBox="0 0 340 180" class="tvc-svg">
+                ${svgDefs}
+                <!-- Spanning Tree Branches -->
+                <line x1="120" y1="35" x2="70" y2="90" stroke="#4f46e5" stroke-width="3" />
+                <line x1="120" y1="35" x2="170" y2="90" stroke="#4f46e5" stroke-width="3" />
+                <line x1="70" y1="90" x2="40" y2="145" stroke="#3b82f6" stroke-width="3" />
+                <line x1="70" y1="90" x2="100" y2="145" stroke="#3b82f6" stroke-width="3" />
+                <line x1="170" y1="90" x2="140" y2="145" stroke="#7c3aed" stroke-width="3" />
+                <line x1="170" y1="90" x2="200" y2="145" stroke="#7c3aed" stroke-width="3" />
+                
+                <!-- Tree Nodes with Letters A-G -->
+                <circle cx="120" cy="35" r="16" fill="url(#gBlue)" stroke="#ffffff" stroke-width="2" filter="url(#nodeShadow)" />
+                <text x="120" y="40" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle">A</text>
+
+                <circle cx="70" cy="90" r="14" fill="url(#gIndigo)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="70" y="95" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle">B</text>
+
+                <circle cx="170" cy="90" r="14" fill="url(#gIndigo)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="170" y="95" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle">C</text>
+
+                <circle cx="40" cy="145" r="13" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="40" y="149" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle">D</text>
+
+                <circle cx="100" cy="145" r="13" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="100" y="149" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle">E</text>
+
+                <circle cx="140" cy="145" r="13" fill="url(#gViolet)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="140" y="149" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle">F</text>
+
+                <circle cx="200" cy="145" r="13" fill="url(#gViolet)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="200" y="149" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle">G</text>
+
+                <!-- Spanning Tree Visual Graphic on Right in Brand Indigo -->
+                <g transform="translate(250, 50)">
+                  <polygon points="22,0 7,30 17,30 2,55 12,55 -3,80 47,80 32,55 42,55 27,30 37,30" fill="#4f46e5" opacity="0.85" />
+                  <rect x="19" y="80" width="6" height="15" fill="#312e81" />
+                  <polygon points="48,15 35,40 43,40 31,62 39,62 25,85 71,85 57,62 65,62 53,40 61,40" fill="#7c3aed" opacity="0.9" />
+                  <rect x="45" y="85" width="6" height="12" fill="#312e81" />
+                </g>
+              </svg>
+            </div>
+            <div class="tvc-footer">A BFS tree connects all reachable nodes.</div>
+          </div>
+        `;
+
+      case "shortest-path":
+        return `
+          <div class="topic-visual-card-hero">
+            <div class="tvc-header">
+              <span class="tvc-badge blue">08 Shortest Path Guarantee</span>
+              <span class="tvc-subtitle">BFS finds the shortest path.</span>
+            </div>
+            <div class="tvc-canvas-wrap">
+              <svg viewBox="0 0 340 180" class="tvc-svg">
+                ${svgDefs}
+                <!-- Background alternative path edges -->
+                <line x1="45" y1="75" x2="85" y2="125" stroke="#cbd5e1" stroke-width="2" opacity="0.8" />
+                <line x1="85" y1="125" x2="135" y2="85" stroke="#cbd5e1" stroke-width="2" opacity="0.8" />
+                <line x1="135" y1="85" x2="195" y2="135" stroke="#cbd5e1" stroke-width="2" opacity="0.8" />
+                
+                <!-- Highlighted Optimal Shortest Path in Electric Blue & Indigo -->
+                <line x1="45" y1="75" x2="120" y2="45" stroke="#2563eb" stroke-width="3.5" />
+                <line x1="120" y1="45" x2="185" y2="85" stroke="#4f46e5" stroke-width="3.5" />
+                
+                <!-- Shortest Path Nodes: S -> A -> T -->
+                <circle cx="45" cy="75" r="16" fill="url(#gBlue)" stroke="#ffffff" stroke-width="2" filter="url(#nodeShadow)" />
+                <text x="45" y="80" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle">S</text>
+
+                <circle cx="120" cy="45" r="15" fill="url(#gIndigo)" stroke="#ffffff" stroke-width="2" filter="url(#nodeShadow)" />
+                <text x="120" y="50" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle">A</text>
+
+                <circle cx="85" cy="125" r="13" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="85" y="129" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle">B</text>
+
+                <circle cx="185" cy="85" r="16" fill="url(#gViolet)" stroke="#ffffff" stroke-width="2" filter="url(#nodeShadow)" />
+                <text x="185" y="90" font-size="12" font-weight="900" fill="#ffffff" text-anchor="middle">T</text>
+
+                <circle cx="195" cy="135" r="13" fill="url(#gIndigo)" stroke="#ffffff" stroke-width="1.8" filter="url(#nodeShadow)" />
+                <text x="195" y="139" font-size="10" font-weight="900" fill="#ffffff" text-anchor="middle">C</text>
+
+                <!-- Achievement Shield Icon on Right -->
+                <g transform="translate(255, 38)">
+                  <path d="M 8 10 Q -6 10 -6 24 Q -6 38 12 44" fill="none" stroke="#4f46e5" stroke-width="4" stroke-linecap="round" />
+                  <path d="M 42 10 Q 56 10 56 24 Q 56 38 38 44" fill="none" stroke="#4f46e5" stroke-width="4" stroke-linecap="round" />
+                  <path d="M 5 10 L 45 10 L 40 44 Q 25 54 10 44 Z" fill="url(#gIndigo)" stroke="#3730a3" stroke-width="2" filter="url(#nodeShadow)" />
+                  <polygon points="25,18 28,26 36,26 30,31 32,39 25,34 18,39 20,31 14,26 22,26" fill="#ffffff" />
+                  <rect x="21" y="52" width="8" height="16" fill="#3730a3" />
+                  <rect x="10" y="68" width="30" height="12" rx="3" fill="#1e293b" />
+                </g>
+              </svg>
+            </div>
+            <div class="tvc-footer">Shortest path in unweighted graphs.</div>
+          </div>
+        `;
+
+      case "connected-components":
+        return `
+          <div class="topic-visual-card-hero">
+            <div class="tvc-header">
+              <span class="tvc-badge blue">09 Connected Components</span>
+              <span class="tvc-subtitle">Find groups in a graph.</span>
+            </div>
+            <div class="tvc-canvas-wrap">
+              <svg viewBox="0 0 340 180" class="tvc-svg">
+                ${svgDefs}
+                <!-- Cluster 1 (Electric Blue) - Component 1: Nodes A, B, C, D -->
+                <path d="M 30 50 Q 80 15 105 60 Q 115 120 70 148 Q 15 140 20 85 Z" fill="rgba(37, 99, 235, 0.08)" stroke="#2563eb" stroke-dasharray="4,4" stroke-width="2" />
+                <line x1="42" y1="65" x2="82" y2="60" stroke="#93c5fd" stroke-width="2.2" />
+                <line x1="82" y1="60" x2="65" y2="105" stroke="#93c5fd" stroke-width="2.2" />
+                <line x1="65" y1="105" x2="42" y2="125" stroke="#93c5fd" stroke-width="2.2" />
+                <circle cx="42" cy="65" r="12" fill="url(#gBlue)" stroke="#ffffff" stroke-width="1.8" />
+                <text x="42" y="69" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">A</text>
+                <circle cx="82" cy="60" r="12" fill="url(#gBlue)" stroke="#ffffff" stroke-width="1.8" />
+                <text x="82" y="64" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">B</text>
+                <circle cx="65" cy="105" r="12" fill="url(#gBlue)" stroke="#ffffff" stroke-width="1.8" />
+                <text x="65" y="109" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">C</text>
+                <circle cx="42" cy="125" r="12" fill="url(#gBlue)" stroke="#ffffff" stroke-width="1.8" />
+                <text x="42" y="129" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">D</text>
+                
+                <!-- Cluster 2 (Indigo) - Component 2: Nodes E, F, G, H -->
+                <path d="M 135 40 Q 185 15 205 60 Q 215 120 170 145 Q 125 130 130 75 Z" fill="rgba(79, 70, 229, 0.08)" stroke="#4f46e5" stroke-dasharray="4,4" stroke-width="2" />
+                <line x1="148" y1="55" x2="188" y2="45" stroke="#c7d2fe" stroke-width="2.2" />
+                <line x1="148" y1="55" x2="152" y2="95" stroke="#c7d2fe" stroke-width="2.2" />
+                <line x1="188" y1="45" x2="182" y2="105" stroke="#c7d2fe" stroke-width="2.2" />
+                <circle cx="148" cy="55" r="12" fill="url(#gIndigo)" stroke="#ffffff" stroke-width="1.8" />
+                <text x="148" y="59" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">E</text>
+                <circle cx="188" cy="45" r="12" fill="url(#gIndigo)" stroke="#ffffff" stroke-width="1.8" />
+                <text x="188" y="49" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">F</text>
+                <circle cx="152" cy="95" r="12" fill="url(#gIndigo)" stroke="#ffffff" stroke-width="1.8" />
+                <text x="152" y="99" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">G</text>
+                <circle cx="182" cy="105" r="12" fill="url(#gIndigo)" stroke="#ffffff" stroke-width="1.8" />
+                <text x="182" y="109" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">H</text>
+
+                <!-- Cluster 3 (Violet) - Component 3: Nodes I, J, K -->
+                <path d="M 235 60 Q 285 30 310 75 Q 320 130 270 158 Q 220 140 230 90 Z" fill="rgba(124, 58, 237, 0.08)" stroke="#7c3aed" stroke-dasharray="4,4" stroke-width="2" />
+                <line x1="248" y1="120" x2="280" y2="70" stroke="#ddd6fe" stroke-width="2.2" />
+                <line x1="280" y1="70" x2="295" y2="125" stroke="#ddd6fe" stroke-width="2.2" />
+                <circle cx="248" cy="120" r="12" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.8" />
+                <text x="248" y="124" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">I</text>
+                <circle cx="280" cy="70" r="12" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.8" />
+                <text x="280" y="74" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">J</text>
+                <circle cx="295" cy="125" r="12" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.8" />
+                <text x="295" y="129" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">K</text>
+              </svg>
+            </div>
+            <div class="tvc-footer">Identify all connected components.</div>
+          </div>
+        `;
+
+      case "bfs-vs-dfs":
+        return `
+          <div class="topic-visual-card-hero">
+            <div class="tvc-header">
+              <span class="tvc-badge blue">10 BFS vs DFS Comparison</span>
+              <span class="tvc-subtitle">Two strategies. Different journeys.</span>
+            </div>
+            <div class="tvc-canvas-wrap">
+              <svg viewBox="0 0 340 180" class="tvc-svg">
+                ${svgDefs}
+                <line x1="170" y1="15" x2="170" y2="165" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="4,4" />
+                <circle cx="170" cy="90" r="16" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#nodeShadow)" />
+                <text x="170" y="94" font-size="10" font-weight="900" fill="#475569" text-anchor="middle">VS</text>
+
+                <!-- BFS Side (Left in Electric Blue & Indigo) -->
+                <text x="85" y="28" font-size="14" font-weight="900" fill="#2563eb" text-anchor="middle">BFS (Wide Wave)</text>
+                <line x1="85" y1="45" x2="45" y2="90" stroke="#93c5fd" stroke-width="2.5" />
+                <line x1="85" y1="45" x2="125" y2="90" stroke="#93c5fd" stroke-width="2.5" />
+                <line x1="45" y1="90" x2="25" y2="140" stroke="#93c5fd" stroke-width="2.5" />
+                <line x1="45" y1="90" x2="65" y2="140" stroke="#93c5fd" stroke-width="2.5" />
+                <line x1="125" y1="90" x2="105" y2="140" stroke="#93c5fd" stroke-width="2.5" />
+                <line x1="125" y1="90" x2="145" y2="140" stroke="#93c5fd" stroke-width="2.5" />
+                
+                <circle cx="85" cy="45" r="13" fill="url(#gBlue)" stroke="#ffffff" stroke-width="1.8" />
+                <text x="85" y="49" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">A</text>
+                <circle cx="45" cy="90" r="12" fill="url(#gIndigo)" stroke="#ffffff" stroke-width="1.8" />
+                <text x="45" y="94" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">B</text>
+                <circle cx="125" cy="90" r="12" fill="url(#gIndigo)" stroke="#ffffff" stroke-width="1.8" />
+                <text x="125" y="94" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">C</text>
+                <circle cx="25" cy="140" r="11" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.5" />
+                <text x="25" y="144" font-size="8" font-weight="900" fill="#ffffff" text-anchor="middle">D</text>
+                <circle cx="65" cy="140" r="11" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.5" />
+                <text x="65" y="144" font-size="8" font-weight="900" fill="#ffffff" text-anchor="middle">E</text>
+                <circle cx="105" cy="140" r="11" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.5" />
+                <text x="105" y="144" font-size="8" font-weight="900" fill="#ffffff" text-anchor="middle">F</text>
+                <circle cx="145" cy="140" r="11" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.5" />
+                <text x="145" y="144" font-size="8" font-weight="900" fill="#ffffff" text-anchor="middle">G</text>
+
+                <!-- DFS Side (Right in Violet) -->
+                <text x="255" y="28" font-size="14" font-weight="900" fill="#7c3aed" text-anchor="middle">DFS (Deep Branch)</text>
+                <line x1="255" y1="45" x2="215" y2="90" stroke="#7c3aed" stroke-width="3.5" />
+                <line x1="215" y1="90" x2="200" y2="140" stroke="#7c3aed" stroke-width="3.5" />
+                <line x1="255" y1="45" x2="295" y2="90" stroke="#e2e8f0" stroke-width="2" />
+                <line x1="295" y1="90" x2="280" y2="140" stroke="#e2e8f0" stroke-width="2" />
+                <line x1="295" y1="90" x2="315" y2="140" stroke="#e2e8f0" stroke-width="2" />
+                
+                <circle cx="255" cy="45" r="13" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.8" />
+                <text x="255" y="49" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">A</text>
+                <circle cx="215" cy="90" r="12" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1.8" />
+                <text x="215" y="94" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">B</text>
+                <circle cx="200" cy="140" r="12" fill="url(#gViolet)" stroke="#ffffff" stroke-width="1.8" />
+                <text x="200" y="144" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">D</text>
+                <circle cx="295" cy="90" r="10" fill="#94a3b8" stroke="#ffffff" stroke-width="1.5" />
+                <text x="295" y="93" font-size="8" font-weight="900" fill="#ffffff" text-anchor="middle">C</text>
+                <circle cx="280" cy="140" r="10" fill="#94a3b8" stroke="#ffffff" stroke-width="1.5" />
+                <text x="280" y="143" font-size="8" font-weight="900" fill="#ffffff" text-anchor="middle">E</text>
+                <circle cx="315" cy="140" r="10" fill="#94a3b8" stroke="#ffffff" stroke-width="1.5" />
+                <text x="315" y="143" font-size="8" font-weight="900" fill="#ffffff" text-anchor="middle">F</text>
+              </svg>
+            </div>
+            <div class="tvc-footer">BFS: Wide &amp; level-wise | DFS: Deep &amp; focused</div>
+          </div>
+        `;
+
+      case "complexity-analysis":
+        return `
+          <div class="topic-visual-card-hero">
+            <div class="tvc-header">
+              <span class="tvc-badge blue">11 Complexity Analysis</span>
+              <span class="tvc-subtitle">Measure the efficiency.</span>
+            </div>
+            <div class="tvc-canvas-wrap">
+              <svg viewBox="0 0 340 180" class="tvc-svg">
+                ${svgDefs}
+                <!-- Speedometer Arc Gauge in Brand Indigo & Blue -->
+                <path d="M 60 120 A 75 75 0 0 1 210 120" fill="none" stroke="#e2e8f0" stroke-width="18" stroke-linecap="round" />
+                <path d="M 60 120 A 75 75 0 0 1 105 52" fill="none" stroke="#2563eb" stroke-width="18" />
+                <path d="M 105 52 A 75 75 0 0 1 165 45" fill="none" stroke="#4f46e5" stroke-width="18" />
+                <path d="M 165 45 A 75 75 0 0 1 210 120" fill="none" stroke="#7c3aed" stroke-width="18" stroke-linecap="round" />
+                
+                <!-- Needle Dial -->
+                <circle cx="135" cy="120" r="12" fill="#0f172a" stroke="#ffffff" stroke-width="2" />
+                <line x1="135" y1="120" x2="135" y2="55" stroke="#0f172a" stroke-width="4.5" stroke-linecap="round" />
+                <text x="135" y="152" font-size="16" font-weight="900" fill="#2563eb" text-anchor="middle">O(V + E)</text>
+                
+                <!-- White Legend Badge Box on Right -->
+                <g transform="translate(225, 45)">
+                  <rect x="0" y="0" width="105" height="85" rx="8" fill="rgba(255,255,255,0.9)" stroke="rgba(203,213,225,0.7)" stroke-width="1.5" filter="url(#nodeShadow)" />
+                  <circle cx="18" cy="24" r="10" fill="url(#gBlue)" stroke="#ffffff" stroke-width="1.5" />
+                  <text x="18" y="28" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">V</text>
+                  <text x="36" y="28" font-size="10" font-weight="800" fill="#1e293b">V = Vertices</text>
+                  
+                  <circle cx="18" cy="58" r="10" fill="url(#gIndigo)" stroke="#ffffff" stroke-width="1.5" />
+                  <text x="18" y="62" font-size="9" font-weight="900" fill="#ffffff" text-anchor="middle">E</text>
+                  <text x="36" y="62" font-size="10" font-weight="800" fill="#1e293b">E = Edges</text>
+                </g>
+              </svg>
+            </div>
+            <div class="tvc-footer">BFS runs in O(V + E) time.</div>
+          </div>
+        `;
+
+      case "real-world-apps":
+        return `
+          <div class="topic-visual-card-hero">
+            <div class="tvc-header">
+              <span class="tvc-badge blue">12 Real-World Applications</span>
+              <span class="tvc-subtitle">BFS powers real solutions.</span>
+            </div>
+            <div class="tvc-canvas-wrap">
+              <svg viewBox="0 0 340 180" class="tvc-svg">
+                ${svgDefs}
+                <!-- 4 Frosted White Cards with Nodes and Badges -->
+                <!-- 1. Social Networks -->
+                <g transform="translate(26, 92)">
+                  <rect x="0" y="0" width="68" height="46" rx="8" fill="rgba(255,255,255,0.92)" stroke="#93c5fd" stroke-width="1.8" filter="url(#nodeShadow)" />
+                  <circle cx="20" cy="18" r="8" fill="url(#gBlue)" stroke="#ffffff" stroke-width="1" />
+                  <text x="20" y="21" font-size="6" font-weight="900" fill="#ffffff" text-anchor="middle">A</text>
+                  <line x1="28" y1="18" x2="40" y2="18" stroke="#93c5fd" stroke-width="1.5" />
+                  <circle cx="48" cy="18" r="8" fill="url(#gGreen)" stroke="#ffffff" stroke-width="1" />
+                  <text x="48" y="21" font-size="6" font-weight="900" fill="#ffffff" text-anchor="middle">B</text>
+                  <text x="34" y="38" font-size="7" font-weight="800" fill="#1e40af" text-anchor="middle">Social Graph</text>
+                </g>
+
+                <!-- 2. Maps & GPS -->
+                <g transform="translate(102, 92)">
+                  <rect x="0" y="0" width="68" height="46" rx="8" fill="rgba(255,255,255,0.92)" stroke="#fca5a5" stroke-width="1.8" filter="url(#nodeShadow)" />
+                  <circle cx="20" cy="18" r="8" fill="url(#gRose)" stroke="#ffffff" stroke-width="1" />
+                  <text x="20" y="21" font-size="6" font-weight="900" fill="#ffffff" text-anchor="middle">S</text>
+                  <line x1="28" y1="18" x2="40" y2="18" stroke="#f87171" stroke-width="1.5" stroke-dasharray="2,2" />
+                  <circle cx="48" cy="18" r="8" fill="url(#gAmber)" stroke="#ffffff" stroke-width="1" />
+                  <text x="48" y="21" font-size="6" font-weight="900" fill="#ffffff" text-anchor="middle">D</text>
+                  <text x="34" y="38" font-size="7" font-weight="800" fill="#991b1b" text-anchor="middle">GPS Routes</text>
+                </g>
+
+                <!-- 3. Web Crawlers -->
+                <g transform="translate(178, 92)">
+                  <rect x="0" y="0" width="68" height="46" rx="8" fill="rgba(255,255,255,0.92)" stroke="#fed7aa" stroke-width="1.8" filter="url(#nodeShadow)" />
+                  <circle cx="20" cy="18" r="8" fill="url(#gAmber)" stroke="#ffffff" stroke-width="1" />
+                  <text x="20" y="21" font-size="6" font-weight="900" fill="#ffffff" text-anchor="middle">URL</text>
+                  <line x1="28" y1="18" x2="40" y2="18" stroke="#fb923c" stroke-width="1.5" />
+                  <circle cx="48" cy="18" r="8" fill="url(#gCyan)" stroke="#ffffff" stroke-width="1" />
+                  <text x="48" y="21" font-size="6" font-weight="900" fill="#ffffff" text-anchor="middle">Link</text>
+                  <text x="34" y="38" font-size="7" font-weight="800" fill="#92400e" text-anchor="middle">Web Crawler</text>
+                </g>
+
+                <!-- 4. AI & Games -->
+                <g transform="translate(254, 92)">
+                  <rect x="0" y="0" width="68" height="46" rx="8" fill="rgba(255,255,255,0.92)" stroke="#d8b4fe" stroke-width="1.8" filter="url(#nodeShadow)" />
+                  <circle cx="20" cy="18" r="8" fill="url(#gPurple)" stroke="#ffffff" stroke-width="1" />
+                  <text x="20" y="21" font-size="6" font-weight="900" fill="#ffffff" text-anchor="middle">AI</text>
+                  <line x1="28" y1="18" x2="40" y2="18" stroke="#c084fc" stroke-width="1.5" />
+                  <circle cx="48" cy="18" r="8" fill="url(#gGreen)" stroke="#ffffff" stroke-width="1" />
+                  <text x="48" y="21" font-size="6" font-weight="900" fill="#ffffff" text-anchor="middle">NPC</text>
+                  <text x="34" y="38" font-size="7" font-weight="800" fill="#4c1d95" text-anchor="middle">AI Pathfinding</text>
+                </g>
+              </svg>
+            </div>
+            <div class="tvc-footer">From tech to real life – BFS is everywhere!</div>
+          </div>
+        `;
+
+      default:
+        return "";
+    }
+  }
+
+  /* ─── Visualize / HTML5 Video Player Engine ─────────────────── */
+
+  initVideoPlayer() {
+    const video = document.getElementById("bfs-main-video");
+    const screen = document.getElementById("video-screen-container");
+    if (!video) return;
+
+    // Click on video screen toggles play/pause
+    if (screen) {
+      screen.addEventListener("click", () => {
+        this.toggleVideoPlay();
+      });
+      // Double-click enters fullscreen
+      screen.addEventListener("dblclick", (e) => {
+        e.preventDefault();
+        this.toggleVideoFullscreen();
+      });
+    }
+
+    video.addEventListener("timeupdate", () => {
+      this.updateVideoProgressUI();
+    });
+
+    video.addEventListener("loadedmetadata", () => {
+      this.updateVideoDurationUI();
+      this.updateVideoProgressUI();
+    });
+
+    video.addEventListener("durationchange", () => {
+      this.updateVideoDurationUI();
+    });
+
+    video.addEventListener("play", () => {
+      this.isVideoPlaying = true;
+      this.syncPlayButtonUI();
+    });
+
+    video.addEventListener("pause", () => {
+      this.isVideoPlaying = false;
+      this.syncPlayButtonUI();
+    });
+
+    video.addEventListener("ended", () => {
+      this.isVideoPlaying = false;
+      this.syncPlayButtonUI();
+      this.completedVideos.add(this.activeLesson);
+      localStorage.setItem("algolearn_completed_videos", JSON.stringify([...this.completedVideos]));
+      this.updateProgressStats();
+    });
+
+    // Set initial properties
+    video.volume = this.videoVolume;
+    video.playbackRate = this.videoSpeed;
+    this.syncPlayButtonUI();
+  }
+
+  selectVideoLesson(lessonKey) {
+    this.activeLesson = lessonKey;
+    const isVideo1 = (lessonKey === "intro" || lessonKey === "video1");
+
+    // Toggle Card Active States
+    const card01 = document.getElementById("lesson-card-01");
+    const card02 = document.getElementById("lesson-card-02");
+    const btn01  = document.getElementById("btn-watch-lesson-01");
+    const btn02  = document.getElementById("btn-watch-lesson-02");
+
+    if (card01 && card02) {
+      card01.classList.toggle("active", isVideo1);
+      card02.classList.toggle("active", !isVideo1);
+    }
+
+    if (btn01 && btn02) {
+      btn01.className = `lesson-action-btn ${isVideo1 ? "solid" : "outline"}`;
+      btn02.className = `lesson-action-btn ${!isVideo1 ? "solid" : "outline"}`;
+    }
+
+    // Update Player Title & Badge
+    const titleEl = document.getElementById("v-player-title");
+    const fileEl  = document.getElementById("v-player-file-tag");
+    const video = document.getElementById("bfs-main-video");
+
+    if (titleEl) {
+      titleEl.textContent = isVideo1
+        ? "NOW PLAYING: BFS VISUALIZATION & TRAVERSAL"
+        : "NOW PLAYING: BFS ALGORITHM & IMPLEMENTATION";
+    }
+    if (fileEl) {
+      fileEl.textContent = isVideo1 ? "video1.mp4" : "video2.mp4";
+    }
+
+    const targetSrc = isVideo1 ? "videos/video1.mp4" : "videos/video2.mp4";
+    if (video) {
+      if (!video.src || !video.src.includes(targetSrc)) {
+        video.src = targetSrc;
+        video.load();
+        video.currentTime = 0;
+        video.playbackRate = this.videoSpeed;
+        video.volume = this.videoVolume;
+        video.play().then(() => {
+          this.isVideoPlaying = true;
+          this.syncPlayButtonUI();
+        }).catch(() => {
+          this.isVideoPlaying = false;
+          this.syncPlayButtonUI();
+        });
+      }
+    }
+
+    this.completedVideos.add(lessonKey);
+    localStorage.setItem("algolearn_completed_videos", JSON.stringify([...this.completedVideos]));
+    this.updateProgressStats();
+    this.playSound("pop");
+  }
+
+  toggleVideoPlay() {
+    const video = document.getElementById("bfs-main-video");
+    if (!video) return;
+
+    if (video.paused) {
+      video.play().then(() => {
+        this.isVideoPlaying = true;
+        this.syncPlayButtonUI();
+      }).catch(() => {});
+    } else {
+      video.pause();
+      this.isVideoPlaying = false;
+      this.syncPlayButtonUI();
+    }
+    this.playSound("pop");
+  }
+
+  syncPlayButtonUI() {
+    const icon = document.getElementById("v-play-icon");
+    const text = document.getElementById("v-play-text");
+    if (icon && text) {
+      icon.innerHTML = this.isVideoPlaying
+        ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`
+        : `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+      text.textContent = this.isVideoPlaying ? "PAUSE" : "PLAY";
+    }
+  }
+
+  skipVideo(delta) {
+    const video = document.getElementById("bfs-main-video");
+    if (!video) return;
+    const duration = isFinite(video.duration) ? video.duration : 0;
+    video.currentTime = Math.max(0, Math.min(duration, (video.currentTime || 0) + delta));
+    this.playSound("pop");
+  }
+
+  seekVideo(event) {
+    const video = document.getElementById("bfs-main-video");
+    const track = document.getElementById("v-progress-track");
+    if (!track || !video || !isFinite(video.duration) || video.duration <= 0) return;
+
+    const rect = track.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const pct = Math.max(0, Math.min(1, clickX / rect.width));
+    video.currentTime = pct * video.duration;
+  }
+
+  setVideoSpeed(speed) {
+    this.videoSpeed = speed;
+    const video = document.getElementById("bfs-main-video");
+    if (video) {
+      video.playbackRate = speed;
+    }
+    document.querySelectorAll(".v-speed-pill").forEach(btn => {
+      btn.classList.toggle("active", parseFloat(btn.dataset.speed) === speed);
+    });
+  }
+
+  setVideoVolume(val) {
+    this.videoVolume = parseFloat(val);
+    const video = document.getElementById("bfs-main-video");
+    if (video) {
+      video.volume = this.videoVolume;
+      video.muted = (this.videoVolume === 0);
+    }
+  }
+
+  toggleMuteVideo() {
+    const video = document.getElementById("bfs-main-video");
+    const slider = document.getElementById("v-volume-slider");
+    if (!video) return;
+
+    if (video.muted || video.volume === 0) {
+      video.muted = false;
+      video.volume = this.videoVolume > 0 ? this.videoVolume : 0.8;
+      this.videoVolume = video.volume;
+    } else {
+      video.muted = true;
+    }
+    if (slider) slider.value = video.muted ? 0 : video.volume;
+  }
+
+  toggleVideoFullscreen() {
+    const video = document.getElementById("bfs-main-video");
+    // Use the card (contains video + controls) as fullscreen target
+    const card = document.querySelector(".video-player-main-card");
+    const screen = document.getElementById("video-screen-container");
+    const target = card || screen || video;
+    if (!target) return;
+
+    const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+
+    if (!isFull) {
+      if (target.requestFullscreen) {
+        target.requestFullscreen().catch(() => {
+          // Fallback to native video fullscreen on mobile
+          if (video && video.webkitEnterFullscreen) video.webkitEnterFullscreen();
+        });
+      } else if (target.webkitRequestFullscreen) {
+        target.webkitRequestFullscreen();
+      } else if (video && video.webkitEnterFullscreen) {
+        video.webkitEnterFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+      }
+    }
+  }
+
+  updateVideoDurationUI() {
+    const video = document.getElementById("bfs-main-video");
+    const timeTotal = document.getElementById("v-time-total");
+    if (!video || !timeTotal) return;
+
+    const duration = isFinite(video.duration) && video.duration > 0 ? video.duration : 0;
+    const mm = String(Math.floor(duration / 60)).padStart(2, "0");
+    const ss = String(Math.floor(duration % 60)).padStart(2, "0");
+    timeTotal.textContent = `${mm}:${ss}`;
+  }
+
+  updateVideoProgressUI() {
+    const video = document.getElementById("bfs-main-video");
+    const timeCurr = document.getElementById("v-time-current");
+    const fill = document.getElementById("v-progress-fill");
+    const thumb = document.getElementById("v-progress-thumb");
+
+    if (!video) return;
+    const current = video.currentTime || 0;
+    const duration = (isFinite(video.duration) && video.duration > 0) ? video.duration : 1;
+
+    const mm = String(Math.floor(current / 60)).padStart(2, "0");
+    const ss = String(Math.floor(current % 60)).padStart(2, "0");
+    if (timeCurr) timeCurr.textContent = `${mm}:${ss}`;
+
+    const pct = Math.min(100, Math.max(0, (current / duration) * 100));
+    if (fill) fill.style.width = `${pct}%`;
+    if (thumb) thumb.style.left = `${pct}%`;
+  }
+
+  /* ─── Progress Section ──────────────────────────────────────── */
+
+  updateProgressStats() {
+    const totalActivities = 20;
+    const completedCount = this.completedChapters.size + this.completedVideos.size + this.completedActivities.size;
+    const overallPct = Math.min(100, Math.round((completedCount / totalActivities) * 100));
+
+    // Update Overall Completion Card
+    const pctEl = document.getElementById("prog-overall-pct");
+    const countEl = document.getElementById("prog-overall-count");
+    const barEl = document.getElementById("prog-overall-bar");
+
+    if (pctEl) pctEl.textContent = `${overallPct}%`;
+    if (countEl) countEl.textContent = `(${completedCount} of ${totalActivities} Activities)`;
+    if (barEl) barEl.style.width = `${overallPct}%`;
+
+    // Update Performance Stats Card
+    const perfAct = document.getElementById("perf-activities-count");
+    const perfMastered = document.getElementById("perf-mastered-count");
+    const perfLevels = document.getElementById("perf-levels-count");
+    const perfChallenges = document.getElementById("perf-challenges-txt");
+
+    if (perfAct) perfAct.textContent = `${completedCount} / 20`;
+    if (perfMastered) perfMastered.textContent = Math.floor(completedCount / 3);
+    if (perfLevels) perfLevels.textContent = `${Math.min(9, Math.floor(completedCount / 2))} / 9`;
+    if (perfChallenges) perfChallenges.textContent = `${Math.min(4, Math.floor(completedCount / 4))} / 4 Challenges`;
+
+    // Video Section in Progress Tracker
+    const videoCount = this.completedVideos.size;
+    const vtTxt = document.getElementById("vt-completed-txt");
+    if (vtTxt) vtTxt.textContent = `2 VIDEOS (${videoCount} / 2 Completed)`;
+
+    const dotIntro = document.getElementById("vt-dot-intro");
+    const pillIntro = document.getElementById("vt-pill-intro");
+    if (this.completedVideos.has("intro")) {
+      if (dotIntro) { dotIntro.textContent = "✓"; dotIntro.style.color = "#10b981"; }
+      if (pillIntro) { pillIntro.textContent = "Completed"; pillIntro.style.color = "#10b981"; }
+    }
+
+    const dotColl = document.getElementById("vt-dot-collision");
+    const pillColl = document.getElementById("vt-pill-collision");
+    if (this.completedVideos.has("shortest_path") || this.completedVideos.has("collision")) {
+      if (dotColl) { dotColl.textContent = "✓"; dotColl.style.color = "#10b981"; }
+      if (pillColl) { pillColl.textContent = "Completed"; pillColl.style.color = "#10b981"; }
+    }
+
+    // Update Sidebar Navigation Badges (Pic 3 Format)
+    const badgeOverview = document.getElementById("nav-badge-overview");
+    const badgeLearn = document.getElementById("nav-badge-learn");
+    const badgeVisualize = document.getElementById("nav-badge-visualize");
+    const badgeGame = document.getElementById("nav-badge-game");
+    const badgeQuiz = document.getElementById("nav-badge-quiz");
+    const badgeProgress = document.getElementById("nav-badge-progress");
+
+    const totalChapters = typeof THEORY_MODULES !== "undefined" ? THEORY_MODULES.length : 12;
+    const gameWonCount = window.game && window.game.completedLevels ? window.game.completedLevels.size : (typeof LEVELS_DATA !== "undefined" ? Math.min(LEVELS_DATA.length, Math.floor(completedCount / 2)) : 0);
+    const totalLevels = typeof LEVELS_DATA !== "undefined" ? LEVELS_DATA.length : 9;
+
+    if (badgeOverview) badgeOverview.textContent = "Overview";
+    if (badgeLearn) badgeLearn.textContent = `${this.completedChapters.size} / ${totalChapters}`;
+    if (badgeVisualize) badgeVisualize.textContent = `${this.completedVideos.size} / 2`;
+    if (badgeGame) badgeGame.textContent = `${gameWonCount} / ${totalLevels}`;
+    if (badgeQuiz) badgeQuiz.textContent = "10 Qs";
+    if (badgeProgress) badgeProgress.textContent = `${overallPct}%`;
+  }
+
+  filterProgressModules(category) {
+    this.activeFilter = category;
+    document.querySelectorAll(".prog-filter-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.filter === category);
+    });
+    this.renderProgressModules();
+    this.playSound("pop");
+  }
+
+  renderProgressModules() {
+    const mount = document.getElementById("prog-modules-list");
+    const countEl = document.getElementById("prog-showing-count");
+    if (!mount) return;
+
+    const filtered = this.activeFilter === "all"
+      ? this.modulesData
+      : this.modulesData.filter(m => m.category === this.activeFilter);
+
+    if (countEl) {
+      countEl.textContent = `Showing ${filtered.length} of ${this.modulesData.length} modules`;
+    }
+
+    mount.innerHTML = filtered.map(m => {
+      const isDone = this.completedActivities.has(m.id);
+      const progressPct = isDone ? 100 : (this.completedChapters.has(m.chapterTarget) ? 60 : 0);
+      const statusText = isDone ? "Completed" : (progressPct > 0 ? "In Progress" : "Not Started");
+
+      return `
+        <div class="prog-module-card" id="module-card-${m.id}">
+          <div class="pm-header-row">
+            <div class="pm-badges-left">
+              <span class="pm-code-badge">${m.code}</span>
+              <span class="pm-cat-badge ${m.category}">${m.categoryLabel}</span>
+            </div>
+            <span class="pm-status-pill ${isDone ? 'done' : ''}">
+              ${isDone ? '✓ Completed' : '○ ' + statusText}
+            </span>
+          </div>
+
+          <h3 class="pm-title">${m.title}</h3>
+          <p class="pm-desc">${m.desc}</p>
+          <div class="pm-criteria-box">${m.criteria}</div>
+
+          <div class="pm-footer-row">
+            <div class="pm-progress-wrap">
+              <span>Progress</span>
+              <div class="pm-mini-bar">
+                <div class="pm-mini-bar-fill" style="width: ${progressPct}%;"></div>
+              </div>
+              <span style="font-weight:700">${progressPct}%</span>
+            </div>
+
+            <button class="pm-action-btn" onclick="app.startModule('${m.id}')">
+              ${isDone ? 'Review Module &rarr;' : 'Start Module &rarr;'}
+            </button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  startModule(moduleId) {
+    const mod = this.modulesData.find(m => m.id === moduleId);
+    if (!mod) return;
+
+    this.completedActivities.add(moduleId);
+    localStorage.setItem("algolearn_completed_activities", JSON.stringify([...this.completedActivities]));
+    this.updateProgressStats();
+
+    if (mod.tabTarget === "theory" && mod.chapterTarget) {
+      this.switchTab("theory");
+      this.selectChapter(mod.chapterTarget);
+    } else if (mod.tabTarget === "quiz") {
+      this.switchTab("quiz");
+    } else {
+      this.switchTab("game");
+    }
+  }
+
+  continueNextRecommended() {
+    this.switchTab("theory");
+    this.selectChapter("graph-foundations");
+  }
+
+  resetAllProgress() {
+    if (confirm("Reset all curriculum progress, completed chapters, and lab milestones?")) {
+      this.completedChapters.clear();
+      this.completedActivities.clear();
+      this.completedVideos.clear();
+      localStorage.removeItem("algolearn_completed_chapters");
+      localStorage.removeItem("algolearn_completed_activities");
+      localStorage.removeItem("algolearn_completed_videos");
+      this.updateProgressStats();
+      this.renderTOC();
+      this.renderActiveChapter();
+      this.renderProgressModules();
+      this.showToast("Curriculum progress reset successfully.");
+    }
+  }
+
+  showToast(message) {
+    const container = document.getElementById("toast-container");
+    if (!container) return;
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
+
+  /* ─── Game Hub & Level Manager ──────────────────────────────── */
+
+  renderProgressSection() {
+    this.updateProgressStats();
+    this.renderProgressModules();
+  }
+
+  openLevelProblem(idx) {
+    this.activeLevelIndex = idx;
+    this.showProblemWorkspace();
+
+    const hub  = document.getElementById("game-levels-hub");
+    const work = document.getElementById("active-problem-container");
+    if (hub)  hub.classList.add("hidden");
+    if (work) { work.classList.remove("hidden"); work.style.display = "block"; }
+
+    if (window.game) {
+      window.game.loadLevel(idx);
+    }
+
+    const lvl = typeof LEVELS_DATA !== "undefined" ? LEVELS_DATA[idx] : null;
+    if (lvl) {
+      const badge = document.getElementById("active-problem-badge");
+      const name  = document.getElementById("active-problem-name");
+      if (badge) badge.textContent = `LEVEL ${lvl.id}`;
+      if (name)  name.textContent  = lvl.title;
+    }
+    this.playSound("pop");
+  }
+
+  showProblemWorkspace() {
+    const hub  = document.getElementById("game-levels-hub");
+    const work = document.getElementById("active-problem-container");
+    if (hub)  { hub.classList.add("hidden");   hub.style.display = "none"; }
+    if (work) { work.classList.remove("hidden"); work.style.display = "block"; }
+  }
+
+  showLevelsHub() {
+    this.activeLevelIndex = null;
+    const hub  = document.getElementById("game-levels-hub");
+    const work = document.getElementById("active-problem-container");
+    if (hub)  { hub.classList.remove("hidden"); hub.style.display = "block"; }
+    if (work) { work.classList.add("hidden");   work.style.display = "none"; }
+  }
+
+  closeActiveProblem() {
+    this.showLevelsHub();
+    this.renderLevelsGrid();
+  }
+
+  replayLevelFromVictory() {
+    const modal = document.getElementById("victory-modal");
+    if (modal) {
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+      modal.style.display = "none";
+    }
+    const currentIdx = (window.game && window.game.currentLevelIndex !== undefined)
+      ? window.game.currentLevelIndex
+      : (this.activeLevelIndex !== null ? this.activeLevelIndex : 0);
+    if (window.game) {
+      window.game.loadLevel(currentIdx);
+    }
+  }
+
+  nextLevelFromVictory() {
+    const modal = document.getElementById("victory-modal");
+    if (modal) {
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+      modal.style.display = "none";
+    }
+    const currentIdx = (window.game && window.game.currentLevelIndex !== undefined)
+      ? window.game.currentLevelIndex
+      : (this.activeLevelIndex !== null ? this.activeLevelIndex : 0);
+    const nextIdx = currentIdx + 1;
+    if (typeof LEVELS_DATA !== "undefined" && nextIdx < LEVELS_DATA.length) {
+      this.openLevelProblem(nextIdx);
+    } else {
+      this.switchTab("quiz");
+    }
+  }
+
+  renderLevelsGrid() {
+    const mount = document.getElementById("levels-grid-mount");
+    if (!mount || typeof LEVELS_DATA === "undefined") return;
+
+    mount.innerHTML = LEVELS_DATA.map((lvl, idx) => {
+      const isDone = window.game && window.game.completedLevels && (window.game.completedLevels.has(lvl.id) || window.game.completedLevels.has(idx));
+      const ops = (lvl.keyOperations || []).map(op => `<span class="tm-key-op-chip"><strong>${op.name}</strong> <code>${op.complexity}</code></span>`).join(" ");
+      return `
+        <div class="topic-master-card ${isDone ? 'is-done' : ''}" onclick="app.openLevelProblem(${idx})">
+          <div class="tm-card-header">
+            <div class="tm-card-icon-box">${lvl.svgIcon || '⚡'}</div>
+            <span class="tm-card-concepts-badge ${isDone ? 'badge-done' : ''}">
+              ${isDone ? '✓ COMPLETED' : `LEVEL ${lvl.id}`}
+            </span>
+          </div>
+          <h3 class="tm-card-title">${lvl.title}</h3>
+          <p class="tm-card-desc">${lvl.subtitle || ''}</p>
+          ${ops ? `<div class="tm-card-ops-row" style="display:flex; flex-wrap:wrap; gap:6px; margin: 10px 0 14px;">${ops}</div>` : ''}
+          <div class="tm-card-footer" style="margin-top: auto; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.78rem; font-weight: 700; color: var(--primary, #6366f1);">${isDone ? 'Replay Challenge' : 'Start Challenge'}</span>
+            <button class="tm-card-action-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  setGameMode(mode) {
+    this.gameMode = mode;
+  }
+}
+
+// Global App Initialization
+document.addEventListener("DOMContentLoaded", () => {
+  window.app = new AppController();
+  window.app.init();
+});
