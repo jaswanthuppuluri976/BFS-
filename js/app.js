@@ -198,6 +198,16 @@ class AppController {
       toggleBtn.addEventListener("click", () => this.toggleSidebar());
     }
 
+    const topbarBrand = document.querySelector(".topbar-brand-logo-left");
+    if (topbarBrand) {
+      topbarBrand.addEventListener("click", () => this.toggleSidebar());
+    }
+
+    const navTitleBtn = document.getElementById("topbar-nav-title-btn");
+    if (navTitleBtn) {
+      navTitleBtn.addEventListener("click", () => this.toggleSidebar());
+    }
+
     // Sidebar Close Button
     const closeBtn = document.getElementById("sidebar-close-btn");
     if (closeBtn) {
@@ -408,8 +418,8 @@ class AppController {
     const iconSpan = btn.querySelector(".theme-icon");
     if (iconSpan) {
       iconSpan.innerHTML = isDark
-        ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`
-        : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+        ? `<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`
+        : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`;
     }
   }
 
@@ -430,8 +440,8 @@ class AppController {
     const box = document.getElementById("sound-icon-box");
     if (!box) return;
     box.innerHTML = this.soundEnabled
-      ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>`
-      : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
+      ? `<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>`
+      : `<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`;
   }
 
   playSound(type) {
@@ -487,8 +497,19 @@ class AppController {
     const mount = document.getElementById("chapter-detail-mount");
     if (!mount || typeof THEORY_MODULES === "undefined") return;
 
-    const ch = THEORY_MODULES.find(m => m.id === this.activeChapterId) || THEORY_MODULES[0];
+    const currentIndex = THEORY_MODULES.findIndex(m => m.id === this.activeChapterId);
+    const chIndex = currentIndex >= 0 ? currentIndex : 0;
+    const ch = THEORY_MODULES[chIndex] || THEORY_MODULES[0];
     if (!ch) return;
+
+    const isCompleted = this.completedChapters.has(ch.id);
+    const hasPrev = chIndex > 0;
+    const hasNext = chIndex < THEORY_MODULES.length - 1;
+    const prevId = hasPrev ? THEORY_MODULES[chIndex - 1].id : null;
+    const nextId = hasNext ? THEORY_MODULES[chIndex + 1].id : null;
+
+    // Determine target level number for "Try Level X" button
+    const levelNum = Math.min(Math.max(1, parseInt(ch.chapterNum, 10) || 1), 6);
 
     mount.innerHTML = `
       <div class="ch-detail-card">
@@ -571,20 +592,77 @@ class AppController {
             </div>
           </div>
 
-          <!-- Memory & Queue State Slots -->
-          <div class="ch-section-tag" style="margin-top: 14px;">${ch.diagram.trayLabel || 'TRAVERSAL STATE ARRAY:'}</div>
+          <!-- Real-World Application Badges & State Array -->
+          <div class="ch-section-tag" style="margin-top: 18px;">${ch.diagram.trayLabel || 'TRAVERSAL STATE ARRAY:'}</div>
           <div class="ch-memory-slots-row">
             ${(ch.diagram.items || []).map(item => `
-              <div class="ch-slot-cell ${item.active ? "active-slot" : ""}" title="${item.label}: ${item.val}">
-                <strong>${item.label}</strong> ${item.val}
+              <div class="ch-slot-card ${item.active ? "active-slot" : ""}">
+                <div class="ch-slot-title">${item.label}</div>
+                <div class="ch-slot-desc">${item.val}</div>
               </div>
             `).join("")}
           </div>
         </div>
         ` : ''}
 
+        <!-- Bottom Chapter Navigation Action Bar (Exact UI Matching Reference Images 1 & 2) -->
+        <div class="ch-bottom-nav-bar">
+          <div class="ch-nav-left-group">
+            <button id="ch-nav-prev-btn" class="ch-nav-btn ch-nav-btn-secondary ${!hasPrev ? 'disabled' : ''}" 
+                    ${hasPrev ? `onclick="app.selectChapter('${prevId}')"` : 'disabled'}
+                    title="Previous Chapter">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+              <span>Prev</span>
+            </button>
+
+            <button id="ch-nav-mark-btn" class="ch-nav-btn ch-nav-btn-primary ${isCompleted ? 'completed' : ''}"
+                    onclick="app.toggleChapterCompletion('${ch.id}')"
+                    title="${isCompleted ? 'Mark as Incomplete' : 'Mark as Completed'}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>${isCompleted ? 'Completed' : 'Mark Completed'}</span>
+            </button>
+
+            <button id="ch-nav-next-btn" class="ch-nav-btn ch-nav-btn-secondary ${!hasNext ? 'disabled' : ''}"
+                    ${hasNext ? `onclick="app.selectChapter('${nextId}')"` : 'disabled'}
+                    title="Next Chapter">
+              <span>Next</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+          </div>
+
+          <div class="ch-nav-right-group">
+            <button id="ch-nav-try-level-btn" class="ch-nav-btn ch-nav-btn-outline"
+                    onclick="app.startPracticeLevel(${levelNum})"
+                    title="Try Practice Level ${levelNum}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block;vertical-align:middle;margin-right:2px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <span>Try Level ${levelNum}</span>
+            </button>
+          </div>
+        </div>
+
       </div>
     `;
+  }
+
+  toggleChapterCompletion(chapterId) {
+    if (this.completedChapters.has(chapterId)) {
+      this.completedChapters.delete(chapterId);
+    } else {
+      this.completedChapters.add(chapterId);
+    }
+    localStorage.setItem("algolearn_completed_chapters", JSON.stringify([...this.completedChapters]));
+    this.renderTOC();
+    this.renderActiveChapter();
+    this.updateProgressStats();
+    this.playSound("pop");
+  }
+
+  startPracticeLevel(levelNum) {
+    this.switchTab("game");
+    if (window.game && typeof window.game.loadLevel === "function") {
+      window.game.loadLevel(levelNum);
+    }
+    this.playSound("pop");
   }
 
   /* ─── 12 Topic Visual Illustration Cards Generator (Attractive Diagrams) ──── */
@@ -598,44 +676,44 @@ class AppController {
           <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.25"/>
         </filter>
         
-        <!-- Unified AlgoLearn Brand Node Gradients (Electric Blue → Indigo → Violet) -->
+        <!-- Unified AlgoLearn Brand Node Gradients (Royal Blue 55% + Violet 35%) -->
         <linearGradient id="gBlue" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#2563eb"/>
+          <stop offset="0%" stop-color="#4B73FF"/><stop offset="100%" stop-color="#315BEA"/>
         </linearGradient>
         <linearGradient id="gIndigo" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#4f46e5"/>
+          <stop offset="0%" stop-color="#6947E8"/><stop offset="100%" stop-color="#4169E1"/>
         </linearGradient>
         <linearGradient id="gPurple" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#7c3aed"/>
+          <stop offset="0%" stop-color="#A78BFA"/><stop offset="100%" stop-color="#6947E8"/>
         </linearGradient>
         <linearGradient id="gViolet" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#c084fc"/><stop offset="100%" stop-color="#7c3aed"/>
+          <stop offset="0%" stop-color="#C4B5FD"/><stop offset="100%" stop-color="#6947E8"/>
         </linearGradient>
         <linearGradient id="gCyan" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#60a5fa"/><stop offset="100%" stop-color="#2563eb"/>
+          <stop offset="0%" stop-color="#60A5FA"/><stop offset="100%" stop-color="#315BEA"/>
         </linearGradient>
         <linearGradient id="gGreen" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#4f46e5"/>
+          <stop offset="0%" stop-color="#5366E8"/><stop offset="100%" stop-color="#4169E1"/>
         </linearGradient>
         <linearGradient id="gAmber" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#93c5fd"/><stop offset="100%" stop-color="#3b82f6"/>
+          <stop offset="0%" stop-color="#93C5FD"/><stop offset="100%" stop-color="#315BEA"/>
         </linearGradient>
         <linearGradient id="gRose" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#6d28d9"/>
+          <stop offset="0%" stop-color="#A78BFA"/><stop offset="100%" stop-color="#6947E8"/>
         </linearGradient>
 
         <!-- Arrow Markers -->
         <marker id="arrGreen" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-          <path d="M 0 1 L 8 5 L 0 9 z" fill="#2563eb"/>
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#315BEA"/>
         </marker>
         <marker id="arrOrange" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-          <path d="M 0 1 L 8 5 L 0 9 z" fill="#4f46e5"/>
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#4169E1"/>
         </marker>
         <marker id="arrRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-          <path d="M 0 1 L 8 5 L 0 9 z" fill="#7c3aed"/>
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#6947E8"/>
         </marker>
         <marker id="arrBlue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-          <path d="M 0 1 L 8 5 L 0 9 z" fill="#3b82f6"/>
+          <path d="M 0 1 L 8 5 L 0 9 z" fill="#4169E1"/>
         </marker>
       </defs>
     `;
@@ -1344,6 +1422,19 @@ class AppController {
     this.syncPlayButtonUI();
   }
 
+  startVideoPlayback() {
+    const video = document.getElementById("bfs-main-video");
+    if (!video) return;
+    if (!video.src || video.src === "" || video.src.endsWith("/")) {
+      const isVideo1 = (this.activeLesson === "intro" || this.activeLesson === "video1");
+      video.src = isVideo1 ? "video/video1.mp4" : "video/video2.mp4";
+      video.load();
+    }
+    video.playbackRate = this.videoSpeed || 1;
+    video.volume = this.videoVolume !== undefined ? this.videoVolume : 0.8;
+    this.syncPlayButtonUI();
+  }
+
   selectVideoLesson(lessonKey) {
     this.activeLesson = lessonKey;
     const isVideo1 = (lessonKey === "intro" || lessonKey === "video1");
@@ -1378,7 +1469,7 @@ class AppController {
       fileEl.textContent = isVideo1 ? "video1.mp4" : "video2.mp4";
     }
 
-    const targetSrc = isVideo1 ? "videos/video1.mp4" : "videos/video2.mp4";
+    const targetSrc = isVideo1 ? "video/video1.mp4" : "video/video2.mp4";
     if (video) {
       if (!video.src || !video.src.includes(targetSrc)) {
         video.src = targetSrc;

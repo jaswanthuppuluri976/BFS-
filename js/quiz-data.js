@@ -99,6 +99,30 @@ const QUIZ_QUESTIONS = [
       { id: "D", text: "There is no bug, BFS allows any random order.", correct: false }
     ],
     explanation: "BFS strictly explores horizontally layer-by-layer. All nodes at Level 1 (both B and C) MUST be dequeued and explored before any node at Level 2 (D) is explored."
+  },
+  {
+    id: 9,
+    category: "Space Complexity",
+    question: "What is the worst-case auxiliary space complexity of BFS on an unweighted graph with V vertices and E edges?",
+    options: [
+      { id: "A", text: "O(1) auxiliary space", correct: false },
+      { id: "B", text: "O(log V) auxiliary space", correct: false },
+      { id: "C", text: "O(V) because in the worst case (e.g. star or complete bipartite graph), the queue can hold up to V vertices.", correct: true },
+      { id: "D", text: "O(E^2) auxiliary space", correct: false }
+    ],
+    explanation: "In the worst case (such as a star graph where the root node connects to all remaining V-1 nodes), all child nodes are enqueued at once, requiring O(V) auxiliary queue memory."
+  },
+  {
+    id: 10,
+    category: "BFS Applications",
+    question: "Which classical graph problem can be solved directly by coloring vertices during a BFS traversal?",
+    options: [
+      { id: "A", text: "Checking whether an undirected graph is bipartite (2-colorable)", correct: true },
+      { id: "B", text: "Finding the minimum spanning tree of a weighted graph", correct: false },
+      { id: "C", text: "Finding the longest simple path in a graph", correct: false },
+      { id: "D", text: "Solving the Traveling Salesperson Problem in polynomial time", correct: false }
+    ],
+    explanation: "By assigning alternating colors (or parity of distances) to successive BFS levels, any edge connecting two vertices of the same color proves the graph has an odd cycle and is not bipartite."
   }
 ];
 

@@ -4,6 +4,108 @@
  * queue rules, time & space complexity breakdowns, and step-by-step level hints.
  */
 
+const BOT_MASCOT_SVG = `
+<svg class="ai-bot-avatar-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="aiBotBg" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="55%" stop-color="#1d4ed8"/>
+      <stop offset="100%" stop-color="#0e1e4f"/>
+    </radialGradient>
+    
+    <!-- Helmet Gradient -->
+    <linearGradient id="aiHelmetGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="85%" stop-color="#f1f5f9"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </linearGradient>
+
+    <!-- Visor Gradient -->
+    <linearGradient id="aiVisorGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0b1329"/>
+      <stop offset="100%" stop-color="#030712"/>
+    </linearGradient>
+
+    <!-- Ear Left Gradient -->
+    <linearGradient id="aiEarL" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+
+    <!-- Ear Right Gradient -->
+    <linearGradient id="aiEarR" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+
+    <!-- Book Base Gradient -->
+    <linearGradient id="aiBookCover" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="48%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+
+    <!-- Soft Glow Filter -->
+    <filter id="aiDropShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#050c26" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Circular Outer Badge -->
+  <circle cx="50" cy="50" r="49" fill="url(#aiBotBg)"/>
+
+  <!-- Subtle Rim Light -->
+  <circle cx="50" cy="50" r="48" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" fill="none"/>
+
+  <!-- Bottom Dark Vignette Arc -->
+  <path d="M10 74 C 22 92, 78 92, 90 74 C 76 96, 24 96, 10 74 Z" fill="#040b20" opacity="0.6"/>
+
+  <!-- Top Antenna -->
+  <rect x="48" y="20" width="4" height="8" rx="2" fill="#ffffff" filter="url(#aiDropShadow)"/>
+  <circle cx="50" cy="17" r="4" fill="#ffffff" filter="url(#aiDropShadow)"/>
+  <circle cx="49" cy="16" r="1.2" fill="#bae6fd"/>
+
+  <!-- Side Ear Cushions / Headphone Muffs -->
+  <rect x="22" y="38" width="8" height="18" rx="4" fill="url(#aiEarL)" filter="url(#aiDropShadow)"/>
+  <rect x="70" y="38" width="8" height="18" rx="4" fill="url(#aiEarR)" filter="url(#aiDropShadow)"/>
+
+  <!-- Robot Head / Helmet -->
+  <rect x="26" y="24" width="48" height="38" rx="19" fill="url(#aiHelmetGrad)" filter="url(#aiDropShadow)"/>
+
+  <!-- Screen / Visor -->
+  <rect x="32" y="32" width="36" height="24" rx="11" fill="url(#aiVisorGrad)"/>
+
+  <!-- Screen Glass Reflection highlight -->
+  <path d="M35 35 C 44 33, 56 33, 65 35 C 62 38, 38 38, 35 35 Z" fill="rgba(255,255,255,0.2)"/>
+
+  <!-- Cute Smiling Eyes (Arch Shapes ^ ^) -->
+  <path d="M38 43 C 39.5 39, 44.5 39, 46 43" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+  <path d="M54 43 C 55.5 39, 60.5 39, 62 43" stroke="#ffffff" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+
+  <!-- Cute Smile (Cyan Arc) -->
+  <path d="M46 48.5 C 47.5 51.5, 52.5 51.5, 54 48.5" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+
+  <!-- Robot Shoulders / Upper Body -->
+  <path d="M34 60 C 34 57, 66 57, 66 60 L 72 72 C 62 76, 38 76, 28 72 Z" fill="#e2e8f0"/>
+
+  <!-- Book Outer Cover Glow -->
+  <path d="M22 75 C 33 84, 47 80, 50 78 C 53 80, 67 84, 78 75 C 70 86, 54 87, 50 82 C 46 87, 30 86, 22 75 Z" fill="url(#aiBookCover)" filter="url(#aiDropShadow)"/>
+
+  <!-- Open Book Pages (White) -->
+  <path d="M24 72 C 34 76, 46 72, 49.5 68 C 50 67.5, 50 67.5, 50.5 68 C 54 72, 66 76, 76 72 C 73 80, 61 82, 50.5 76 C 50 75.8, 50 75.8, 49.5 76 C 39 82, 27 80, 24 72 Z" fill="#ffffff" filter="url(#aiDropShadow)"/>
+
+  <!-- Book Spine Center Fold Line & Page Details -->
+  <line x1="50" y1="68" x2="50" y2="76" stroke="#94a3b8" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M28 73 C 35 75.5, 43 73, 47 70.5" stroke="#e2e8f0" stroke-width="1" fill="none"/>
+  <path d="M53 70.5 C 57 73, 65 75.5, 72 73" stroke="#e2e8f0" stroke-width="1" fill="none"/>
+
+  <!-- Robot Hands / Little Thumbs gripping book -->
+  <ellipse cx="26" cy="72" rx="3" ry="2.2" fill="#ffffff" transform="rotate(-15 26 72)"/>
+  <ellipse cx="74" cy="72" rx="3" ry="2.2" fill="#ffffff" transform="rotate(15 74 72)"/>
+</svg>
+`;
+
 class AIAssistant {
   constructor() {
     this.isOpen = false;
@@ -23,13 +125,12 @@ class AIAssistant {
     const div = document.createElement("div");
     div.id = "ai-assistant-container";
     div.innerHTML = `
-      <!-- Floating Action Button (Bottom-Right) -->
-      <button id="ai-assistant-fab" class="ai-fab-btn" title="Open BFS AI Assistant">
+      <!-- Floating Action Button (Bottom-Right Logo Only) -->
+      <button id="ai-assistant-fab" class="ai-fab-btn" title="Open BFS AI Assistant" aria-label="Open BFS AI Assistant">
         <span class="ai-fab-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><rect x="4" y="8" width="16" height="12" rx="2"/><line x1="9" y1="13" x2="9.01" y2="13" stroke-width="3"/><line x1="15" y1="13" x2="15.01" y2="13" stroke-width="3"/><path d="M10 17h4"/></svg>
+          ${BOT_MASCOT_SVG}
         </span>
         <span class="ai-fab-pulse"></span>
-        <span class="ai-fab-label">AI Assistant</span>
       </button>
 
       <!-- Chat Window Drawer -->
@@ -39,7 +140,7 @@ class AIAssistant {
         <div class="ai-chat-header">
           <div class="ai-header-left">
             <div class="ai-avatar-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><rect x="4" y="8" width="16" height="12" rx="2"/><line x1="9" y1="13" x2="9.01" y2="13" stroke-width="3"/><line x1="15" y1="13" x2="15.01" y2="13" stroke-width="3"/><path d="M10 17h4"/></svg>
+              ${BOT_MASCOT_SVG}
             </div>
             <div>
               <h4 class="ai-chat-title">BFS AI Assistant</h4>
@@ -176,7 +277,7 @@ class AIAssistant {
     msgDiv.className = "ai-msg ai-msg-system";
     msgDiv.innerHTML = `
       <div class="ai-msg-avatar">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><rect x="4" y="8" width="16" height="12" rx="2"/></svg>
+        ${BOT_MASCOT_SVG}
       </div>
       <div class="msg-bubble">${this.formatMarkdown(text)}</div>
     `;

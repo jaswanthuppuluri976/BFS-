@@ -75,16 +75,13 @@ function requestHandler(req, res) {
   });
 }
 
-PORTS.forEach(port => {
-  try {
-    const s = http.createServer(requestHandler);
-    s.on('error', (err) => {
-      console.log(`Port ${port} error: ${err.message}`);
-    });
-    s.listen(port, '0.0.0.0', () => {
-      console.log(`✓ Active on http://localhost:${port} and http://127.0.0.1:${port}`);
-    });
-  } catch (e) {
-    console.error(`Failed to bind port ${port}:`, e);
-  }
+const PORT = 3000;
+
+const server = http.createServer(requestHandler);
+server.on('error', (err) => {
+  console.error(`Server error: ${err.message}`);
 });
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`✓ AlgoLearn BFS server active on http://0.0.0.0:${PORT}`);
+});
+
