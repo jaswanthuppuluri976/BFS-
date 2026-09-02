@@ -12,8 +12,27 @@ class AppController {
     this.activeFilter = "all";   // 'all' | 'foundation' | 'technique' | 'analysis' | 'examination'
     this.currentTheme = localStorage.getItem("algolearn_theme") || "light";
     this.soundEnabled = localStorage.getItem("algolearn_sound") !== "false";
+    this.activeCodeLanguage = "c"; // Default active programming language tab
 
-    // Video Player State
+    // Video Player State & Dedicated Sources
+    this.video1Src = "/videos/video1.mp4";
+    this.video2Src = "/videos/video2.mp4";
+
+    this.videoLessons = {
+      intro: {
+        id: "video1",
+        title: "NOW PLAYING: BFS VISUALIZATION & TRAVERSAL",
+        fileTag: "video1.mp4",
+        src: this.video1Src
+      },
+      shortest_path: {
+        id: "video2",
+        title: "NOW PLAYING: BFS ALGORITHM & IMPLEMENTATION",
+        fileTag: "video2.mp4",
+        src: this.video2Src
+      }
+    };
+
     this.isVideoPlaying = true;
     this.videoTime = 1;
     this.videoDuration = 30;
@@ -559,6 +578,9 @@ class AppController {
         </div>
         ` : ''}
 
+        <!-- Topic Code Implementations (C / C++ / Java / Python) -->
+        ${this.renderCodeImplementationBox(ch)}
+
         <!-- Architecture Diagram Step Flow -->
         ${ch.diagram ? `
         <div class="ch-arch-diagram-wrap">
@@ -663,6 +685,212 @@ class AppController {
       window.game.loadLevel(levelNum);
     }
     this.playSound("pop");
+  }
+
+  /* ─── Topic-Specific Code Implementations Component (C / C++ / Java / Python) ─── */
+
+  renderCodeImplementationBox(ch) {
+    if (!ch || !ch.codeImplementations) return "";
+
+    const lang = this.activeCodeLanguage || "c";
+    const rawCode = ch.codeImplementations[lang] || ch.codeImplementations.c || "";
+    const highlightedCode = this.highlightSyntax(rawCode, lang);
+
+    const langs = [
+      { id: "c", label: "C" },
+      { id: "cpp", label: "C++" },
+      { id: "java", label: "Java" },
+      { id: "python", label: "Python" }
+    ];
+
+    return `
+      <div class="ch-code-section-wrapper">
+        <div class="ch-section-tag">CODE IMPLEMENTATIONS (C / C++ / JAVA / PYTHON)</div>
+        <div class="ch-code-card">
+          <div class="ch-code-topbar">
+            <div class="ch-code-lang-tabs" role="tablist" aria-label="Programming Language Tabs">
+              ${langs.map(l => `
+                <button class="ch-code-tab-btn ${l.id === lang ? 'active' : ''}"
+                        onclick="app.setCodeLanguage('${l.id}')"
+                        role="tab"
+                        aria-selected="${l.id === lang ? 'true' : 'false'}"
+                        title="Switch to ${l.label} Implementation">
+                  ${l.label}
+                </button>
+              `).join("")}
+            </div>
+            <button id="ch-code-copy-btn" class="ch-code-copy-btn" onclick="app.copyCurrentCode()" title="Copy Source Code">
+              <svg class="copy-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span class="copy-text">Copy</span>
+            </button>
+          </div>
+          <div class="ch-code-body">
+            <pre class="ch-code-pre"><code id="ch-code-display" class="ch-code-content language-${lang}">${highlightedCode}</code></pre>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  setCodeLanguage(lang) {
+    this.activeCodeLanguage = lang;
+    this.playSound("click");
+
+    const currentCh = (typeof THEORY_MODULES !== "undefined") ? 
+      (THEORY_MODULES.find(m => m.id === this.activeChapterId) || THEORY_MODULES[0]) : null;
+
+    if (!currentCh || !currentCh.codeImplementations) return;
+
+    const codeDisplay = document.getElementById("ch-code-display");
+    if (codeDisplay) {
+      const rawCode = currentCh.codeImplementations[lang] || currentCh.codeImplementations.c || "";
+      codeDisplay.className = `ch-code-content language-${lang}`;
+      codeDisplay.innerHTML = this.highlightSyntax(rawCode, lang);
+    }
+
+    const tabs = document.querySelectorAll(".ch-code-tab-btn");
+    tabs.forEach(tab => {
+      const tabText = tab.textContent.trim().toLowerCase();
+      const isMatch = (lang === "c" && tabText === "c") ||
+                      (lang === "cpp" && tabText === "c++") ||
+                      (lang === "java" && tabText === "java") ||
+                      (lang === "python" && tabText === "python");
+      tab.classList.toggle("active", isMatch);
+      tab.setAttribute("aria-selected", isMatch ? "true" : "false");
+    });
+  }
+
+  copyCurrentCode() {
+    const currentCh = (typeof THEORY_MODULES !== "undefined") ? 
+      (THEORY_MODULES.find(m => m.id === this.activeChapterId) || THEORY_MODULES[0]) : null;
+
+    if (!currentCh || !currentCh.codeImplementations) return;
+
+    const lang = this.activeCodeLanguage || "c";
+    const rawCode = currentCh.codeImplementations[lang] || currentCh.codeImplementations.c || "";
+    const copyBtn = document.getElementById("ch-code-copy-btn");
+
+    const onCopied = () => {
+      this.playSound("pop");
+      if (copyBtn) {
+        copyBtn.classList.add("copied");
+        copyBtn.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          <span class="copy-text">Copied!</span>
+        `;
+        setTimeout(() => {
+          if (copyBtn) {
+            copyBtn.classList.remove("copied");
+            copyBtn.innerHTML = `
+              <svg class="copy-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span class="copy-text">Copy</span>
+            `;
+          }
+        }, 2000);
+      }
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(rawCode).then(onCopied).catch(() => {
+        this.fallbackCopyText(rawCode, onCopied);
+      });
+    } else {
+      this.fallbackCopyText(rawCode, onCopied);
+    }
+  }
+
+  fallbackCopyText(text, callback) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.top = "0";
+    textArea.style.left = "0";
+    textArea.style.opacity = "0";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand("copy");
+      if (callback) callback();
+    } catch (err) {
+      console.error("Fallback copy failed", err);
+    }
+    document.body.removeChild(textArea);
+  }
+
+  highlightSyntax(rawCode, lang) {
+    if (!rawCode) return "";
+
+    // 1. Escape HTML special characters
+    let text = rawCode
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+    // Store placeholders for protected segments (strings, comments, preprocessor)
+    const placeholders = [];
+    const addPlaceholder = (match, className) => {
+      const idx = placeholders.length;
+      placeholders.push(`<span class="${className}">${match}</span>`);
+      return `___TOKEN_PH_${idx}___`;
+    };
+
+    // 2. Multi-line comments /* ... */
+    text = text.replace(/\/\*[\s\S]*?\*\//g, m => addPlaceholder(m, "syn-com"));
+
+    // 3. Single-line comments
+    if (lang === "python") {
+      text = text.replace(/(#[^\n]*)/g, m => addPlaceholder(m, "syn-com"));
+    } else {
+      text = text.replace(/(\/\/[^\n]*)/g, m => addPlaceholder(m, "syn-com"));
+    }
+
+    // 4. Strings ("..." or '...')
+    text = text.replace(/(&quot;[\s\S]*?&quot;|"[^"\\]*(?:\\.[^"\\]*)*"|'[^'\\]*(?:\\.[^'\\]*)*')/g, m => addPlaceholder(m, "syn-str"));
+
+    // 5. Preprocessor directives & imports
+    if (lang === "c" || lang === "cpp") {
+      text = text.replace(/(#(?:include|define|pragma|ifdef|ifndef|endif)[^\n]*)/g, m => addPlaceholder(m, "syn-prep"));
+    }
+
+    // 6. Keywords and types definition per language
+    const cKeywords = ["auto","break","case","const","continue","default","do","else","enum","extern","for","goto","if","register","return","signed","sizeof","static","struct","switch","typedef","union","unsigned","volatile","while","NULL"];
+    const cppKeywords = [...cKeywords, "class","public","private","protected","virtual","override","namespace","using","template","typename","new","delete","this","nullptr","true","false","inline","explicit","friend","operator","try","catch","throw","std"];
+    const javaKeywords = ["abstract","assert","boolean","break","byte","case","catch","char","class","const","continue","default","do","double","else","enum","extends","final","finally","float","for","goto","if","implements","import","instanceof","int","interface","long","native","new","package","private","protected","public","return","short","static","strictfp","super","switch","synchronized","this","throw","throws","transient","try","void","volatile","while","true","false","null","System","out","println","print","Arrays","Collections","List","ArrayList","LinkedList","Queue","ArrayDeque","Map","HashMap","Set","HashSet"];
+    const pythonKeywords = ["and","as","assert","async","await","break","class","continue","def","del","elif","else","except","finally","for","from","global","if","import","in","is","lambda","nonlocal","not","or","pass","raise","return","try","while","with","yield","True","False","None","self","range","len","print","enumerate","map","list","dict","set","tuple","int","str","float","bool","deque","Dict","List","Tuple","Optional"];
+
+    const types = ["int","void","bool","boolean","char","float","double","long","short","unsigned","size_t","struct","class","vector","queue","deque","string","Point","Node","Graph","AdjListNode","FIFOQueue","BasicBFS","GraphFoundations","Cell","Edge"];
+
+    let kwList = cKeywords;
+    if (lang === "cpp") kwList = cppKeywords;
+    else if (lang === "java") kwList = javaKeywords;
+    else if (lang === "python") kwList = pythonKeywords;
+
+    // Highlight Types
+    const typeRegex = new RegExp(`\\b(${types.join("|")})\\b`, "g");
+    text = text.replace(typeRegex, '<span class="syn-type">$1</span>');
+
+    // Highlight Keywords
+    const kwRegex = new RegExp(`\\b(${kwList.join("|")})\\b`, "g");
+    text = text.replace(kwRegex, '<span class="syn-kw">$1</span>');
+
+    // Highlight Numbers
+    text = text.replace(/\b(\d+)\b/g, '<span class="syn-num">$1</span>');
+
+    // 7. Restore placeholders
+    placeholders.forEach((ph, i) => {
+      text = text.replace(`___TOKEN_PH_${i}___`, ph);
+    });
+
+    return text;
   }
 
   /* ─── 12 Topic Visual Illustration Cards Generator (Attractive Diagrams) ──── */
@@ -1425,9 +1653,13 @@ class AppController {
   startVideoPlayback() {
     const video = document.getElementById("bfs-main-video");
     if (!video) return;
+    const lessonKey = (this.activeLesson === "shortest_path" || this.activeLesson === "video2" || this.activeLesson === "algorithm")
+      ? "shortest_path"
+      : "intro";
+    const lessonData = this.videoLessons[lessonKey] || this.videoLessons.intro;
+
     if (!video.src || video.src === "" || video.src.endsWith("/")) {
-      const isVideo1 = (this.activeLesson === "intro" || this.activeLesson === "video1");
-      video.src = isVideo1 ? "video/video1.mp4" : "video/video2.mp4";
+      video.src = lessonData.src;
       video.load();
     }
     video.playbackRate = this.videoSpeed || 1;
@@ -1436,8 +1668,12 @@ class AppController {
   }
 
   selectVideoLesson(lessonKey) {
-    this.activeLesson = lessonKey;
-    const isVideo1 = (lessonKey === "intro" || lessonKey === "video1");
+    const canonicalKey = (lessonKey === "shortest_path" || lessonKey === "video2" || lessonKey === "algorithm")
+      ? "shortest_path"
+      : "intro";
+    this.activeLesson = canonicalKey;
+    const isVideo1 = (canonicalKey === "intro");
+    const lessonData = this.videoLessons[canonicalKey] || this.videoLessons.intro;
 
     // Toggle Card Active States
     const card01 = document.getElementById("lesson-card-01");
@@ -1461,33 +1697,47 @@ class AppController {
     const video = document.getElementById("bfs-main-video");
 
     if (titleEl) {
-      titleEl.textContent = isVideo1
-        ? "NOW PLAYING: BFS VISUALIZATION & TRAVERSAL"
-        : "NOW PLAYING: BFS ALGORITHM & IMPLEMENTATION";
+      titleEl.textContent = lessonData.title;
     }
     if (fileEl) {
-      fileEl.textContent = isVideo1 ? "video1.mp4" : "video2.mp4";
+      fileEl.textContent = lessonData.fileTag;
     }
 
-    const targetSrc = isVideo1 ? "video/video1.mp4" : "video/video2.mp4";
     if (video) {
-      if (!video.src || !video.src.includes(targetSrc)) {
+      const targetSrc = lessonData.src;
+      const currentSrc = video.currentSrc || video.src || "";
+      
+      // If switching to a different video source
+      if (!currentSrc.includes(targetSrc) && !currentSrc.endsWith(lessonData.fileTag)) {
+        video.pause();
         video.src = targetSrc;
         video.load();
         video.currentTime = 0;
-        video.playbackRate = this.videoSpeed;
-        video.volume = this.videoVolume;
-        video.play().then(() => {
-          this.isVideoPlaying = true;
-          this.syncPlayButtonUI();
-        }).catch(() => {
-          this.isVideoPlaying = false;
-          this.syncPlayButtonUI();
-        });
+        video.playbackRate = this.videoSpeed || 1.0;
+        video.volume = this.videoVolume !== undefined ? this.videoVolume : 0.8;
+        
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            this.isVideoPlaying = true;
+            this.syncPlayButtonUI();
+          }).catch(() => {
+            this.isVideoPlaying = false;
+            this.syncPlayButtonUI();
+          });
+        }
+      } else {
+        // If same video, just ensure it plays
+        if (video.paused) {
+          video.play().then(() => {
+            this.isVideoPlaying = true;
+            this.syncPlayButtonUI();
+          }).catch(() => {});
+        }
       }
     }
 
-    this.completedVideos.add(lessonKey);
+    this.completedVideos.add(canonicalKey);
     localStorage.setItem("algolearn_completed_videos", JSON.stringify([...this.completedVideos]));
     this.updateProgressStats();
     this.playSound("pop");
