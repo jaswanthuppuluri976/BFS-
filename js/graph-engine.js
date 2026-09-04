@@ -79,7 +79,7 @@ class GraphEngine {
     }
   }
 
-  highlightEdge(fromId, toId, color = "#4f46e5", width = "4") {
+  highlightEdge(fromId, toId, color = "url(#primary-gradient)", width = "4.5") {
     const edgeId1 = `edge-${fromId}-${toId}`;
     const edgeId2 = `edge-${toId}-${fromId}`;
     const edgeEl = document.getElementById(edgeId1) || document.getElementById(edgeId2);
@@ -105,38 +105,44 @@ class GraphEngine {
     // Defs for gradients, patterns & luminous filters
     const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
     defs.innerHTML = `
+      <!-- Shared Reusable Global Gradient for Tree Nodes, Links, and Badges -->
+      <linearGradient id="primary-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#2E55FA"/>
+        <stop offset="100%" stop-color="#7A27FD"/>
+      </linearGradient>
+
       <!-- Ambient Blueprint Dot Pattern -->
       <pattern id="graph-grid-dots" width="28" height="28" patternUnits="userSpaceOnUse">
-        <circle cx="14" cy="14" r="1.2" fill="${isDark ? '#3b82f6' : '#64748b'}" fill-opacity="${isDark ? '0.18' : '0.12'}"/>
+        <circle cx="14" cy="14" r="1.2" fill="${isDark ? '#4f46e5' : '#64748b'}" fill-opacity="${isDark ? '0.2' : '0.12'}"/>
       </pattern>
 
       <!-- Center Ambient Glow -->
       <radialGradient id="graph-ambient-glow" cx="50%" cy="40%" r="65%">
-        <stop offset="0%" stop-color="${isDark ? '#4f46e5' : '#2563eb'}" stop-opacity="${isDark ? '0.09' : '0.05'}"/>
+        <stop offset="0%" stop-color="#2E55FA" stop-opacity="${isDark ? '0.12' : '0.05'}"/>
         <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
       </radialGradient>
 
-      <!-- Glow Filters -->
+      <!-- Glow Filters (Subtle blue-to-violet glow derived from #2E55FA and #7A27FD) -->
       <filter id="node-shadow" x="-30%" y="-30%" width="160%" height="160%">
-        <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="${isDark ? '#000000' : '#0f172a'}" flood-opacity="${isDark ? '0.6' : '0.15'}"/>
+        <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000000" flood-opacity="${isDark ? '0.6' : '0.15'}"/>
       </filter>
       <filter id="glow-unvisited" x="-30%" y="-30%" width="160%" height="160%">
-        <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#3b82f6" flood-opacity="${isDark ? '0.4' : '0.2'}"/>
+        <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#2E55FA" flood-opacity="${isDark ? '0.5' : '0.25'}"/>
       </filter>
       <filter id="glow-beacon" x="-40%" y="-40%" width="180%" height="180%">
-        <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#2563eb" flood-opacity="0.85"/>
+        <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#7A27FD" flood-opacity="0.8"/>
       </filter>
       <filter id="glow-gold" x="-40%" y="-40%" width="180%" height="180%">
-        <feDropShadow dx="0" dy="0" stdDeviation="7" flood-color="#7c3aed" flood-opacity="0.8"/>
+        <feDropShadow dx="0" dy="0" stdDeviation="7" flood-color="#7A27FD" flood-opacity="0.8"/>
       </filter>
       <filter id="glow-current" x="-40%" y="-40%" width="180%" height="180%">
-        <feDropShadow dx="0" dy="0" stdDeviation="7" flood-color="#7c3aed" flood-opacity="0.8"/>
+        <feDropShadow dx="0" dy="0" stdDeviation="7" flood-color="#7A27FD" flood-opacity="0.85"/>
       </filter>
       <filter id="glow-visited" x="-40%" y="-40%" width="180%" height="180%">
-        <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#2563eb" flood-opacity="0.75"/>
+        <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#2E55FA" flood-opacity="0.75"/>
       </filter>
 
-      <!-- Node Gradients (AlgoLearn Brand System) -->
+      <!-- Node Gradients (Inside kept dark) -->
       <linearGradient id="unvisited-dark-grad" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" stop-color="#1e293b"/>
         <stop offset="100%" stop-color="#0f172a"/>
@@ -146,29 +152,24 @@ class GraphEngine {
         <stop offset="100%" stop-color="#f8fafc"/>
       </linearGradient>
       <linearGradient id="visited-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#3b82f6"/>
-        <stop offset="100%" stop-color="#2563eb"/>
+        <stop offset="0%" stop-color="#1e293b"/>
+        <stop offset="100%" stop-color="#0f172a"/>
       </linearGradient>
       <linearGradient id="current-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#a78bfa"/>
-        <stop offset="50%" stop-color="#7c3aed"/>
-        <stop offset="100%" stop-color="#6d28d9"/>
+        <stop offset="0%" stop-color="#1e1b4b"/>
+        <stop offset="100%" stop-color="#0f172a"/>
       </linearGradient>
       <linearGradient id="queued-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#818cf8"/>
-        <stop offset="100%" stop-color="#4f46e5"/>
+        <stop offset="0%" stop-color="#1e1b4b"/>
+        <stop offset="100%" stop-color="#0f172a"/>
       </linearGradient>
       <linearGradient id="neighbor-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#60a5fa"/>
-        <stop offset="100%" stop-color="#2563eb"/>
+        <stop offset="0%" stop-color="#1e293b"/>
+        <stop offset="100%" stop-color="#0f172a"/>
       </linearGradient>
       <linearGradient id="target-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#c084fc"/>
-        <stop offset="100%" stop-color="#7c3aed"/>
-      </linearGradient>
-      <linearGradient id="edge-cyber-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#2563eb" stop-opacity="${isDark ? '0.6' : '0.4'}"/>
-        <stop offset="100%" stop-color="#7c3aed" stop-opacity="${isDark ? '0.6' : '0.4'}"/>
+        <stop offset="0%" stop-color="#2e1065"/>
+        <stop offset="100%" stop-color="#0f172a"/>
       </linearGradient>
     `;
     this.svg.appendChild(defs);
@@ -199,11 +200,13 @@ class GraphEngine {
       line.setAttribute("id", `edge-${edge.from}-${edge.to}`);
       line.setAttribute("x1", u.x);
       line.setAttribute("y1", u.y);
-      line.setAttribute("x2", v.x);
+      // If x1 == x2 (vertical line), add tiny 0.1 delta for SVG gradient bounding box calculation
+      const x2 = (u.x === v.x) ? v.x + 0.1 : v.x;
+      line.setAttribute("x2", x2);
       line.setAttribute("y2", v.y);
-      line.setAttribute("stroke", isDark ? "#38bdf8" : "#94a3b8");
-      line.setAttribute("stroke-opacity", isDark ? "0.75" : "0.9");
-      line.setAttribute("stroke-width", isDark ? "3" : "2.8");
+      line.setAttribute("stroke", "url(#primary-gradient)");
+      line.setAttribute("stroke-opacity", "1");
+      line.setAttribute("stroke-width", "3.2");
       line.setAttribute("stroke-linecap", "round");
       line.setAttribute("class", "graph-canvas-edge");
       edgesGroup.appendChild(line);
@@ -237,7 +240,7 @@ class GraphEngine {
         const beaconRing = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         beaconRing.setAttribute("r", "29");
         beaconRing.setAttribute("fill", "none");
-        beaconRing.setAttribute("stroke", "#38bdf8");
+        beaconRing.setAttribute("stroke", "url(#primary-gradient)");
         beaconRing.setAttribute("stroke-width", "2");
         beaconRing.setAttribute("stroke-dasharray", "4 4");
         beaconRing.setAttribute("filter", "url(#glow-beacon)");
@@ -254,7 +257,7 @@ class GraphEngine {
         const currentRing = document.createElementNS("http://www.w3.org/2000/svg", "circle");
         currentRing.setAttribute("r", "28");
         currentRing.setAttribute("fill", "none");
-        currentRing.setAttribute("stroke", "#818cf8");
+        currentRing.setAttribute("stroke", "url(#primary-gradient)");
         currentRing.setAttribute("stroke-width", "2.5");
         currentRing.setAttribute("stroke-dasharray", "5 3");
         currentRing.setAttribute("filter", "url(#glow-current)");
@@ -268,43 +271,43 @@ class GraphEngine {
       // Main Node Circle
       const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
       circle.setAttribute("r", "23");
-      circle.setAttribute("stroke-width", isDark ? "2.5" : "3");
+      circle.setAttribute("stroke-width", "3");
 
       let fill = isDark ? "url(#unvisited-dark-grad)" : "#ffffff";
-      let stroke = isDark ? "#38bdf8" : "#0284c7";
-      let textColor = isDark ? "#ffffff" : "#0f172a"; // Dark navy in light mode, pure white in dark mode
-      let filter = isDark ? "url(#glow-unvisited)" : "url(#node-shadow)";
+      let stroke = "url(#primary-gradient)"; // Use exact blue-to-violet gradient
+      let textColor = isDark ? "#ffffff" : "#0f172a";
+      let filter = "url(#glow-unvisited)";
 
       if (node.isUnreachable) {
         fill = isDark ? "#1e293b" : "#f1f5f9";
-        stroke = isDark ? "#475569" : "#cbd5e1";
-        textColor = isDark ? "#64748b" : "#94a3b8";
+        stroke = "#94a3b8";
+        textColor = "#64748b";
         circle.setAttribute("stroke-dasharray", "4 3");
         filter = "";
       } else if (state === "current") {
-        fill = "url(#current-grad)";
-        stroke = isDark ? "#c7d2fe" : "#3730a3";
-        textColor = "#ffffff";
+        fill = isDark ? "url(#current-grad)" : "#f5f3ff";
+        stroke = "url(#primary-gradient)";
+        textColor = isDark ? "#ffffff" : "#4338ca";
         filter = "url(#glow-current)";
       } else if (state === "visited") {
-        fill = "url(#visited-grad)";
-        stroke = isDark ? "#6ee7b7" : "#065f46";
-        textColor = "#ffffff";
+        fill = isDark ? "url(#visited-grad)" : "#eff6ff";
+        stroke = "url(#primary-gradient)";
+        textColor = isDark ? "#ffffff" : "#1d4ed8";
         filter = "url(#glow-visited)";
       } else if (state === "in_queue") {
-        fill = "url(#queued-grad)";
-        stroke = isDark ? "#bae6fd" : "#0369a1";
-        textColor = "#ffffff";
+        fill = isDark ? "url(#queued-grad)" : "#f5f3ff";
+        stroke = "url(#primary-gradient)";
+        textColor = isDark ? "#ffffff" : "#6d28d9";
         filter = "url(#glow-beacon)";
       } else if (isTarget) {
-        fill = "url(#target-grad)";
-        stroke = isDark ? "#fef08a" : "#b45309";
-        textColor = "#0f172a";
+        fill = isDark ? "url(#target-grad)" : "#faf5ff";
+        stroke = "url(#primary-gradient)";
+        textColor = isDark ? "#ffffff" : "#7c3aed";
         filter = "url(#glow-gold)";
       } else if (isUnvisitedNeighbor) {
-        fill = isDark ? "url(#neighbor-grad)" : "#e0f2fe";
-        stroke = isDark ? "#38bdf8" : "#0284c7";
-        textColor = isDark ? "#ffffff" : "#0369a1";
+        fill = isDark ? "url(#neighbor-grad)" : "#ffffff";
+        stroke = "url(#primary-gradient)";
+        textColor = isDark ? "#ffffff" : "#0f172a";
         filter = "url(#glow-beacon)";
       }
 
@@ -324,7 +327,7 @@ class GraphEngine {
       text.textContent = node.id;
       nodeG.appendChild(text);
 
-      // Sub-badge: Level tag formatted as a modern mini pill
+      // Sub-badge: Level tag formatted as a modern mini pill with blue-to-violet gradient stroke
       if (!node.isUnreachable && node.level !== undefined && node.level >= 0) {
         const badgeG = document.createElementNS("http://www.w3.org/2000/svg", "g");
         badgeG.setAttribute("class", "node-level-pill");
@@ -335,9 +338,9 @@ class GraphEngine {
         pillBg.setAttribute("width", "26");
         pillBg.setAttribute("height", "14");
         pillBg.setAttribute("rx", "7");
-        pillBg.setAttribute("fill", isDark ? "#0f172a" : "#ffffff");
-        pillBg.setAttribute("stroke", isDark ? "#38bdf8" : "#0284c7");
-        pillBg.setAttribute("stroke-width", "1.2");
+        pillBg.setAttribute("fill", isDark ? "#070d1c" : "#ffffff");
+        pillBg.setAttribute("stroke", "url(#primary-gradient)");
+        pillBg.setAttribute("stroke-width", "1.5");
         badgeG.appendChild(pillBg);
 
         const subText = document.createElementNS("http://www.w3.org/2000/svg", "text");
@@ -346,7 +349,7 @@ class GraphEngine {
         subText.setAttribute("y", "36.5");
         subText.setAttribute("font-size", "8.5");
         subText.setAttribute("font-weight", "800");
-        subText.setAttribute("fill", isDark ? "#38bdf8" : "#0284c7");
+        subText.setAttribute("fill", isDark ? "#ffffff" : "#1e1b4b");
         subText.textContent = `L${node.level}`;
         badgeG.appendChild(subText);
 

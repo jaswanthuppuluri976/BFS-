@@ -1924,6 +1924,9 @@ class AppController {
     if (this.completedVideos.has("intro")) {
       if (dotIntro) { dotIntro.textContent = "✓"; dotIntro.style.color = "#10b981"; }
       if (pillIntro) { pillIntro.textContent = "Completed"; pillIntro.style.color = "#10b981"; }
+    } else {
+      if (dotIntro) { dotIntro.textContent = "○"; dotIntro.style.color = ""; }
+      if (pillIntro) { pillIntro.textContent = "Pending"; pillIntro.style.color = ""; }
     }
 
     const dotColl = document.getElementById("vt-dot-collision");
@@ -1931,6 +1934,9 @@ class AppController {
     if (this.completedVideos.has("shortest_path") || this.completedVideos.has("collision")) {
       if (dotColl) { dotColl.textContent = "✓"; dotColl.style.color = "#10b981"; }
       if (pillColl) { pillColl.textContent = "Completed"; pillColl.style.color = "#10b981"; }
+    } else {
+      if (dotColl) { dotColl.textContent = "○"; dotColl.style.color = ""; }
+      if (pillColl) { pillColl.textContent = "Pending"; pillColl.style.color = ""; }
     }
 
     // Update Sidebar Navigation Badges (Pic 3 Format)
@@ -2038,19 +2044,89 @@ class AppController {
   }
 
   resetAllProgress() {
-    if (confirm("Reset all curriculum progress, completed chapters, and lab milestones?")) {
-      this.completedChapters.clear();
-      this.completedActivities.clear();
-      this.completedVideos.clear();
-      localStorage.removeItem("algolearn_completed_chapters");
-      localStorage.removeItem("algolearn_completed_activities");
-      localStorage.removeItem("algolearn_completed_videos");
-      this.updateProgressStats();
-      this.renderTOC();
-      this.renderActiveChapter();
-      this.renderProgressModules();
-      this.showToast("Curriculum progress reset successfully.");
+    // 1. Clear curriculum and video progress
+    this.completedChapters.clear();
+    this.completedActivities.clear();
+    this.completedVideos.clear();
+    localStorage.removeItem("algolearn_completed_chapters");
+    localStorage.removeItem("algolearn_completed_activities");
+    localStorage.removeItem("algolearn_completed_videos");
+    localStorage.removeItem("algolearn_completed_levels");
+    localStorage.removeItem("algolearn_score");
+
+    // 2. Reset active chapter back to the first chapter
+    if (typeof THEORY_MODULES !== "undefined" && THEORY_MODULES.length > 0) {
+      this.activeChapterId = THEORY_MODULES[0].id;
     }
+
+    // 3. Reset Game Engine (levels, score, streak, state)
+    if (window.game) {
+      if (window.game.completedLevels) window.game.completedLevels.clear();
+      window.game.score = 0;
+      window.game.streak = 0;
+      window.game.maxStreak = 0;
+      window.game.mistakesCount = 0;
+      window.game.correctActionsCount = 0;
+      window.game.isLevelCompleted = false;
+
+      const scoreEl = document.getElementById("score-value");
+      if (scoreEl) scoreEl.textContent = "0";
+      const streakEl = document.getElementById("streak-value");
+      if (streakEl) streakEl.textContent = "0";
+
+      if (window.game.guidedEngine && window.game.guidedEngine.isActive) {
+        window.game.guidedEngine.toggle();
+      }
+      if (typeof window.game.loadLevel === "function") {
+        window.game.loadLevel(0);
+      }
+      if (typeof window.game.updateGuidedSolveUI === "function") {
+        window.game.updateGuidedSolveUI();
+      }
+
+      // Close victory modal if open
+      const victoryModal = document.getElementById("victory-modal");
+      if (victoryModal) victoryModal.classList.add("hidden");
+    }
+
+    // 4. Reset Quiz Engine
+    if (window.quizEngine && typeof window.quizEngine.reset === "function") {
+      window.quizEngine.reset();
+    }
+
+    // 5. Reset Interactive Video Player
+    if (this.videoPlayback) {
+      this.videoPlayback.currentTime = 0;
+      this.videoPlayback.isPlaying = false;
+    }
+    const vFill = document.getElementById("v-progress-fill");
+    const vThumb = document.getElementById("v-progress-thumb");
+    if (vFill) vFill.style.width = "0%";
+    if (vThumb) vThumb.style.left = "0%";
+
+    // 6. Reset Visualizer Engines
+    if (window.applicationsDemoEngine && typeof window.applicationsDemoEngine.restart === "function") {
+      window.applicationsDemoEngine.restart();
+    }
+    if (window.spanningTreeStudio && typeof window.spanningTreeStudio.restart === "function") {
+      window.spanningTreeStudio.restart();
+    }
+
+    // 7. Re-render all views and statistics to 0%
+    this.updateProgressStats();
+    this.renderTOC();
+    this.renderActiveChapter();
+    this.renderProgressModules();
+    this.renderLevelsGrid();
+
+    // 8. Visual button feedback & notification
+    const btn = document.getElementById("reset-state-btn");
+    if (btn) {
+      btn.classList.add("btn-spinning");
+      setTimeout(() => btn.classList.remove("btn-spinning"), 650);
+    }
+    this.playSound("pop");
+    this.showToast("All website progress has been reset to zero.");
   }
 
   showToast(message) {

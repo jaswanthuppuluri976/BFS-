@@ -661,15 +661,15 @@ class GameEngine {
 
     let svgHTML = `
       <defs>
-        <linearGradient id="stEdgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#38bdf8"/>
-          <stop offset="100%" stop-color="#818cf8"/>
+        <linearGradient id="primary-gradient-st" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#2E55FA"/>
+          <stop offset="100%" stop-color="#7A27FD"/>
         </linearGradient>
         <filter id="stGlow" x="-30%" y="-30%" width="160%" height="160%">
-          <feDropShadow dx="0" dy="0" stdDeviation="3.5" flood-color="${isDark ? '#38bdf8' : '#0284c7'}" flood-opacity="${isDark ? '0.7' : '0.3'}"/>
+          <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#7A27FD" flood-opacity="0.6"/>
         </filter>
         <filter id="stEdgePulse" x="-30%" y="-30%" width="160%" height="160%">
-          <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#f59e0b" flood-opacity="0.8"/>
+          <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#7A27FD" flood-opacity="0.8"/>
         </filter>
       </defs>
     `;
@@ -683,11 +683,12 @@ class GameEngine {
           this.lastDiscoveredEdge.parent === edge.parent && 
           this.lastDiscoveredEdge.child === edge.child;
 
+        const x2 = (p1.x === p2.x) ? p2.x + 0.1 : p2.x;
         svgHTML += `
-          <line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" 
-                stroke="${isNewlyAdded ? '#f59e0b' : (isDark ? '#38bdf8' : '#0284c7')}" 
+          <line x1="${p1.x}" y1="${p1.y}" x2="${x2}" y2="${p2.y}" 
+                stroke="url(#primary-gradient-st)" 
                 stroke-width="${isNewlyAdded ? 4 : 3}" 
-                stroke-opacity="${isDark ? '0.85' : '1'}"
+                stroke-opacity="1" 
                 stroke-linecap="round" 
                 class="st-tree-edge ${isNewlyAdded ? 'edge-pulse-active' : ''}" />
         `;
@@ -700,38 +701,16 @@ class GameEngine {
       if (!pos) return;
 
       const isCurrent = this.currentExplorerNode === n.id;
-      const isVisited = this.visited.has(n.id);
-      const isQueued = this.queue.includes(n.id);
-      const isNew = this.lastDiscoveredEdge && this.lastDiscoveredEdge.child === n.id;
-
-      let fill = isDark ? "#111d42" : "#ffffff";
-      let stroke = isDark ? "#38bdf8" : "#0284c7";
+      let fill = isDark ? "#070d1c" : "#ffffff";
+      let stroke = "url(#primary-gradient-st)";
       let textFill = isDark ? "#ffffff" : "#0f172a";
-
-      if (isCurrent) {
-        fill = "#6366f1";
-        stroke = "#a5b4fc";
-        textFill = "#ffffff";
-      } else if (isVisited) {
-        fill = isDark ? "#059669" : "#0284c7";
-        stroke = isDark ? "#34d399" : "#0369a1";
-        textFill = "#ffffff";
-      } else if (isNew) {
-        fill = "#38bdf8";
-        stroke = "#bae6fd";
-        textFill = "#ffffff";
-      } else if (isQueued) {
-        fill = isDark ? "#0284c7" : "#e0f2fe";
-        stroke = isDark ? "#38bdf8" : "#0284c7";
-        textFill = isDark ? "#ffffff" : "#0369a1";
-      }
 
       svgHTML += `
         <g class="st-tree-node-group" filter="url(#stGlow)">
-          ${isCurrent ? `<circle cx="${pos.x}" cy="${pos.y}" r="20" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="3 3"><animateTransform attributeName="transform" type="rotate" from="0 ${pos.x} ${pos.y}" to="360 ${pos.x} ${pos.y}" dur="4s" repeatCount="indefinite"/></circle>` : ''}
+          ${isCurrent ? `<circle cx="${pos.x}" cy="${pos.y}" r="20" fill="none" stroke="url(#primary-gradient-st)" stroke-width="2" stroke-dasharray="3 3"><animateTransform attributeName="transform" type="rotate" from="0 ${pos.x} ${pos.y}" to="360 ${pos.x} ${pos.y}" dur="4s" repeatCount="indefinite"/></circle>` : ''}
           <circle cx="${pos.x}" cy="${pos.y}" r="15" fill="${fill}" stroke="${stroke}" stroke-width="2.5" class="st-node-circle" />
-          <text x="${pos.x}" y="${pos.y + 4.5}" text-anchor="middle" font-size="11.5" font-weight="900" fill="${textFill}">${n.id}</text>
-          <text x="${pos.x + 18}" y="${pos.y - 4}" font-size="8.5" font-weight="800" fill="${isDark ? '#38bdf8' : '#0284c7'}">L${pos.level}</text>
+          <text x="${pos.x}" y="${pos.y + 4.5}" text-anchor="middle" font-size="11.5" font-weight="900" fill="${textFill}" class="st-tree-node-label">${n.id}</text>
+          <text x="${pos.x + 18}" y="${pos.y - 4}" font-size="8.5" font-weight="800" fill="${isDark ? '#ffffff' : '#475569'}" class="st-tree-level-label">L${pos.level}</text>
         </g>
       `;
     });
@@ -859,7 +838,7 @@ class GameEngine {
       if (this.guidedEngine.isActive) {
         guidedContainer.classList.remove("hidden");
         const nextAction = this.guidedEngine.getNextActionDescription();
-        if (nextMoveBtn) nextMoveBtn.textContent = `Single Step: ${nextAction.buttonText} ➔`;
+        if (nextMoveBtn) nextMoveBtn.textContent = "Next Step";
         if (guidedExplain) {
           guidedExplain.innerHTML = `
             <strong>${nextAction.headline}</strong><br/>

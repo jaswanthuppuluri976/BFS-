@@ -642,12 +642,12 @@ class SpanningTreeStudio {
   _renderSpanningTreeSVG(preset, step) {
     let svg = `
       <defs>
-        <linearGradient id="stTreeEdgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#38bdf8"/>
-          <stop offset="100%" stop-color="#0284c7"/>
+        <linearGradient id="stTreeEdgeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#2E55FA"/>
+          <stop offset="100%" stop-color="#7A27FD"/>
         </linearGradient>
         <filter id="glowTree" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0284c7" flood-opacity="0.3"/>
+          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#7A27FD" flood-opacity="0.5"/>
         </filter>
       </defs>
     `;
@@ -683,8 +683,9 @@ class SpanningTreeStudio {
           step.newlyAddedTreeEdge.from === edge.from && 
           step.newlyAddedTreeEdge.to === edge.to;
 
+        const x2 = (p1.x === p2.x) ? p2.x + 0.1 : p2.x;
         svg += `
-          <line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}"
+          <line x1="${p1.x}" y1="${p1.y}" x2="${x2}" y2="${p2.y}"
                 stroke="${isNewlyAdded ? '#f59e0b' : 'url(#stTreeEdgeGrad)'}"
                 stroke-width="${isNewlyAdded ? 4.5 : 3}"
                 stroke-linecap="round" />
@@ -697,34 +698,19 @@ class SpanningTreeStudio {
       const pos = nodePositions[n.id];
       if (!pos) return;
 
+      const isDark = document.body.classList.contains("dark-theme") || 
+                     document.documentElement.getAttribute("data-theme") === "dark";
       const isCurrent = step.currentNode === n.id;
-      const isVisited = step.visited.includes(n.id);
-      const isNewlyAdded = step.newlyAddedTreeEdge && step.newlyAddedTreeEdge.to === n.id;
-
-      let fill = "#e0f2fe";
-      let stroke = "#0284c7";
-      let textFill = "#0369a1";
-
-      if (isCurrent) {
-        fill = "#0284c7"; // Active processing node in tree (deep blue)
-        stroke = "#1d4ed8";
-        textFill = "#ffffff";
-      } else if (isVisited) {
-        fill = "#0369a1"; // Visited tree node (royal blue)
-        stroke = "#0284c7";
-        textFill = "#ffffff";
-      } else if (isNewlyAdded) {
-        fill = "#38bdf8"; // Newly discovered tree node (bright cyan blue)
-        stroke = "#0284c7";
-        textFill = "#ffffff";
-      }
+      let fill = isDark ? "#070d1c" : "#ffffff";
+      let stroke = "url(#stTreeEdgeGrad)";
+      let textFill = isDark ? "#ffffff" : "#0f172a";
 
       svg += `
         <g class="st-tree-node-group" filter="url(#glowTree)">
-          ${isCurrent ? `<circle cx="${pos.x}" cy="${pos.y}" r="24" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="4"><animateTransform attributeName="transform" type="rotate" from="0 ${pos.x} ${pos.y}" to="360 ${pos.x} ${pos.y}" dur="5s" repeatCount="indefinite"/></circle>` : ''}
+          ${isCurrent ? `<circle cx="${pos.x}" cy="${pos.y}" r="24" fill="none" stroke="url(#stTreeEdgeGrad)" stroke-width="2.5" stroke-dasharray="4"><animateTransform attributeName="transform" type="rotate" from="0 ${pos.x} ${pos.y}" to="360 ${pos.x} ${pos.y}" dur="5s" repeatCount="indefinite"/></circle>` : ''}
           <circle cx="${pos.x}" cy="${pos.y}" r="18" fill="${fill}" stroke="${stroke}" stroke-width="2.5" />
-          <text x="${pos.x}" y="${pos.y + 5}" text-anchor="middle" font-size="12" font-weight="900" fill="${textFill}">${n.id}</text>
-          <text x="${pos.x + 20}" y="${pos.y - 8}" font-size="8.5" font-weight="800" fill="#64748b">L${pos.level}</text>
+          <text x="${pos.x}" y="${pos.y + 5}" text-anchor="middle" font-size="12" font-weight="900" fill="${textFill}" class="st-tree-node-label">${n.id}</text>
+          <text x="${pos.x + 20}" y="${pos.y - 8}" font-size="8.5" font-weight="800" fill="${isDark ? '#ffffff' : '#475569'}" class="st-tree-level-label">L${pos.level}</text>
         </g>
       `;
     });

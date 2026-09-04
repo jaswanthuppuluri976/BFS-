@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AlgoLearn — Interactive Breadth First Search (BFS) Traversal Engine</title>
+  <title>AlgoLearn - BFS Traversal Engine</title>
+  <meta name="description" content="Interactive Breadth First Search (BFS) Traversal Engine and DSA learning platform with visualizations, games, and quizzes.">
+  <meta property="og:title" content="AlgoLearn - BFS Traversal Engine">
+  <meta property="og:description" content="Interactive Breadth First Search (BFS) Traversal Engine and DSA learning platform with visualizations, games, and quizzes.">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/extra-styles.css">
 </head>
@@ -123,91 +126,9 @@
           </button>
 
           <div class="topbar-brand-logo-left" title="AlgoLearn — Your DSA Journey" style="cursor: pointer;" onclick="app.toggleSidebar()">
-            <svg class="algolearn-cap-logo" viewBox="0 0 100 80" width="42" height="34" aria-label="AlgoLearn Logo">
-              <defs>
-                <!-- Light Mode Top Diamond Gradient (Deep Sapphire to Royal Blue) -->
-                <linearGradient id="alCapTopLight" x1="10%" y1="10%" x2="90%" y2="90%">
-                  <stop offset="0%" stop-color="#0a1a3e"/>
-                  <stop offset="35%" stop-color="#113a82"/>
-                  <stop offset="70%" stop-color="#1d64e8"/>
-                  <stop offset="100%" stop-color="#2563eb"/>
-                </linearGradient>
-
-                <!-- Dark Mode Top Diamond Gradient (Midnight Navy to Vivid Royal Blue) -->
-                <linearGradient id="alCapTopDark" x1="10%" y1="10%" x2="90%" y2="90%">
-                  <stop offset="0%" stop-color="#091b42"/>
-                  <stop offset="35%" stop-color="#124096"/>
-                  <stop offset="70%" stop-color="#1e6bff"/>
-                  <stop offset="100%" stop-color="#38bdf8"/>
-                </linearGradient>
-
-                <!-- Base Left Gradient (Purple / Magenta) -->
-                <linearGradient id="alCapBaseL" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#6b21a8"/>
-                  <stop offset="40%" stop-color="#8b2fc9"/>
-                  <stop offset="100%" stop-color="#a855f7"/>
-                </linearGradient>
-                <linearGradient id="alCapBaseLDark" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#7e22ce"/>
-                  <stop offset="50%" stop-color="#a855f7"/>
-                  <stop offset="100%" stop-color="#c084fc"/>
-                </linearGradient>
-
-                <!-- Base Right Gradient (Azure / Cyan Blue) -->
-                <linearGradient id="alCapBaseR" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#0284c7"/>
-                  <stop offset="45%" stop-color="#0ea5e9"/>
-                  <stop offset="100%" stop-color="#38bdf8"/>
-                </linearGradient>
-                <linearGradient id="alCapBaseRDark" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#0284c7"/>
-                  <stop offset="40%" stop-color="#00b4d8"/>
-                  <stop offset="100%" stop-color="#00f2fe"/>
-                </linearGradient>
-
-                <!-- Tassel Gradient -->
-                <linearGradient id="alTasselGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stop-color="#0284c7"/>
-                  <stop offset="100%" stop-color="#00b4d8"/>
-                </linearGradient>
-
-                <!-- Dark Mode Ambient Glow -->
-                <filter id="alCapGlowDark" x="-20%" y="-20%" width="140%" height="140%">
-                  <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#1e6bff" flood-opacity="0.35"/>
-                </filter>
-              </defs>
-
-              <g class="al-cap-group">
-                <!-- Lower Base Left Facet (Purple / Violet) -->
-                <path class="al-base-l" d="M 18 36 L 18 48 C 18 56, 23 62, 33 66 L 47 72 L 47 48 Z" />
-                
-                <!-- Lower Base Right Facet (Azure / Cyan Blue) -->
-                <path class="al-base-r" d="M 47 48 L 47 72 L 61 66 C 71 62, 76 56, 76 48 L 76 36 Z" />
-                
-                <!-- Lower Base Bottom Rim Highlight -->
-                <path class="al-base-rim" d="M 18 48 C 18 56, 23 62, 33 66 L 47 72 L 61 66 C 71 62, 76 56, 76 48" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.2" stroke-linecap="round"/>
-
-                <!-- Diamond Mortarboard Top -->
-                <path class="al-cap-top" d="M 44 8.5 C 45.8 7.2, 48.2 7.2, 50 8.5 L 88 26.5 C 90.5 27.8, 90.5 29.8, 88 31.1 L 50 49.1 C 48.2 50.4, 45.8 50.4, 44 49.1 L 6 31.1 C 3.5 29.8, 3.5 27.8, 6 26.5 Z" />
-                
-                <!-- Mortarboard Top Subtle Edge Highlight -->
-                <path class="al-cap-highlight" d="M 6 27 L 47 48.5 L 88 27" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1.2" stroke-linecap="round" />
-
-                <!-- Tassel Anchor Button -->
-                <ellipse class="al-tassel-btn" cx="72" cy="27" rx="3" ry="2" />
-                
-                <!-- Tassel Cord -->
-                <path class="al-tassel-cord" d="M 72 27 C 78 30, 83 37, 84 45" fill="none" stroke-width="2.2" stroke-linecap="round" />
-                
-                <!-- Tassel Knot Band -->
-                <ellipse class="al-tassel-knot" cx="84" cy="46" rx="2.4" ry="1.6" />
-                
-                <!-- Tassel Bell / Drop -->
-                <path class="al-tassel-drop" d="M 84 47.5 C 87.5 51.5, 87.5 58, 84 62 C 80.5 58, 80.5 51.5, 84 47.5 Z" />
-              </g>
-            </svg>
+            <img id="topbar-brand-logo-img" class="algolearn-brand-logo-img algolearn-cap-logo" src="/assets/graduation-cap-logo.png" alt="AlgoLearn — Your DSA Journey" />
             <div class="brand-title-wrap">
-              <span class="brand-logo-text"><span class="brand-word-algo">Algo</span><span class="brand-word-learn">Learn</span></span>
+              <span class="brand-logo-text"><span class="brand-word-algo">Algo</span><span class="brand-word-l">L</span><span class="brand-word-earn">earn</span></span>
               <span class="brand-tagline">YOUR DSA JOURNEY</span>
             </div>
           </div>
@@ -1047,7 +968,7 @@
                     All Levels
                   </button>
                   <div class="prob-title-cluster">
-                    <span id="active-problem-badge" class="prob-level-pill">LVL 1</span>
+                    <span id="active-problem-badge" class="prob-level-pill">LEVEL 1</span>
                     <span id="active-problem-name" class="prob-title-text">BFS Level-by-Level Basics</span>
                   </div>
                 </div>
@@ -1058,9 +979,13 @@
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                     Hint
                   </button>
-                  <button id="guided-mode-toggle-btn" class="prob-action-btn" onclick="if(window.game&&window.game.guidedEngine){window.game.guidedEngine.toggle();window.game.updateGuidedSolveUI();}" title="Guided Solve">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-                    Guided Solve
+                  <button id="guided-mode-toggle-btn" class="prob-action-btn guided-solve-pill-btn" onclick="if(window.game&&window.game.guidedEngine){window.game.guidedEngine.toggle();window.game.updateGuidedSolveUI();}" title="Guided Solve">
+                    <svg class="guided-btn-bulb-icon" width="14" height="14" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7z" fill="#ea580c"/>
+                      <line x1="9" y1="20" x2="15" y2="20" stroke="#ea580c" stroke-width="2" stroke-linecap="round"/>
+                      <line x1="10" y1="22.5" x2="14" y2="22.5" stroke="#ea580c" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <span>GUIDED SOLVE</span>
                   </button>
                   <button id="restart-level-btn" class="prob-action-btn" title="Reset Challenge">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
@@ -1111,10 +1036,10 @@
                           Dequeue Front
                         </button>
                       </div>
-                      <div class="queue-flow-indicator" style="font-size: 0.68rem; font-weight: 700; color: var(--primary, #0284c7); margin-bottom: 6px; background: rgba(2, 132, 199, 0.08); padding: 4px 8px; border-radius: 6px; text-align: center;">
+                      <div class="queue-flow-indicator" style="font-size: 0.68rem; font-weight: 700; color: #2E55FA; margin-bottom: 6px; background: rgba(46, 85, 250, 0.08); padding: 4px 8px; border-radius: 6px; text-align: center;">
                         <span class="flow-tag">ENQUEUE &rarr; REAR &nbsp;&nbsp;|&nbsp;&nbsp; FRONT &rarr; DEQUEUE</span>
                       </div>
-                      <div id="queue-dropzone" class="queue-tray-dropzone glowing-queue-tray" title="Drag unvisited graph neighbors here to Enqueue at REAR" style="min-height: 64px; border: 2px dashed #38bdf8; border-radius: 10px; background: var(--bg-hover, #f0f9ff); display: flex; align-items: center;">
+                      <div id="queue-dropzone" class="queue-tray-dropzone glowing-queue-tray" title="Drag unvisited graph neighbors here to Enqueue at REAR" style="min-height: 64px; display: flex; align-items: center;">
                         <div id="queue-items-container" class="queue-items-flow"></div>
                       </div>
                     </div>
@@ -1194,13 +1119,12 @@
                     </div>
 
                     <!-- Guided Solve Container (If Enabled) -->
-                    <div id="guided-solve-container" class="guided-solve-box hidden" style="margin-top: 12px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 10px 12px;">
+                    <div id="guided-solve-container" class="guided-solve-box hidden">
                       <div class="guided-info">
-                        <div id="guided-explanation-text" style="font-size: 0.78rem; color: #92400e; margin-bottom: 8px;">Click "Single Step" to perform the next BFS move.</div>
+                        <div id="guided-explanation-text" class="guided-explanation-text">Click "Next Step" to perform the next BFS move.</div>
                       </div>
-                      <div class="guided-action-buttons" style="display: flex; gap: 6px;">
-                        <button id="guided-autoplay-btn" class="btn btn-outline btn-sm" style="font-size: 0.75rem;"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block;vertical-align:middle;margin-right:4px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>Auto-Play Steps</button>
-                        <button id="guided-next-btn" class="btn btn-primary btn-sm" style="font-size: 0.75rem;">Single Step &rarr;</button>
+                      <div class="guided-action-buttons" style="display: flex; width: 100%; margin-top: 6px;">
+                        <button id="guided-next-btn" class="btn guided-single-bar-btn" type="button" aria-label="Next Step">Next Step</button>
                       </div>
                     </div>
 
