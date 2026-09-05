@@ -7,35 +7,62 @@
 const BOT_MASCOT_SVG = `
 <svg class="ai-bot-avatar-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- Vibrant Blue-to-Violet Background Gradient -->
-    <linearGradient id="chatLogoBg" x1="15%" y1="0%" x2="85%" y2="100%">
-      <stop offset="0%" stop-color="#2c62ff"/>
-      <stop offset="45%" stop-color="#3b72fe"/>
-      <stop offset="100%" stop-color="#7a2efd"/>
+    <!-- Royal Blue to Violet Gradient exactly matching image.png -->
+    <linearGradient id="chatLogoBg" x1="12%" y1="5%" x2="88%" y2="95%">
+      <stop offset="0%" stop-color="#2165fc"/>
+      <stop offset="48%" stop-color="#4651fb"/>
+      <stop offset="100%" stop-color="#8028f8"/>
     </linearGradient>
 
-    <!-- Drop Shadow for Foreground Bubble -->
-    <filter id="chatBubbleShadow" x="-15%" y="-10%" width="130%" height="130%">
-      <feDropShadow dx="-1" dy="3" stdDeviation="2.5" flood-color="#1e1b4b" flood-opacity="0.18"/>
+    <!-- Soft Depth Filter for Back Bubble onto Squircle Background -->
+    <filter id="backBubbleShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0.8" dy="1.6" stdDeviation="2.0" flood-color="#120b3e" flood-opacity="0.22"/>
+    </filter>
+
+    <!-- High-Contrast Multi-Layer Depth Filter for Front Bubble onto Back Bubble -->
+    <filter id="frontBubbleShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="1.2" dy="2.2" stdDeviation="1.2" flood-color="#0e0736" flood-opacity="0.55"/>
+      <feDropShadow dx="2.0" dy="4.0" stdDeviation="3.5" flood-color="#140a48" flood-opacity="0.32"/>
     </filter>
   </defs>
 
-  <!-- Squircle Rounded Background -->
-  <rect x="0" y="0" width="100" height="100" rx="22" fill="url(#chatLogoBg)"/>
+  <!-- 1. Squircle Rounded Background -->
+  <rect width="100" height="100" rx="23" ry="23" fill="url(#chatLogoBg)"/>
 
-  <!-- Back Speech Bubble -->
-  <path d="M50 44 C50 33 60 25 72 25 C84 25 93 33 93 45 C93 55 86 63 76 64 C74.5 67 76 72 79 76 C74 76 69 73 66 69 C61 69 50 64 50 44 Z"
-        fill="#ffffff" opacity="0.95"/>
-
-  <!-- Front Main Speech Bubble -->
-  <path filter="url(#chatBubbleShadow)"
-        d="M24.5 48 C24.5 32 37 20 53 20 C69 20 81.5 32 81.5 48 C81.5 64 69 76 53 76 C46 76 39.5 73.5 35 69.5 C31.5 72.5 26.5 74.5 22 75 C23.5 70 24.5 64 24.5 61 C24.5 61 24.5 54 24.5 48 Z"
+  <!-- 2. Back Speech Bubble (placed behind front bubble, tail pointing down-right) -->
+  <path filter="url(#backBubbleShadow)"
+        d="M 52.0 36.0
+           C 60.5 35.0 70.0 39.0 74.8 45.5
+           C 78.5 51.5 78.2 59.5 75.0 65.0
+           C 75.0 67.5 76.0 71.5 74.0 74.2
+           C 71.4 73.4 68.2 70.8 66.2 69.2
+           C 61.2 71.2 55.5 70.0 50.5 66.8
+           Z"
         fill="#ffffff"/>
 
-  <!-- Three Gradient Sequence Dots inside Main Bubble -->
-  <circle cx="42" cy="48" r="4.2" fill="#2563eb"/>
-  <circle cx="53" cy="48" r="4.2" fill="#4f46e5"/>
-  <circle cx="64" cy="48" r="4.2" fill="#7c3aed"/>
+  <!-- 3. Distinct Shadow Crease / Outline separating upper bubble from lower bubble -->
+  <path d="M 61.5 37.0
+           C 66.0 43.0 67.2 51.5 64.5 58.5
+           C 62.5 63.5 58.0 67.5 51.0 67.0"
+        stroke="#0e0736" stroke-width="3.0" stroke-opacity="0.42" stroke-linecap="round" fill="none"/>
+
+  <!-- 4. Front Speech Bubble (main circular bubble with tail pointing bottom-left) -->
+  <path filter="url(#frontBubbleShadow)"
+        d="M 45.5 25.0
+           C 57.1 25.0 66.5 34.4 66.5 46.0
+           C 66.5 57.6 57.1 67.0 45.5 67.0
+           C 42.2 67.0 39.0 66.2 36.2 64.8
+           C 32.5 63.0 29.0 65.0 26.8 68.2
+           C 27.2 64.5 27.2 60.5 26.0 56.5
+           C 25.0 53.0 24.5 49.6 24.5 46.0
+           C 24.5 34.4 33.9 25.0 45.5 25.0
+           Z"
+        fill="#ffffff"/>
+
+  <!-- 5. Three Gradient Sequence Dots inside Front Bubble -->
+  <circle cx="36.5" cy="46.0" r="2.9" fill="#2165fc"/>
+  <circle cx="45.5" cy="46.0" r="2.9" fill="#4651fb"/>
+  <circle cx="54.5" cy="46.0" r="2.9" fill="#8028f8"/>
 </svg>
 `;
 
