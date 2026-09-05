@@ -9,5 +9,9 @@
     "build": "echo 'No build step required'",
     "start": "node server.js"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "devDependencies": {
+    "jpeg-js": "^0.4.4",
+    "pngjs": "^7.0.0"
+  }
 }
