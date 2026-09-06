@@ -33,9 +33,9 @@ class AppController {
       }
     };
 
-    this.isVideoPlaying = true;
-    this.videoTime = 1;
-    this.videoDuration = 30;
+    this.isVideoPlaying = false;
+    this.videoTime = 0;
+    this.videoDuration = 0;
     this.videoSpeed = 1.0;
     this.videoVolume = 0.8;
     this.videoTimer = null;
@@ -345,6 +345,25 @@ class AppController {
 
   switchTab(tabName) {
     this.activeTab = tabName;
+
+    // Immediately stop and pause HTML5 video whenever switching tabs or leaving visualize
+    const video = document.getElementById("bfs-main-video");
+    if (video && !video.paused) {
+      video.pause();
+    }
+    this.isVideoPlaying = false;
+    this.syncPlayButtonUI();
+
+    // Also stop/pause background simulators if switching tabs
+    if (window.applicationsDemoEngine && typeof window.applicationsDemoEngine.pause === "function") {
+      window.applicationsDemoEngine.pause();
+    }
+    if (window.spanningTreeStudio && typeof window.spanningTreeStudio.pause === "function") {
+      window.spanningTreeStudio.pause();
+    }
+    if (window.game && window.game.guidedEngine && window.game.guidedEngine.isAutoPlaying) {
+      window.game.guidedEngine.pauseAutoPlay();
+    }
 
     // Update Sidebar Navigation Buttons
     document.querySelectorAll(".sidebar-nav-btn").forEach(btn => {
@@ -1601,7 +1620,7 @@ class AppController {
     const screen = document.getElementById("video-screen-container");
     if (!video) return;
 
-    // Click on video screen toggles play/pause
+    // Click on video screen or center play overlay toggles play/pause
     if (screen) {
       screen.addEventListener("click", () => {
         this.toggleVideoPlay();
@@ -1612,6 +1631,15 @@ class AppController {
         this.toggleVideoFullscreen();
       });
     }
+
+    // Pause video if user switches browser tab or window loses visibility
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden && video && !video.paused) {
+        video.pause();
+        this.isVideoPlaying = false;
+        this.syncPlayButtonUI();
+      }
+    });
 
     video.addEventListener("timeupdate", () => {
       this.updateVideoProgressUI();
@@ -1644,7 +1672,11 @@ class AppController {
       this.updateProgressStats();
     });
 
-    // Set initial properties
+    // Explicitly start in paused state
+    if (!video.paused) {
+      video.pause();
+    }
+    this.isVideoPlaying = false;
     video.volume = this.videoVolume;
     video.playbackRate = this.videoSpeed;
     this.syncPlayButtonUI();
@@ -1664,6 +1696,12 @@ class AppController {
     }
     video.playbackRate = this.videoSpeed || 1;
     video.volume = this.videoVolume !== undefined ? this.videoVolume : 0.8;
+
+    // Do NOT autoplay when entering visualization; video only plays when user clicks play button
+    if (!video.paused) {
+      video.pause();
+    }
+    this.isVideoPlaying = false;
     this.syncPlayButtonUI();
   }
 
@@ -1715,26 +1753,14 @@ class AppController {
         video.currentTime = 0;
         video.playbackRate = this.videoSpeed || 1.0;
         video.volume = this.videoVolume !== undefined ? this.videoVolume : 0.8;
-        
-        const playPromise = video.play();
-        if (playPromise !== undefined) {
-          playPromise.then(() => {
-            this.isVideoPlaying = true;
-            this.syncPlayButtonUI();
-          }).catch(() => {
-            this.isVideoPlaying = false;
-            this.syncPlayButtonUI();
-          });
-        }
-      } else {
-        // If same video, just ensure it plays
-        if (video.paused) {
-          video.play().then(() => {
-            this.isVideoPlaying = true;
-            this.syncPlayButtonUI();
-          }).catch(() => {});
-        }
       }
+      
+      // Video should remain paused until user clicks the play button
+      if (!video.paused) {
+        video.pause();
+      }
+      this.isVideoPlaying = false;
+      this.syncPlayButtonUI();
     }
 
     this.completedVideos.add(canonicalKey);
@@ -1748,10 +1774,17 @@ class AppController {
     if (!video) return;
 
     if (video.paused) {
-      video.play().then(() => {
-        this.isVideoPlaying = true;
-        this.syncPlayButtonUI();
-      }).catch(() => {});
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          this.isVideoPlaying = true;
+          this.syncPlayButtonUI();
+        }).catch((err) => {
+          console.warn("Video playback was interrupted or blocked:", err);
+          this.isVideoPlaying = false;
+          this.syncPlayButtonUI();
+        });
+      }
     } else {
       video.pause();
       this.isVideoPlaying = false;
@@ -1763,11 +1796,17 @@ class AppController {
   syncPlayButtonUI() {
     const icon = document.getElementById("v-play-icon");
     const text = document.getElementById("v-play-text");
+    const overlay = document.getElementById("video-center-play-overlay");
+
     if (icon && text) {
       icon.innerHTML = this.isVideoPlaying
         ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`
         : `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
       text.textContent = this.isVideoPlaying ? "PAUSE" : "PLAY";
+    }
+
+    if (overlay) {
+      overlay.classList.toggle("is-hidden", this.isVideoPlaying);
     }
   }
 
@@ -2095,10 +2134,13 @@ class AppController {
     }
 
     // 5. Reset Interactive Video Player
-    if (this.videoPlayback) {
-      this.videoPlayback.currentTime = 0;
-      this.videoPlayback.isPlaying = false;
+    const video = document.getElementById("bfs-main-video");
+    if (video) {
+      video.pause();
+      video.currentTime = 0;
     }
+    this.isVideoPlaying = false;
+    this.syncPlayButtonUI();
     const vFill = document.getElementById("v-progress-fill");
     const vThumb = document.getElementById("v-progress-thumb");
     if (vFill) vFill.style.width = "0%";
