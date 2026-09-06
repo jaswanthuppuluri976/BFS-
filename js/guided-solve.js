@@ -20,6 +20,14 @@ class GuidedSolveEngine {
     return this.isActive;
   }
 
+  reset() {
+    this.isActive = false;
+    this.pauseAutoPlay();
+    if (this.game && typeof this.game.updateGuidedSolveUI === "function") {
+      this.game.updateGuidedSolveUI();
+    }
+  }
+
   getNextActionDescription() {
     const queue = [...this.game.queue];
     const current = this.game.currentExplorerNode;
@@ -112,6 +120,7 @@ class GuidedSolveEngine {
       this.game.handleDequeueExplore();
     } else if (nextAction.actionType === "complete") {
       if (this.isAutoPlaying) this.pauseAutoPlay();
+      this.isActive = false;
       this.game.triggerVictory();
     }
 

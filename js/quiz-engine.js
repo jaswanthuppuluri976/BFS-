@@ -7,10 +7,16 @@ class QuizEngine {
   constructor() {
     this.questions = (typeof QUIZ_QUESTIONS !== 'undefined' ? QUIZ_QUESTIONS : (typeof window !== 'undefined' ? window.QUIZ_QUESTIONS : [])) || [];
     this.currentIndex = 0;
-    this.score = 0;
-    this.userAnswers = {};
+    try {
+      this.userAnswers = JSON.parse(localStorage.getItem("algolearn_quiz_answers") || "{}");
+      this.score = parseInt(localStorage.getItem("algolearn_quiz_score") || "0", 10);
+      this.isCompleted = localStorage.getItem("algolearn_quiz_completed") === "true";
+    } catch (e) {
+      this.userAnswers = {};
+      this.score = 0;
+      this.isCompleted = false;
+    }
     this.pendingSelections = {};
-    this.isCompleted = false;
     this.unansweredWarning = null;
     this.expandedQuestions = new Set([2]);
     this.container = null;
@@ -22,12 +28,8 @@ class QuizEngine {
     if (!this.questions || this.questions.length === 0) {
       this.questions = (typeof QUIZ_QUESTIONS !== 'undefined' ? QUIZ_QUESTIONS : (typeof window !== 'undefined' ? window.QUIZ_QUESTIONS : [])) || [];
     }
-    if (!this.initialized) {
-      this.initialized = true;
-      this.reset();
-    } else {
-      this.render();
-    }
+    this.initialized = true;
+    this.render();
   }
 
   reset() {
@@ -38,6 +40,14 @@ class QuizEngine {
     this.isCompleted = false;
     this.unansweredWarning = null;
     this.expandedQuestions = new Set([2]);
+    try {
+      localStorage.removeItem("algolearn_quiz_answers");
+      localStorage.removeItem("algolearn_quiz_score");
+      localStorage.removeItem("algolearn_quiz_completed");
+    } catch (e) {}
+    if (typeof app !== 'undefined' && typeof app.updateProgressStats === 'function') {
+      app.updateProgressStats();
+    }
     this.render();
   }
 
@@ -125,6 +135,17 @@ class QuizEngine {
       this.unansweredWarning.targetQuestionNum = nextTarget + 1;
     }
 
+    // Persist answers and score to localStorage
+    try {
+      localStorage.setItem("algolearn_quiz_answers", JSON.stringify(this.userAnswers));
+      localStorage.setItem("algolearn_quiz_score", String(this.score));
+    } catch (e) {}
+
+    // Update app progress & dash bar badge (e.g. 1 / 10)
+    if (typeof app !== 'undefined' && typeof app.updateProgressStats === 'function') {
+      app.updateProgressStats();
+    }
+
     this.render();
   }
 
@@ -168,6 +189,26 @@ class QuizEngine {
     // All questions answered: complete quiz and show results review
     this.unansweredWarning = null;
     this.isCompleted = true;
+    try {
+      localStorage.setItem("algolearn_quiz_completed", "true");
+    } catch (e) {}
+
+    // Notify app of completion
+    if (typeof app !== 'undefined') {
+      if (this.score >= 80 || Object.keys(this.userAnswers).length === this.questions.length) {
+        app.completedActivities.add("FN-10");
+        try {
+          localStorage.setItem("algolearn_completed_activities", JSON.stringify([...app.completedActivities]));
+        } catch (e) {}
+      }
+      if (typeof app.updateProgressStats === 'function') {
+        app.updateProgressStats();
+      }
+      if (typeof app.renderProgressModules === 'function') {
+        app.renderProgressModules();
+      }
+    }
+
     this.render();
     if (typeof soundManager !== 'undefined' && soundManager.playSuccess) {
       soundManager.playSuccess();

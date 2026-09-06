@@ -1929,8 +1929,41 @@ class AppController {
   /* ─── Progress Section ──────────────────────────────────────── */
 
   updateProgressStats() {
-    const totalActivities = 20;
-    const completedCount = this.completedChapters.size + this.completedVideos.size + this.completedActivities.size;
+    const totalChapters = typeof THEORY_MODULES !== "undefined" ? THEORY_MODULES.length : 12;
+    const totalLevels = typeof LEVELS_DATA !== "undefined" ? LEVELS_DATA.length : 9;
+
+    // 1. Get Game Levels Completed
+    const completedLevels = (window.game && window.game.completedLevels)
+      ? window.game.completedLevels
+      : new Set(JSON.parse(localStorage.getItem("algolearn_completed_levels") || "[]"));
+    const gameWonCount = completedLevels.size;
+
+    // 2. Get Quiz Answers & Status
+    const quizAnswers = (window.quizEngine && window.quizEngine.userAnswers)
+      ? window.quizEngine.userAnswers
+      : JSON.parse(localStorage.getItem("algolearn_quiz_answers") || "{}");
+    const quizAnsweredCount = Object.keys(quizAnswers).length;
+    const totalQuizQuestions = (window.quizEngine && window.quizEngine.questions && window.quizEngine.questions.length)
+      ? window.quizEngine.questions.length
+      : 10;
+    const isQuizDone = (window.quizEngine && window.quizEngine.isCompleted) || localStorage.getItem("algolearn_quiz_completed") === "true";
+
+    // 3. Auto-sync curriculum modules (FN-01 to FN-10) based on accomplishments
+    if (this.completedChapters.has("graph-foundations")) this.completedActivities.add("FN-01");
+    if (this.completedChapters.has("what-is-bfs")) this.completedActivities.add("FN-02");
+    if (completedLevels.has(1)) this.completedActivities.add("FN-03");
+    if (completedLevels.has(2) || completedLevels.has(3)) this.completedActivities.add("FN-04");
+    if (completedLevels.has(4) || this.completedChapters.has("edge-classification")) this.completedActivities.add("FN-05");
+    if (completedLevels.has(5) || this.completedChapters.has("spanning-tree")) this.completedActivities.add("FN-06");
+    if (this.completedChapters.has("shortest-path") || this.completedVideos.has("shortest_path") || this.completedVideos.has("collision")) this.completedActivities.add("FN-07");
+    if (this.completedChapters.has("connected-components") || completedLevels.has(6)) this.completedActivities.add("FN-08");
+    if (this.completedChapters.has("complexity-analysis") || completedLevels.has(8) || completedLevels.has(9)) this.completedActivities.add("FN-09");
+    if (isQuizDone || quizAnsweredCount >= 10) this.completedActivities.add("FN-10");
+
+    // 4. Calculate Total and Completed Activities
+    const totalActivities = totalChapters + 2 + totalLevels + 1; // 12 + 2 + 9 + 1 = 24
+    const quizCompletedWeight = (isQuizDone || quizAnsweredCount >= 10) ? 1 : 0;
+    const completedCount = Math.min(totalActivities, this.completedChapters.size + this.completedVideos.size + gameWonCount + quizCompletedWeight);
     const overallPct = Math.min(100, Math.round((completedCount / totalActivities) * 100));
 
     // Update Overall Completion Card
@@ -1948,10 +1981,16 @@ class AppController {
     const perfLevels = document.getElementById("perf-levels-count");
     const perfChallenges = document.getElementById("perf-challenges-txt");
 
-    if (perfAct) perfAct.textContent = `${completedCount} / 20`;
-    if (perfMastered) perfMastered.textContent = Math.floor(completedCount / 3);
-    if (perfLevels) perfLevels.textContent = `${Math.min(9, Math.floor(completedCount / 2))} / 9`;
-    if (perfChallenges) perfChallenges.textContent = `${Math.min(4, Math.floor(completedCount / 4))} / 4 Challenges`;
+    if (perfAct) perfAct.textContent = `${completedCount} / ${totalActivities}`;
+    if (perfMastered) {
+      const masteredVal = gameWonCount + (this.completedChapters.size >= 12 ? 1 : 0) + (isQuizDone ? 1 : 0);
+      perfMastered.textContent = String(masteredVal);
+    }
+    if (perfLevels) perfLevels.textContent = `${gameWonCount} / ${totalLevels}`;
+
+    const challengeIds = [6, 7, 8, 9];
+    const challengesWon = challengeIds.filter(id => completedLevels.has(id)).length;
+    if (perfChallenges) perfChallenges.textContent = `${challengesWon} / 4 Challenges`;
 
     // Video Section in Progress Tracker
     const videoCount = this.completedVideos.size;
@@ -1978,7 +2017,7 @@ class AppController {
       if (pillColl) { pillColl.textContent = "Pending"; pillColl.style.color = ""; }
     }
 
-    // Update Sidebar Navigation Badges (Pic 3 Format)
+    // Update Sidebar Navigation Badges ("Dash Bar")
     const badgeOverview = document.getElementById("nav-badge-overview");
     const badgeLearn = document.getElementById("nav-badge-learn");
     const badgeVisualize = document.getElementById("nav-badge-visualize");
@@ -1986,15 +2025,11 @@ class AppController {
     const badgeQuiz = document.getElementById("nav-badge-quiz");
     const badgeProgress = document.getElementById("nav-badge-progress");
 
-    const totalChapters = typeof THEORY_MODULES !== "undefined" ? THEORY_MODULES.length : 12;
-    const gameWonCount = window.game && window.game.completedLevels ? window.game.completedLevels.size : (typeof LEVELS_DATA !== "undefined" ? Math.min(LEVELS_DATA.length, Math.floor(completedCount / 2)) : 0);
-    const totalLevels = typeof LEVELS_DATA !== "undefined" ? LEVELS_DATA.length : 9;
-
     if (badgeOverview) badgeOverview.textContent = "Overview";
     if (badgeLearn) badgeLearn.textContent = `${this.completedChapters.size} / ${totalChapters}`;
     if (badgeVisualize) badgeVisualize.textContent = `${this.completedVideos.size} / 2`;
     if (badgeGame) badgeGame.textContent = `${gameWonCount} / ${totalLevels}`;
-    if (badgeQuiz) badgeQuiz.textContent = "10 Qs";
+    if (badgeQuiz) badgeQuiz.textContent = `${quizAnsweredCount} / ${totalQuizQuestions}`;
     if (badgeProgress) badgeProgress.textContent = `${overallPct}%`;
   }
 
@@ -2016,8 +2051,9 @@ class AppController {
       ? this.modulesData
       : this.modulesData.filter(m => m.category === this.activeFilter);
 
+    const completedModCount = this.modulesData.filter(m => this.completedActivities.has(m.id)).length;
     if (countEl) {
-      countEl.textContent = `Showing ${filtered.length} of ${this.modulesData.length} modules`;
+      countEl.textContent = `Showing ${filtered.length} of ${this.modulesData.length} modules (${completedModCount} / ${this.modulesData.length} Completed)`;
     }
 
     mount.innerHTML = filtered.map(m => {
@@ -2091,6 +2127,9 @@ class AppController {
     localStorage.removeItem("algolearn_completed_activities");
     localStorage.removeItem("algolearn_completed_videos");
     localStorage.removeItem("algolearn_completed_levels");
+    localStorage.removeItem("algolearn_quiz_answers");
+    localStorage.removeItem("algolearn_quiz_score");
+    localStorage.removeItem("algolearn_quiz_completed");
     localStorage.removeItem("algolearn_score");
 
     // 2. Reset active chapter back to the first chapter
@@ -2229,6 +2268,15 @@ class AppController {
   }
 
   closeActiveProblem() {
+    if (window.game && window.game.guidedEngine) {
+      window.game.guidedEngine.isActive = false;
+      if (window.game.guidedEngine.isAutoPlaying) {
+        window.game.guidedEngine.pauseAutoPlay();
+      }
+      if (typeof window.game.updateGuidedSolveUI === "function") {
+        window.game.updateGuidedSolveUI();
+      }
+    }
     this.showLevelsHub();
     this.renderLevelsGrid();
   }

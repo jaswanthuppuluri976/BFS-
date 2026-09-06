@@ -13,7 +13,11 @@ class GameEngine {
     this.maxStreak = 0;
     this.mistakesCount = 0;
     this.correctActionsCount = 0;
-    this.completedLevels = new Set();
+    try {
+      this.completedLevels = new Set(JSON.parse(localStorage.getItem("algolearn_completed_levels") || "[]"));
+    } catch (e) {
+      this.completedLevels = new Set();
+    }
 
     // Runtime BFS state & Real-Time BFS Spanning Tree
     this.queue = [];
@@ -67,9 +71,14 @@ class GameEngine {
       victoryModal.style.display = "none";
     }
 
-    if (this.guidedEngine && this.guidedEngine.isAutoPlaying) {
-      this.guidedEngine.pauseAutoPlay();
+    // Guided Solve must ALWAYS be reset to inactive when entering/loading any level
+    if (this.guidedEngine) {
+      this.guidedEngine.isActive = false;
+      if (this.guidedEngine.isAutoPlaying) {
+        this.guidedEngine.pauseAutoPlay();
+      }
     }
+    this.updateGuidedSolveUI();
 
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
@@ -472,12 +481,51 @@ class GameEngine {
     this.completedLevels.add(this.currentLevelData.id);
     this.addScore(100); // Level completion bonus
 
-    if (this.timerInterval) clearInterval(this.timerInterval);
-    if (this.guidedEngine && this.guidedEngine.isAutoPlaying) {
-      this.guidedEngine.pauseAutoPlay();
+    // Persist completed levels to localStorage
+    try {
+      localStorage.setItem("algolearn_completed_levels", JSON.stringify([...this.completedLevels]));
+    } catch (e) {
+      console.warn("Could not persist completed levels", e);
     }
 
+    if (this.timerInterval) clearInterval(this.timerInterval);
+    if (this.guidedEngine) {
+      this.guidedEngine.isActive = false;
+      if (this.guidedEngine.isAutoPlaying) {
+        this.guidedEngine.pauseAutoPlay();
+      }
+    }
+    this.updateGuidedSolveUI();
+
     if (window.soundManager) soundManager.playSuccess();
+
+    // Notify main app to update progress, badges, and dashboard
+    if (typeof app !== "undefined") {
+      const lvlId = this.currentLevelData.id;
+      app.completedActivities.add(`level-${lvlId}`);
+
+      // Map level completions to curriculum modules
+      if (lvlId === 1) app.completedActivities.add("FN-03");
+      if (lvlId === 2 || lvlId === 3) app.completedActivities.add("FN-04");
+      if (lvlId === 4) app.completedActivities.add("FN-05");
+      if (lvlId === 5) app.completedActivities.add("FN-06");
+      if (lvlId === 6) app.completedActivities.add("FN-08");
+      if (lvlId === 8 || lvlId === 9) app.completedActivities.add("FN-09");
+
+      try {
+        localStorage.setItem("algolearn_completed_activities", JSON.stringify([...app.completedActivities]));
+      } catch (e) {}
+
+      if (typeof app.updateProgressStats === "function") {
+        app.updateProgressStats();
+      }
+      if (typeof app.renderProgressModules === "function") {
+        app.renderProgressModules();
+      }
+      if (typeof app.renderLevelsGrid === "function") {
+        app.renderLevelsGrid();
+      }
+    }
 
     this.render();
     this.renderSpanningTree();
@@ -833,21 +881,32 @@ class GameEngine {
     const guidedContainer = document.getElementById("guided-solve-container");
     const nextMoveBtn = document.getElementById("guided-next-btn");
     const guidedExplain = document.getElementById("guided-explanation-text");
+    const toggleBtn = document.getElementById("guided-mode-toggle-btn");
 
-    if (guidedContainer && this.guidedEngine) {
-      if (this.guidedEngine.isActive) {
+    if (guidedContainer) {
+      if (this.guidedEngine && this.guidedEngine.isActive) {
         guidedContainer.classList.remove("hidden");
+        guidedContainer.style.display = "block";
         const nextAction = this.guidedEngine.getNextActionDescription();
         if (nextMoveBtn) nextMoveBtn.textContent = "Next Step";
-        if (guidedExplain) {
+        if (guidedExplain && nextAction) {
           guidedExplain.innerHTML = `
             <strong>${nextAction.headline}</strong><br/>
             <span>${nextAction.explanation}</span><br/>
             <span class="q-state">Queue State: ${nextAction.queuePreview}</span>
           `;
         }
+        if (toggleBtn) {
+          toggleBtn.classList.add("active");
+          toggleBtn.setAttribute("aria-pressed", "true");
+        }
       } else {
         guidedContainer.classList.add("hidden");
+        guidedContainer.style.display = "none";
+        if (toggleBtn) {
+          toggleBtn.classList.remove("active");
+          toggleBtn.setAttribute("aria-pressed", "false");
+        }
       }
     }
   }

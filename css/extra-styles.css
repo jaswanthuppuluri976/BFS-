@@ -7678,6 +7678,10 @@ body.dark-theme .queue-header-title {
   transition: all 0.2s ease;
 }
 
+.guided-solve-box.hidden {
+  display: none !important;
+}
+
 body.dark-theme .guided-solve-box {
   background: #0d1428 !important;
   border: 1.5px solid rgba(46, 85, 250, 0.4) !important;
@@ -11047,6 +11051,14 @@ body.sidebar-open #topbar-menu-toggle {
 .guided-solve-pill-btn:active {
   transform: translateY(0) !important;
   box-shadow: 0 1px 2px rgba(217, 119, 6, 0.15) !important;
+}
+
+#guided-mode-toggle-btn.guided-solve-pill-btn.active,
+.guided-solve-pill-btn.active {
+  background: #fde68a !important;
+  border-color: #d97706 !important;
+  color: #92400e !important;
+  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.3) !important;
 }
 
 #guided-mode-toggle-btn.guided-solve-pill-btn .guided-btn-bulb-icon {
