@@ -677,7 +677,7 @@
             <div class="visualize-lessons-row">
               
               <!-- Lesson 01 Card (Active State) -->
-              <div class="lesson-select-card active" id="lesson-card-01" data-video-src="videos/video1.mp4" onclick="app.selectVideoLesson('intro')">
+              <div class="lesson-select-card active" id="lesson-card-01" data-video-src="videos/WhatsApp Video 2026-09-07 at 15.21.29.mp4" onclick="app.selectVideoLesson('intro', false)">
                 <div class="lesson-card-top">
                   <span class="lesson-tag">Video 1</span>
                   <span class="lesson-icon-video">
@@ -692,13 +692,13 @@
                   <span class="lesson-pill">Level 0 &rarr; 1 &rarr; 2</span>
                   <span class="lesson-pill">Linear Time O(V + E)</span>
                 </div>
-                <button class="lesson-action-btn solid" id="btn-watch-lesson-01" onclick="event.stopPropagation(); app.selectVideoLesson('intro')">
+                <button class="lesson-action-btn solid" id="btn-watch-lesson-01" onclick="event.stopPropagation(); app.selectVideoLesson('intro', true)">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block;vertical-align:middle;margin-right:5px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>CLICK TO WATCH
                 </button>
               </div>
 
               <!-- Lesson 02 Card -->
-              <div class="lesson-select-card" id="lesson-card-02" data-video-src="videos/video2.mp4" onclick="app.selectVideoLesson('shortest_path')">
+              <div class="lesson-select-card" id="lesson-card-02" data-video-src="videos/WhatsApp Video 2026-09-07 at 15.50.48.mp4" onclick="app.selectVideoLesson('shortest_path', false)">
                 <div class="lesson-card-top">
                   <span class="lesson-tag">Video 2</span>
                   <span class="lesson-icon-video">
@@ -713,7 +713,7 @@
                   <span class="lesson-pill">Parent Backtracking</span>
                   <span class="lesson-pill">Spanning Tree Formation</span>
                 </div>
-                <button class="lesson-action-btn outline" id="btn-watch-lesson-02" onclick="event.stopPropagation(); app.selectVideoLesson('shortest_path')">
+                <button class="lesson-action-btn outline" id="btn-watch-lesson-02" onclick="event.stopPropagation(); app.selectVideoLesson('shortest_path', true)">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block;vertical-align:middle;margin-right:5px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>CLICK TO WATCH
                 </button>
               </div>
@@ -731,12 +731,15 @@
                   <span class="v-status-lbl">CURRENT LESSON</span>
                 </div>
                 <h4 id="v-player-title" class="v-player-heading">NOW PLAYING: BFS VISUALIZATION &amp; TRAVERSAL</h4>
-                <span id="v-player-file-tag" class="v-file-badge">video1.mp4</span>
+                <span id="v-player-file-tag" class="v-file-badge">WhatsApp Video 2026-09-07 at 15.21.29.mp4</span>
               </div>
 
               <!-- Video Screen Container -->
               <div class="video-screen-container" id="video-screen-container" style="position: relative; width: 100%; height: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: #000; display: block;">
-                <video id="bfs-main-video" class="bfs-video-player" playsinline webkit-playsinline x5-playsinline preload="metadata" src="/videos/video1.mp4" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center center; display: block; border: none; border-radius: 0; margin: 0; padding: 0;">
+                <video id="bfs-main-video" class="bfs-video-player" playsinline webkit-playsinline x5-playsinline preload="metadata" src="videos/WhatsApp Video 2026-09-07 at 15.21.29.mp4" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center center; display: block; border: none; border-radius: 0; margin: 0; padding: 0; background: #000;">
+                  <source src="videos/WhatsApp Video 2026-09-07 at 15.21.29.mp4" type="video/mp4">
+                  <source src="videos/video1.mp4" type="video/mp4">
+                  <source src="/videos/WhatsApp Video 2026-09-07 at 15.21.29.mp4" type="video/mp4">
                   <source src="/videos/video1.mp4" type="video/mp4">
                   Your browser does not support HTML5 video.
                 </video>
@@ -914,12 +917,12 @@
               </div>
 
               <div class="vt-lessons-list">
-                <div class="vt-lesson-item" onclick="app.switchTab('visualize'); app.selectVideoLesson('intro')">
+                <div class="vt-lesson-item" onclick="app.switchTab('visualize'); app.selectVideoLesson('intro', true)">
                   <span class="vt-bullet-dot" id="vt-dot-intro">&bull;</span>
                   <span class="vt-lesson-name">Video 1: BFS Visualization &amp; Traversal</span>
                   <span class="vt-status-pill" id="vt-pill-intro">Not completed</span>
                 </div>
-                <div class="vt-lesson-item" onclick="app.switchTab('visualize'); app.selectVideoLesson('shortest_path')">
+                <div class="vt-lesson-item" onclick="app.switchTab('visualize'); app.selectVideoLesson('shortest_path', true)">
                   <span class="vt-bullet-dot" id="vt-dot-collision">&bull;</span>
                   <span class="vt-lesson-name">Video 2: BFS Algorithm &amp; Implementation</span>
                   <span class="vt-status-pill" id="vt-pill-collision">Not completed</span>

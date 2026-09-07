@@ -37,8 +37,9 @@ function requestHandler(req, res) {
       return res.end('403 Forbidden');
     }
 
-    // Support /video/ and /videos/ interchangeably
+    // Support /video/ and /videos/ interchangeably, and alias video1/video2 to user added videos
     try {
+      const videosDir = path.join(PUBLIC_DIR, 'videos');
       if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
         if (reqPath.startsWith('/video/')) {
           const altPath = path.join(PUBLIC_DIR, reqPath.replace('/video/', '/videos/'));
@@ -50,6 +51,18 @@ function requestHandler(req, res) {
           if (fs.existsSync(altPath) && fs.statSync(altPath).isFile()) {
             filePath = altPath;
           }
+        }
+      }
+
+      // Check for video1.mp4 / video2.mp4 fallback alias
+      if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+        const basename = path.basename(filePath).toLowerCase();
+        if (basename === 'video1.mp4') {
+          const v1 = path.join(videosDir, 'WhatsApp Video 2026-09-07 at 15.21.29.mp4');
+          if (fs.existsSync(v1) && fs.statSync(v1).isFile()) filePath = v1;
+        } else if (basename === 'video2.mp4') {
+          const v2 = path.join(videosDir, 'WhatsApp Video 2026-09-07 at 15.50.48.mp4');
+          if (fs.existsSync(v2) && fs.statSync(v2).isFile()) filePath = v2;
         }
       }
     } catch (e) {

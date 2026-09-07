@@ -2889,7 +2889,7 @@ video.bfs-video-player,
   min-height: 100% !important;
   max-width: 100% !important;
   max-height: 100% !important;
-  object-fit: cover !important;
+  object-fit: contain !important;
   object-position: center center !important;
   display: block !important;
   background: #000 !important;
