@@ -54,6 +54,158 @@ body.dark-theme .modal-card {
   background: #121827;
 }
 
+/* ==========================================================================
+   Reset Progress Confirmation Modal (exact match of Image 2)
+   ========================================================================== */
+.reset-alert-card {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 92%;
+  max-width: 470px;
+  padding: 38px 36px 32px 36px;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22), 0 4px 16px rgba(0, 0, 0, 0.08);
+  position: relative;
+  animation: alertCardPopIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+@keyframes alertCardPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.93) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.reset-alert-icon-box {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  background: #fff1f2;
+  border: 1px solid #ffe4e6;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 22px;
+}
+
+.reset-alert-title {
+  font-size: 1.35rem;
+  font-weight: 850;
+  color: #0f172a;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin: 0 0 14px 0;
+  line-height: 1.25;
+}
+
+.reset-alert-desc {
+  font-size: 0.93rem;
+  line-height: 1.58;
+  color: #475569;
+  max-width: 385px;
+  margin: 0 auto 30px auto;
+}
+
+.reset-alert-actions {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: center;
+}
+
+.reset-btn-exit {
+  flex: 1;
+  height: 48px;
+  border-radius: 13px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #334155;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.18s ease;
+}
+
+.reset-btn-exit:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.reset-btn-exit:active {
+  transform: scale(0.98);
+}
+
+.reset-btn-confirm {
+  flex: 1;
+  height: 48px;
+  border-radius: 13px;
+  background: #e1144b;
+  border: none;
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(225, 20, 75, 0.35);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.reset-btn-confirm:hover {
+  background: #cf1042;
+  box-shadow: 0 6px 20px rgba(225, 20, 75, 0.48);
+  transform: translateY(-1px);
+}
+
+.reset-btn-confirm:active {
+  transform: translateY(0);
+}
+
+/* Dark Theme Overrides */
+body.dark-theme .reset-alert-card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+body.dark-theme .reset-alert-icon-box {
+  background: rgba(225, 20, 75, 0.15);
+  border-color: rgba(225, 20, 75, 0.3);
+}
+
+body.dark-theme .reset-alert-title {
+  color: #ffffff;
+}
+
+body.dark-theme .reset-alert-desc {
+  color: #94a3b8;
+}
+
+body.dark-theme .reset-btn-exit {
+  background: #334155;
+  border-color: #475569;
+  color: #f1f5f9;
+}
+
+body.dark-theme .reset-btn-exit:hover {
+  background: #475569;
+  color: #ffffff;
+}
+
 .modal-header {
   display: flex;
   align-items: center;
@@ -5147,12 +5299,12 @@ body.dark-theme .explorer-placeholder {
   z-index: 99999;
 }
 
-/* Floating FAB Button — Squircle Logo */
+/* Floating FAB Button — Circular Logo */
 .ai-fab-btn {
   background: transparent;
   color: #ffffff;
   border: none;
-  border-radius: 14px;
+  border-radius: 50%;
   width: 58px;
   height: 58px;
   padding: 0;
@@ -5160,7 +5312,7 @@ body.dark-theme .explorer-placeholder {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(33, 101, 252, 0.4), 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 24px rgba(27, 98, 255, 0.4), 0 3px 10px rgba(126, 26, 246, 0.3);
   transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   overflow: visible;
@@ -5168,7 +5320,7 @@ body.dark-theme .explorer-placeholder {
 
 .ai-fab-btn:hover {
   transform: translateY(-4px) scale(1.08);
-  box-shadow: 0 14px 36px rgba(33, 101, 252, 0.55), 0 0 16px rgba(128, 40, 248, 0.4);
+  box-shadow: 0 14px 36px rgba(27, 98, 255, 0.55), 0 0 18px rgba(126, 26, 246, 0.45);
 }
 
 .ai-fab-btn:active {
@@ -5181,7 +5333,7 @@ body.dark-theme .explorer-placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 14px;
+  border-radius: 50%;
   overflow: hidden;
 }
 
@@ -5189,21 +5341,11 @@ body.dark-theme .explorer-placeholder {
   width: 100%;
   height: 100%;
   display: block;
-  border-radius: 14px;
+  border-radius: 50%;
 }
 
 .ai-fab-pulse {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  background: #10b981;
-  border: 2.5px solid #ffffff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
-  pointer-events: none;
-  z-index: 2;
+  display: none !important;
 }
 
 /* Chat Window Drawer */
@@ -5252,7 +5394,7 @@ body.dark-theme .explorer-placeholder {
 .ai-avatar-icon {
   width: 36px;
   height: 36px;
-  border-radius: 9px;
+  border-radius: 50%;
   background: transparent;
   display: flex;
   align-items: center;
@@ -5344,7 +5486,7 @@ body.dark-theme .explorer-placeholder {
 .ai-msg-avatar {
   width: 28px;
   height: 28px;
-  border-radius: 7px;
+  border-radius: 50%;
   flex-shrink: 0;
   display: flex;
   align-items: center;

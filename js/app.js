@@ -320,6 +320,24 @@ class AppController {
         if (window.demoPlayer) window.demoPlayer.closeDemo();
       });
     }
+
+    // Reset Progress Confirmation Modal backdrop and Escape listeners
+    const resetModal = document.getElementById("reset-progress-modal");
+    if (resetModal) {
+      resetModal.addEventListener("click", (e) => {
+        if (e.target === resetModal) {
+          this.closeResetModal();
+        }
+      });
+    }
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        if (resetModal && !resetModal.classList.contains("hidden")) {
+          this.closeResetModal();
+        }
+      }
+    });
   }
 
   /* ─── Sidebar Drawer ────────────────────────────────────────── */
@@ -2116,6 +2134,30 @@ class AppController {
   continueNextRecommended() {
     this.switchTab("theory");
     this.selectChapter("graph-foundations");
+  }
+
+  /* ─── Reset Progress Confirmation Alert (Image 2) ────────────── */
+
+  openResetModal() {
+    const modal = document.getElementById("reset-progress-modal");
+    if (modal) {
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+      this.playSound("pop");
+    }
+  }
+
+  closeResetModal() {
+    const modal = document.getElementById("reset-progress-modal");
+    if (modal) {
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+  }
+
+  confirmResetProgress() {
+    this.closeResetModal();
+    this.resetAllProgress();
   }
 
   resetAllProgress() {

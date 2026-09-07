@@ -151,7 +151,7 @@
           </button>
 
           <!-- Reset / Reload -->
-          <button id="reset-state-btn" class="icon-only-btn" onclick="app.resetAllProgress()" title="Reset Progress">
+          <button id="reset-state-btn" class="icon-only-btn" onclick="app.openResetModal()" title="Reset Progress">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="23 4 23 10 17 10"></polyline>
               <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
@@ -832,7 +832,7 @@
               <div class="prog-meta-row">
                 <span class="prog-tracker-tag">BFS CURRICULUM PROGRESS TRACKER</span>
                 <span class="prog-sync-time">Last synced: Today</span>
-                <button class="prog-reset-link-btn" onclick="app.resetAllProgress()">
+                <button class="prog-reset-link-btn" onclick="app.openResetModal()">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
                   Reset Progress
                 </button>
@@ -1236,6 +1236,43 @@
         <div style="margin-top: 14px; display: flex; justify-content: flex-end;">
           <button class="btn btn-primary" onclick="if(window.theoryBFSDemo) theoryBFSDemo.closeDemo()">Got it! Return</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Reset Progress Confirmation Alert Modal (matching Image 2) -->
+  <div id="reset-progress-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="reset-modal-title">
+    <div class="reset-alert-card">
+      <!-- Warning Badge Icon -->
+      <div class="reset-alert-icon-box">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e1144b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+      </div>
+
+      <!-- Title -->
+      <h3 id="reset-modal-title" class="reset-alert-title">RESET PROGRESS?</h3>
+
+      <!-- Description text -->
+      <p class="reset-alert-desc">
+        Are you sure you want to reset your learning progress?<br>
+        All completed theory chapters, watched videos, completed game levels, quiz progress, and mastery progress will be reset.
+      </p>
+
+      <!-- Action buttons -->
+      <div class="reset-alert-actions">
+        <button id="cancel-reset-btn" class="reset-btn-exit" onclick="if(window.app) app.closeResetModal()">
+          EXIT
+        </button>
+        <button id="confirm-reset-btn" class="reset-btn-confirm" onclick="if(window.app) app.confirmResetProgress()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          RESET
+        </button>
       </div>
     </div>
   </div>
