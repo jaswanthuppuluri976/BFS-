@@ -129,7 +129,14 @@ class GameEngine {
     this.updateStatsUI();
 
     if (window.soundManager) soundManager.playPop();
-    this.showToast(`Level ${this.currentLevelData.id}: ${this.currentLevelData.title}`, "info");
+    const curSubLevel = this._getSubLevelNumber ? this._getSubLevelNumber(this.currentLevelIndex) : this.currentLevelData.id;
+    this.showToast(`Level ${curSubLevel}: ${this.currentLevelData.title}`, "info");
+  }
+
+  _getSubLevelNumber(idx) {
+    if (idx <= 1) return idx + 1;
+    if (idx <= 4) return idx - 2 + 1;
+    return idx - 5 + 1;
   }
 
   startChallengeTimer() {
@@ -577,12 +584,12 @@ class GameEngine {
           ${nextLevelData ? `
             <div class="vic-next-level-card">
               <div class="vic-next-tag">NEXT CHALLENGE UNLOCKED</div>
-              <div class="vic-next-name">Level ${nextLevelData.id}: ${nextLevelData.title}</div>
+              <div class="vic-next-name">Level ${this._getSubLevelNumber(this.currentLevelIndex + 1)}: ${nextLevelData.title}</div>
               <div class="vic-next-desc">${nextLevelData.subtitle}</div>
             </div>
           ` : `
             <div class="vic-all-cleared-card">
-              <div class="vic-next-name" style="color: #10b981;">Mastered All 9 Challenges!</div>
+              <div class="vic-next-name" style="color: #10b981;">Mastered All Challenges!</div>
               <div class="vic-next-desc">You are ready for the final BFS Mastery Examination!</div>
             </div>
           `}
@@ -599,7 +606,8 @@ class GameEngine {
       const nextBtn = document.getElementById("victory-next-btn");
       if (nextBtn) {
         if (nextLevelData) {
-          nextBtn.innerHTML = `Continue to Level ${nextLevelData.id} &rarr;`;
+          const nextSub = this._getSubLevelNumber(this.currentLevelIndex + 1);
+          nextBtn.innerHTML = `Continue to Level ${nextSub} &rarr;`;
         } else {
           nextBtn.innerHTML = `Mastery Examination &rarr;`;
         }

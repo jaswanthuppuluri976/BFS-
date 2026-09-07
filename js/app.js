@@ -45,6 +45,7 @@ class AppController {
     this.completedChapters = new Set(JSON.parse(localStorage.getItem("algolearn_completed_chapters") || "[]"));
     this.completedActivities = new Set(JSON.parse(localStorage.getItem("algolearn_completed_activities") || "[]"));
     this.completedVideos = new Set(JSON.parse(localStorage.getItem("algolearn_completed_videos") || "[]"));
+    this.expandedGameModules = new Set();
 
     // 10 BFS Curriculum Modules Data (FN-01 to FN-10)
     this.modulesData = [
@@ -2236,6 +2237,7 @@ class AppController {
     }
 
     // 7. Re-render all views and statistics to 0%
+    if (this.expandedGameModules) this.expandedGameModules.clear();
     this.updateProgressStats();
     this.renderTOC();
     this.renderActiveChapter();
@@ -2288,7 +2290,15 @@ class AppController {
     if (lvl) {
       const badge = document.getElementById("active-problem-badge");
       const name  = document.getElementById("active-problem-name");
-      if (badge) badge.textContent = `LEVEL ${lvl.id}`;
+      let subLevel = 1;
+      if (idx <= 1) {
+        subLevel = idx + 1;
+      } else if (idx <= 4) {
+        subLevel = idx - 2 + 1;
+      } else {
+        subLevel = idx - 5 + 1;
+      }
+      if (badge) badge.textContent = `LEVEL ${subLevel}`;
       if (name)  name.textContent  = lvl.title;
     }
     this.playSound("pop");
@@ -2356,27 +2366,267 @@ class AppController {
     }
   }
 
+  startModule(modIdx) {
+    const modules = [
+      { levelIndices: [0, 1] },
+      { levelIndices: [2, 3, 4] },
+      { levelIndices: [5, 6, 7, 8] }
+    ];
+    const mod = modules[modIdx];
+    if (!mod || typeof LEVELS_DATA === "undefined") return;
+
+    const completed = (window.game && window.game.completedLevels) ? window.game.completedLevels : new Set();
+    const nextIdx = mod.levelIndices.find(idx => {
+      const lvl = LEVELS_DATA[idx];
+      return lvl && !completed.has(lvl.id) && !completed.has(idx);
+    });
+
+    const targetIdx = nextIdx !== undefined ? nextIdx : mod.levelIndices[0];
+    this.openLevelProblem(targetIdx);
+  }
+
+  toggleModuleExpand(modIdx, event) {
+    if (event) event.stopPropagation();
+    if (!this.expandedGameModules) this.expandedGameModules = new Set();
+    if (this.expandedGameModules.has(modIdx)) {
+      this.expandedGameModules.delete(modIdx);
+    } else {
+      this.expandedGameModules.add(modIdx);
+    }
+    this.renderLevelsGrid();
+  }
+
+  toggleAllModulesExpand() {
+    if (!this.expandedGameModules) this.expandedGameModules = new Set();
+    if (this.expandedGameModules.size >= 3) {
+      this.expandedGameModules.clear();
+    } else {
+      this.expandedGameModules = new Set([0, 1, 2]);
+    }
+    this.renderLevelsGrid();
+  }
+
+  handleModuleCardClick(event, modIdx) {
+    // If clicked on an internal level item, action button, or collapse button, ignore card-level toggle
+    if (
+      event.target.closest(".module-sublevel-section") ||
+      event.target.closest(".module-card-footer") ||
+      event.target.closest(".tm-card-action-btn") ||
+      event.target.closest(".module-collapse-btn")
+    ) {
+      return;
+    }
+    this.toggleModuleExpand(modIdx, event);
+  }
+
   renderLevelsGrid() {
     const mount = document.getElementById("levels-grid-mount");
     if (!mount || typeof LEVELS_DATA === "undefined") return;
 
-    mount.innerHTML = LEVELS_DATA.map((lvl, idx) => {
-      const isDone = window.game && window.game.completedLevels && (window.game.completedLevels.has(lvl.id) || window.game.completedLevels.has(idx));
-      const ops = (lvl.keyOperations || []).map(op => `<span class="tm-key-op-chip"><strong>${op.name}</strong> <code>${op.complexity}</code></span>`).join(" ");
+    // Sync header "Expand All / Collapse All" button state
+    const toggleAllBtn = document.getElementById("toggle-all-modules-btn");
+    if (toggleAllBtn) {
+      const allExpanded = this.expandedGameModules && this.expandedGameModules.size >= 3;
+      toggleAllBtn.innerHTML = allExpanded
+        ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></svg><span>Collapse All Modules</span>`
+        : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg><span>Expand All Modules</span>`;
+      toggleAllBtn.title = allExpanded ? "Collapse all 3 modules" : "Expand all 3 modules to view all levels";
+    }
+
+    const completed = (window.game && window.game.completedLevels) ? window.game.completedLevels : new Set();
+
+    const modules = [
+      {
+        id: "module-tree-traversal",
+        themeClass: "theme-tree",
+        title: "Tree Traversal",
+        description: "Hierarchical acyclic topologies with strict FIFO parent-child branch exploration.",
+        difficulty: "Foundational",
+        topics: ["Acyclic Trees", "FIFO Enqueue", "Level-by-Level"],
+        iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`,
+        levelIndices: [0, 1] // Level 1 (Simple Tree Traversal), Level 2 (Binary Tree Exploration)
+      },
+      {
+        id: "module-graph-traversal",
+        themeClass: "theme-graph",
+        title: "Graph Traversal",
+        description: "Interconnected multi-path networks featuring cycles, back-edges, and visited set guards.",
+        difficulty: "Core Concepts",
+        topics: ["Cycle Detection", "Visited Sets", "Dense Adjacency"],
+        iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/><line x1="18" y1="8" x2="18" y2="16"/></svg>`,
+        levelIndices: [2, 3, 4] // Level 3 (Undirected Graph), Level 4 (Cyclic Graph), Level 5 (Dense Graph)
+      },
+      {
+        id: "module-advanced-graph",
+        themeClass: "theme-advanced",
+        title: "Advanced Graph Challenges",
+        description: "Complex frontiers including disconnected islands, anti-DFS invariants, and peak queue scales.",
+        difficulty: "Mastery & Capstone",
+        topics: ["Disconnected Islands", "BFS Invariant", "Final Labyrinth"],
+        iconSvg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>`,
+        levelIndices: [5, 6, 7], // Level 6 (Disconnected), Level 7 (Misleading Paths), Level 8 (Large Network)
+        finalChallengeIndex: 8 // Level 9 (Master Challenge & Labyrinth)
+      }
+    ];
+
+    mount.innerHTML = modules.map((mod, modIdx) => {
+      const allModIndices = mod.levelIndices.concat(mod.finalChallengeIndex !== undefined ? [mod.finalChallengeIndex] : []);
+      const completedCount = allModIndices.filter(idx => {
+        const lvl = LEVELS_DATA[idx];
+        return lvl && (completed.has(lvl.id) || completed.has(idx));
+      }).length;
+      const isAllDone = completedCount === allModIndices.length;
+      const isExpanded = !!(this.expandedGameModules && this.expandedGameModules.has(modIdx));
+      const percent = Math.round((completedCount / allModIndices.length) * 100);
+
+      // Determine next playable level in this module
+      const nextIdx = allModIndices.find(idx => {
+        const lvl = LEVELS_DATA[idx];
+        return lvl && !completed.has(lvl.id) && !completed.has(idx);
+      });
+      const playableIdx = nextIdx !== undefined ? nextIdx : allModIndices[0];
+      const playableSubNum = allModIndices.indexOf(playableIdx) + 1;
+
+      let actionText = "Start Challenge";
+      if (isAllDone) {
+        actionText = "Replay Challenges";
+      } else if (completedCount > 0) {
+        actionText = `Resume Level ${playableSubNum > 0 ? playableSubNum : 1}`;
+      }
+
+      // Render the sub-levels as interactive rows inside the expandable drawer (starts at Level 1 for each card)
+      const subLevelsHtml = mod.levelIndices.map((lvlIdx, subIdx) => {
+        const lvl = LEVELS_DATA[lvlIdx];
+        if (!lvl) return "";
+        const isDone = completed.has(lvl.id) || completed.has(lvlIdx);
+        const subLevelNum = subIdx + 1;
+        const opsHtml = (lvl.keyOperations || []).map(op => `
+          <div class="module-op-row">
+            <span class="module-op-name">${op.name}</span>
+            <span class="module-op-complexity">${op.complexity}</span>
+          </div>
+        `).join("");
+
+        return `
+          <div class="module-sublevel-section ${isDone ? 'is-done' : ''}" onclick="event.stopPropagation(); app.openLevelProblem(${lvlIdx})" title="Play Level ${subLevelNum}: ${lvl.title}">
+            <div class="module-sublevel-header">
+              <div class="module-sublevel-meta">
+                <span class="module-level-tag ${isDone ? 'tag-done' : ''}">${isDone ? '✓ ' : ''}LEVEL ${subLevelNum}</span>
+                <h4 class="module-sublevel-name">${lvl.title}</h4>
+              </div>
+              <div class="module-sublevel-play-icon">
+                ${isDone 
+                  ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` 
+                  : `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>`
+                }
+              </div>
+            </div>
+            <div class="module-ops-list">
+              ${opsHtml}
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      // Capstone challenge section for Module 3 (Master Challenge & Labyrinth)
+      let capstoneHtml = "";
+      if (mod.finalChallengeIndex !== undefined) {
+        const capstoneLvl = LEVELS_DATA[mod.finalChallengeIndex];
+        if (capstoneLvl) {
+          const isCapstoneDone = completed.has(capstoneLvl.id) || completed.has(mod.finalChallengeIndex);
+          const capstoneSubNum = mod.levelIndices.length + 1;
+          const capOpsHtml = (capstoneLvl.keyOperations || []).map(op => `
+            <div class="module-op-row">
+              <span class="module-op-name">${op.name}</span>
+              <span class="module-op-complexity">${op.complexity}</span>
+            </div>
+          `).join("");
+
+          capstoneHtml = `
+            <div class="module-sublevel-section module-capstone-section ${isCapstoneDone ? 'is-done' : ''}" onclick="event.stopPropagation(); app.openLevelProblem(${mod.finalChallengeIndex})" title="Play Final Challenge: Level ${capstoneSubNum} - ${capstoneLvl.title}">
+              <div class="module-sublevel-header">
+                <div class="module-sublevel-meta">
+                  <span class="module-level-tag tag-capstone ${isCapstoneDone ? 'tag-done' : ''}">${isCapstoneDone ? '✓ ' : '★ '}FINAL CHALLENGE &bull; LEVEL ${capstoneSubNum}</span>
+                  <h4 class="module-sublevel-name">${capstoneLvl.title}</h4>
+                </div>
+                <div class="module-sublevel-play-icon">
+                  ${isCapstoneDone 
+                    ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>` 
+                    : `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>`
+                  }
+                </div>
+              </div>
+              <div class="module-ops-list">
+                ${capOpsHtml}
+              </div>
+            </div>
+          `;
+        }
+      }
+
       return `
-        <div class="topic-master-card ${isDone ? 'is-done' : ''}" onclick="app.openLevelProblem(${idx})">
-          <div class="tm-card-header">
-            <div class="tm-card-icon-box">${lvl.svgIcon || '⚡'}</div>
-            <span class="tm-card-concepts-badge ${isDone ? 'badge-done' : ''}">
-              ${isDone ? '✓ COMPLETED' : `LEVEL ${lvl.id}`}
+        <div class="module-master-card ${mod.themeClass} ${isAllDone ? 'is-all-done' : ''} ${isExpanded ? 'is-expanded' : ''}" 
+             id="${mod.id}" 
+             onclick="app.handleModuleCardClick(event, ${modIdx})"
+             title="${isExpanded ? 'Click to collapse module' : 'Click to view challenges in this module'}">
+          
+          <div class="module-card-header">
+            <div class="module-icon-box">${mod.iconSvg}</div>
+            <span class="module-badge-pill ${isAllDone ? 'badge-done' : ''}">
+              <span class="module-badge-dot"></span>
+              ${isAllDone ? '✓ ALL CLEARED' : `${completedCount}/${allModIndices.length} CLEARED`}
             </span>
           </div>
-          <h3 class="tm-card-title">${lvl.title}</h3>
-          <p class="tm-card-desc">${lvl.subtitle || ''}</p>
-          ${ops ? `<div class="tm-card-ops-row" style="display:flex; flex-wrap:wrap; gap:6px; margin: 10px 0 14px;">${ops}</div>` : ''}
-          <div class="tm-card-footer" style="margin-top: auto; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 0.78rem; font-weight: 700; color: var(--primary, #6366f1);">${isDone ? 'Replay Challenge' : 'Start Challenge'}</span>
-            <button class="tm-card-action-btn">
+
+          <h3 class="module-card-title">${mod.title}</h3>
+          <p class="module-card-desc">${mod.description}</p>
+
+          <div class="module-meta-row">
+            <span class="module-meta-chip difficulty-chip">● ${mod.difficulty}</span>
+            <span class="module-meta-chip count-chip">${allModIndices.length} Interactive Levels</span>
+          </div>
+
+          <div class="module-progress-wrapper">
+            <div class="module-progress-header">
+              <span>Progress</span>
+              <span class="module-progress-val">${percent}% (${completedCount}/${allModIndices.length})</span>
+            </div>
+            <div class="module-progress-track">
+              <div class="module-progress-fill" style="width: ${percent}%;"></div>
+            </div>
+          </div>
+
+          <div class="module-topics-row">
+            ${mod.topics.map(t => `<span class="module-topic-tag">${t}</span>`).join("")}
+          </div>
+
+          <div class="module-expand-trigger ${isExpanded ? 'active' : ''}" onclick="app.toggleModuleExpand(${modIdx}, event)">
+            <span class="module-expand-label">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
+              ${isExpanded ? 'Hide Level Breakdown' : `View Levels & Operations (${allModIndices.length})`}
+            </span>
+            <span class="module-expand-arrow ${isExpanded ? 'is-up' : ''}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+          </div>
+          <div class="module-click-hint">${isExpanded ? 'Click card or button to collapse' : 'Click card or button to expand level list'}</div>
+
+          <div class="module-levels-drawer">
+            <div class="module-drawer-divider">
+              <span>Interactive Challenges</span>
+              <span>${completedCount}/${allModIndices.length} Complete</span>
+            </div>
+            ${subLevelsHtml}
+            ${capstoneHtml}
+            <button type="button" class="module-collapse-btn" onclick="app.toggleModuleExpand(${modIdx}, event)">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+              Hide Levels
+            </button>
+          </div>
+
+          <div class="module-card-footer" onclick="event.stopPropagation(); app.startModule(${modIdx})" title="${actionText}">
+            <span class="module-footer-action-text">${actionText}</span>
+            <button class="tm-card-action-btn" aria-label="${actionText}">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </button>
           </div>

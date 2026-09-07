@@ -957,11 +957,17 @@
                 <div>
                   <span class="step-pill">INTERACTIVE CHALLENGES</span>
                   <h2>BFS Graph Traversal Labs &amp; Arenas</h2>
-                  <p>Master FIFO queue enqueue/dequeue cycles, visited set tracking, and spanning trees hands-on across 9 adventure levels.</p>
+                  <p>Master FIFO queue enqueue/dequeue cycles, visited set tracking, and spanning trees hands-on across 3 structured traversal modules.</p>
                 </div>
-                <button class="btn btn-outline" onclick="app.switchTab('theory')">
-                  &larr; Back to Theory
-                </button>
+                <div class="hub-header-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                  <button id="toggle-all-modules-btn" class="btn btn-outline" onclick="app.toggleAllModulesExpand()" style="font-size: 0.82rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;" title="Expand all 3 modules to view all levels">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                    <span>Expand All Modules</span>
+                  </button>
+                  <button class="btn btn-outline" onclick="app.switchTab('theory')">
+                    &larr; Back to Theory
+                  </button>
+                </div>
               </div>
               <div id="levels-grid-mount" class="levels-selection-grid"></div>
             </div>
