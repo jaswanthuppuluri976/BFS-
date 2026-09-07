@@ -960,10 +960,6 @@
                   <p>Master FIFO queue enqueue/dequeue cycles, visited set tracking, and spanning trees hands-on across 3 structured traversal modules.</p>
                 </div>
                 <div class="hub-header-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                  <button id="toggle-all-modules-btn" class="btn btn-outline" onclick="app.toggleAllModulesExpand()" style="font-size: 0.82rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;" title="Expand all 3 modules to view all levels">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                    <span>Expand All Modules</span>
-                  </button>
                   <button class="btn btn-outline" onclick="app.switchTab('theory')">
                     &larr; Back to Theory
                   </button>
@@ -972,14 +968,22 @@
               <div id="levels-grid-mount" class="levels-selection-grid"></div>
             </div>
 
+            <!-- Module Detail Screen (Displayed when user enters a module card) -->
+            <div id="module-levels-view" class="module-levels-view-container hidden">
+              <!-- Rendered dynamically by app.renderModuleDetailView(modIdx) -->
+            </div>
+
             <div id="active-problem-container" class="active-problem-container hidden">
               <!-- Immersive Single-Row Problem Header -->
               <div class="problem-top-nav-bar">
                 <!-- Left: Back + Level Badge + Title -->
                 <div class="problem-nav-left">
-                  <button class="prob-back-btn" onclick="app.closeActiveProblem()" title="Back to All Challenges">
+                  <button class="prob-back-btn" onclick="app.closeActiveProblem()" title="Back to Module Levels">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-                    All Levels
+                    <span id="prob-back-btn-text">Module Levels</span>
+                  </button>
+                  <button class="prob-back-btn" onclick="app.exitModuleToHub()" title="Back to All Modules" style="margin-left: 4px;">
+                    All Modules
                   </button>
                   <div class="prob-title-cluster">
                     <span id="active-problem-badge" class="prob-level-pill">LEVEL 1</span>
