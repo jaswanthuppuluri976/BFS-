@@ -396,8 +396,26 @@ class AppController {
     if (window.spanningTreeStudio && typeof window.spanningTreeStudio.pause === "function") {
       window.spanningTreeStudio.pause();
     }
-    if (window.game && window.game.guidedEngine && window.game.guidedEngine.isAutoPlaying) {
-      window.game.guidedEngine.pauseAutoPlay();
+    if (window.game && window.game.guidedEngine) {
+      if (window.game.guidedEngine.isAutoPlaying) {
+        window.game.guidedEngine.pauseAutoPlay();
+      }
+      window.game.guidedEngine.isActive = false;
+      if (typeof window.game.updateGuidedSolveUI === "function") {
+        window.game.updateGuidedSolveUI();
+      }
+    }
+
+    // When navigating away from the game section, reset game sub-views to the cards hub
+    if (tabName !== "game") {
+      this.activeLevelIndex = null;
+      this.currentModuleIndex = null;
+      const hub = document.getElementById("game-levels-hub");
+      const modView = document.getElementById("module-levels-view");
+      const work = document.getElementById("active-problem-container");
+      if (modView) { modView.classList.add("hidden"); modView.style.display = "none"; }
+      if (work) { work.classList.add("hidden"); work.style.display = "none"; }
+      if (hub) { hub.classList.remove("hidden"); hub.style.display = "block"; }
     }
 
     // Update Sidebar Navigation Buttons
@@ -447,27 +465,19 @@ class AppController {
     } else if (tabName === "visualize") {
       this.startVideoPlayback();
     } else if (tabName === "game") {
+      // Always reset to the modules hub so user sees module cards at first
+      this.activeLevelIndex = null;
+      this.currentModuleIndex = null;
       const hub = document.getElementById("game-levels-hub");
       const modView = document.getElementById("module-levels-view");
       const work = document.getElementById("active-problem-container");
-      if (this.activeLevelIndex !== null) {
-        if (hub) { hub.classList.add("hidden"); hub.style.display = "none"; }
-        if (modView) { modView.classList.add("hidden"); modView.style.display = "none"; }
-        if (work) { work.classList.remove("hidden"); work.style.display = "block"; }
-      } else if (this.currentModuleIndex !== null) {
-        if (hub) { hub.classList.add("hidden"); hub.style.display = "none"; }
-        if (work) { work.classList.add("hidden"); work.style.display = "none"; }
-        if (modView) {
-          modView.classList.remove("hidden");
-          modView.style.display = "block";
-          this.renderModuleDetailView(this.currentModuleIndex);
-        }
-      } else {
-        if (modView) { modView.classList.add("hidden"); modView.style.display = "none"; }
-        if (work) { work.classList.add("hidden"); work.style.display = "none"; }
-        if (hub) { hub.classList.remove("hidden"); hub.style.display = "block"; }
-        this.renderLevelsGrid();
+      if (modView) { modView.classList.add("hidden"); modView.style.display = "none"; }
+      if (work) { work.classList.add("hidden"); work.style.display = "none"; }
+      if (hub) {
+        hub.classList.remove("hidden");
+        hub.style.display = "block";
       }
+      this.renderLevelsGrid();
     } else if (tabName === "progress") {
       this.updateProgressStats();
       this.renderProgressModules();
@@ -755,9 +765,8 @@ class AppController {
 
   startPracticeLevel(levelNum) {
     this.switchTab("game");
-    if (window.game && typeof window.game.loadLevel === "function") {
-      window.game.loadLevel(levelNum);
-    }
+    const idx = Math.max(0, (parseInt(levelNum, 10) || 1) - 1);
+    this.openLevelProblem(idx);
     this.playSound("pop");
   }
 
@@ -1895,17 +1904,12 @@ class AppController {
   syncPlayButtonUI() {
     const icon = document.getElementById("v-play-icon");
     const text = document.getElementById("v-play-text");
-    const overlay = document.getElementById("video-center-play-overlay");
 
     if (icon && text) {
       icon.innerHTML = this.isVideoPlaying
         ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`
         : `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
       text.textContent = this.isVideoPlaying ? "PAUSE" : "PLAY";
-    }
-
-    if (overlay) {
-      overlay.classList.toggle("is-hidden", this.isVideoPlaying);
     }
   }
 
@@ -2385,7 +2389,7 @@ class AppController {
       } else if (idx <= 4) {
         subLevel = idx - 2 + 1;
       } else {
-        subLevel = idx - 5 + 1;
+        subLevel = idx - 6 + 1;
       }
       if (badge) badge.textContent = `LEVEL ${subLevel}`;
       if (name) name.textContent = lvl.title;
@@ -2411,7 +2415,11 @@ class AppController {
     const work = document.getElementById("active-problem-container");
     if (modView) { modView.classList.add("hidden"); modView.style.display = "none"; }
     if (work) { work.classList.add("hidden"); work.style.display = "none"; }
-    if (hub) { hub.classList.remove("hidden"); hub.style.display = "block"; }
+    if (hub) {
+      hub.classList.remove("hidden");
+      hub.style.display = "block";
+    }
+    this.renderLevelsGrid();
   }
 
   closeActiveProblem() {
@@ -2504,9 +2512,9 @@ class AppController {
         description: "Complex frontiers including disconnected islands, anti-DFS invariants, and peak queue scales.",
         difficulty: "Mastery & Capstone",
         topics: ["Disconnected Islands", "BFS Invariant", "Final Labyrinth"],
-        iconGradient: "linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%)",
+        iconGradient: "linear-gradient(135deg, #4f46e5 0%, #818cf8 100%)",
         iconSvg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
-        levelIndices: [5, 6, 7], // Level 1 (Disconnected), Level 2 (Misleading Paths), Level 3 (Large Network)
+        levelIndices: [6, 7], // Level 1 (Misleading Paths), Level 2 (Large Network)
         finalChallengeIndex: 8 // Level 4 (Capstone Final Challenge)
       }
     ];
@@ -2566,7 +2574,6 @@ class AppController {
         return lvl && (completed.has(lvl.id) || completed.has(idx));
       }).length;
       const isAllDone = completedCount === allModIndices.length;
-      const percent = Math.round((completedCount / allModIndices.length) * 100);
 
       const nextIdx = allModIndices.find(idx => {
         const lvl = LEVELS_DATA[idx];
@@ -2602,16 +2609,6 @@ class AppController {
           <div class="module-meta-row">
             <span class="module-meta-chip difficulty-chip">● ${mod.difficulty}</span>
             <span class="module-meta-chip count-chip">${allModIndices.length} Interactive Levels</span>
-          </div>
-
-          <div class="module-progress-wrapper">
-            <div class="module-progress-header">
-              <span>Progress</span>
-              <span class="module-progress-val">${percent}% (${completedCount}/${allModIndices.length})</span>
-            </div>
-            <div class="module-progress-track">
-              <div class="module-progress-fill" style="width: ${percent}%;"></div>
-            </div>
           </div>
 
           <div class="module-topics-row">

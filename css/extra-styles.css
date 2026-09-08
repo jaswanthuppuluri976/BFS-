@@ -678,10 +678,10 @@ body.dark-theme .reset-btn-exit:hover {
 }
 
 .module-master-card.theme-advanced {
-  --card-accent: #7c3aed;
-  --card-accent-rgb: 124, 58, 237;
-  --card-accent-soft: rgba(124, 58, 237, 0.08);
-  --card-accent-border: #c4b5fd;
+  --card-accent: #5b5bd6;
+  --card-accent-rgb: 91, 91, 214;
+  --card-accent-soft: rgba(91, 91, 214, 0.08);
+  --card-accent-border: #a5b4fc;
 }
 
 /* Ambient dotted pattern in top right corner */
@@ -755,9 +755,9 @@ body.dark-theme .reset-btn-exit:hover {
 .module-master-card.theme-advanced .module-icon-box,
 .module-levels-view-container.theme-advanced .module-icon-box,
 .module-view-hero-card.theme-advanced .module-icon-box {
-  background: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%) !important;
+  background: linear-gradient(135deg, #4f46e5 0%, #818cf8 100%) !important;
   color: #ffffff !important;
-  box-shadow: 0 6px 16px -2px rgba(139, 92, 246, 0.4) !important;
+  box-shadow: 0 6px 16px -2px rgba(91, 91, 214, 0.45) !important;
 }
 
 .module-icon-box svg {
