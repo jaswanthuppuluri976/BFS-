@@ -14,36 +14,42 @@ class AppController {
     this.soundEnabled = localStorage.getItem("algolearn_sound") !== "false";
     this.activeCodeLanguage = "c"; // Default active programming language tab
 
-    // Video Player State & Dedicated Sources (Added Videos in videos/ directory)
-    this.video1File = "WhatsApp Video 2026-09-07 at 15.21.29.mp4";
-    this.video2File = "WhatsApp Video 2026-09-07 at 15.50.48.mp4";
+    // Video Player State & Dedicated Sources
+    this.video1File = "video1.mp4";
+    this.video2File = "video2.mp4";
 
-    this.video1Src = `videos/${this.video1File}`;
-    this.video2Src = `videos/${this.video2File}`;
+    this.video1Src = "videos/video1.mp4";
+    this.video2Src = "videos/video2.mp4";
 
     this.videoLessons = {
       intro: {
         id: "video1",
         title: "NOW PLAYING: BFS VISUALIZATION & TRAVERSAL",
-        fileTag: this.video1File,
-        src: this.video1Src,
+        fileTag: "video1.mp4",
+        src: "videos/video1.mp4",
         fallbacks: [
-          this.video1Src,
           "videos/video1.mp4",
-          `/${this.video1Src}`,
-          "/videos/video1.mp4"
+          "video1 (2).mp4",
+          "video1.mp4",
+          "/videos/video1.mp4",
+          "/video1 (2).mp4",
+          "/video1.mp4",
+          "videos/WhatsApp Video 2026-09-07 at 15.21.29.mp4"
         ]
       },
       shortest_path: {
         id: "video2",
         title: "NOW PLAYING: BFS ALGORITHM & IMPLEMENTATION",
-        fileTag: this.video2File,
-        src: this.video2Src,
+        fileTag: "video2.mp4",
+        src: "videos/video2.mp4",
         fallbacks: [
-          this.video2Src,
           "videos/video2.mp4",
-          `/${this.video2Src}`,
-          "/videos/video2.mp4"
+          "video2 (2).mp4",
+          "video2.mp4",
+          "/videos/video2.mp4",
+          "/video2 (2).mp4",
+          "/video2.mp4",
+          "videos/WhatsApp Video 2026-09-07 at 15.50.48.mp4"
         ]
       }
     };
