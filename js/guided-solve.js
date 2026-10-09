@@ -14,6 +14,12 @@ class GuidedSolveEngine {
 
   toggle(enable) {
     this.isActive = typeof enable === "boolean" ? enable : !this.isActive;
+    if (this.isActive) {
+      const lvlNum = this.game ? (this.game.currentLevelIndex !== undefined ? this.game.currentLevelIndex + 1 : 1) : 1;
+      if (typeof window.app !== "undefined" && typeof window.app.recordGuidedPenalty === "function") {
+        window.app.recordGuidedPenalty(lvlNum);
+      }
+    }
     if (!this.isActive && this.isAutoPlaying) {
       this.pauseAutoPlay();
     }

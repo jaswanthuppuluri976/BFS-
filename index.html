@@ -7,8 +7,8 @@
   <meta name="description" content="Interactive Breadth First Search (BFS) Traversal Engine and DSA learning platform with visualizations, games, and quizzes.">
   <meta property="og:title" content="AlgoLearn - BFS Traversal Engine">
   <meta property="og:description" content="Interactive Breadth First Search (BFS) Traversal Engine and DSA learning platform with visualizations, games, and quizzes.">
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/extra-styles.css">
+  <link rel="stylesheet" href="css/styles.css?v=20261009-3">
+  <link rel="stylesheet" href="css/extra-styles.css?v=20261009-3">
 </head>
 <body class="sidebar-expanded">
 
@@ -150,13 +150,7 @@
             </span>
           </button>
 
-          <!-- Reset / Reload -->
-          <button id="reset-state-btn" class="icon-only-btn" onclick="app.openResetModal()" title="Reset Progress">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="23 4 23 10 17 10"></polyline>
-              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-            </svg>
-          </button>
+
         </div>
 
       </header>
@@ -694,6 +688,7 @@
                   <div class="v-card-tag-row">
                     <span class="lesson-tag">Video 1</span>
                     <span class="v-file-badge">video final 1.mp4</span>
+                    <span class="video-points-badge">+8 pts</span>
                   </div>
                   <h3 class="v-card-title">Video 1: BFS Visualization &amp; Traversal</h3>
                   <p class="v-card-desc">Watch BFS explore graph nodes level-by-level using an animated concentric wave and FIFO queue.</p>
@@ -709,6 +704,8 @@
                     id="bfs-video-1"
                     class="bfs-embedded-player"
                     controls
+                    controlslist="nodownload noplaybackrate"
+                    disablepictureinpicture
                     preload="metadata"
                     playsinline
                   >
@@ -725,6 +722,7 @@
                   <div class="v-card-tag-row">
                     <span class="lesson-tag">Video 2</span>
                     <span class="v-file-badge">video final 2.mp4</span>
+                    <span class="video-points-badge">+8 pts</span>
                   </div>
                   <h3 class="v-card-title">Video 2: BFS Algorithm &amp; Implementation</h3>
                   <p class="v-card-desc">Understand discovery edges, cross edge handling, visited set protection, and optimal path backtracking.</p>
@@ -740,6 +738,8 @@
                     id="bfs-video-2"
                     class="bfs-embedded-player"
                     controls
+                    controlslist="nodownload noplaybackrate"
+                    disablepictureinpicture
                     preload="metadata"
                     playsinline
                   >
@@ -761,102 +761,205 @@
         <section id="view-progress" class="tab-view-container hidden">
           <div class="progress-view-wrapper">
             
-            <!-- Progress Top Header -->
-            <div class="prog-hero-header">
-              <div class="prog-meta-row">
-                <span class="prog-tracker-tag">BFS CURRICULUM PROGRESS TRACKER</span>
-                <span class="prog-sync-time">Last synced: Today</span>
-                <button class="prog-reset-link-btn" onclick="app.openResetModal()">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-                  Reset Progress
-                </button>
-              </div>
-              <h1 class="prog-main-title">Learning Progress &amp; BFS Mastery</h1>
-              <p class="prog-main-desc">Track your journey through graph representations, FIFO queue mechanics, visited sets, spanning trees, and lab arenas.</p>
-            </div>
-
-            <!-- Top 3 Stat Cards Row -->
-            <div class="prog-stats-triplet-grid">
-              
-              <!-- Stat Card 1: Overall Completion -->
-              <div class="prog-stat-card">
-                <span class="stat-card-title">OVERALL COMPLETION</span>
-                <div class="stat-card-big-val" id="prog-overall-pct">0%</div>
-                <span class="stat-card-sub" id="prog-overall-count">(0 of 20 Activities)</span>
-                
-                <div class="prog-bar-container">
-                  <div class="prog-bar-fill" id="prog-overall-bar" style="width: 0%;"></div>
-                </div>
-                <div class="prog-bar-labels">
-                  <span>0% Beginner</span>
-                  <span>100% Master</span>
-                </div>
-              </div>
-
-              <!-- Stat Card 2: Performance Stats -->
-              <div class="prog-stat-card">
-                <span class="stat-card-title">PERFORMANCE STATS</span>
-                
-                <div class="perf-stats-row">
-                  <div class="perf-stat-col">
-                    <span class="perf-num gold" id="perf-mastered-count">0</span>
-                    <span class="perf-lbl">MASTERED</span>
+            <!-- PANEL A: BFS Learning Progress -->
+            <div class="prog-panel-card prog-panel-a">
+              <div class="prog-panel-top-row">
+                <div class="prog-panel-title-group">
+                  <div class="prog-glow-icon-box blue-purple">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                      <polyline points="17 6 23 6 23 12"></polyline>
+                    </svg>
                   </div>
-                  <div class="perf-stat-col">
-                    <span class="perf-num" id="perf-activities-count">0 / 20</span>
-                    <span class="perf-lbl">ACTIVITIES</span>
-                  </div>
-                  <div class="perf-stat-col">
-                    <span class="perf-num purple" id="perf-levels-count">0 / 9</span>
-                    <span class="perf-lbl">LEVELS WON</span>
-                  </div>
-                </div>
-
-                <div class="perf-challenges-badge">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block;vertical-align:middle;margin-right:5px;"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
-                  <span>Master Challenges: <strong id="perf-challenges-txt">0 / 4 Challenges</strong></span>
-                </div>
-              </div>
-
-              <!-- Stat Card 3: Recommended Next Step -->
-              <div class="prog-stat-card">
-                <span class="stat-card-title">RECOMMENDED NEXT STEP</span>
-                <h4 class="next-step-title" id="next-step-title">GRAPH FOUNDATIONS &amp; BFS</h4>
-                <p class="next-step-desc" id="next-step-desc">Study the 12 curriculum chapters and practice level-by-level queue expansion...</p>
-                <button class="btn-continue-learning" onclick="app.continueNextRecommended()">
-                  CONTINUE LEARNING &rarr;
-                </button>
-              </div>
-
-            </div>
-
-            <!-- Video Lessons Tracker Card -->
-            <div class="video-tracker-card">
-              <div class="vt-card-header">
-                <div class="vt-title-left">
-                  <span class="vt-icon">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-                  </span>
                   <div>
-                    <span class="vt-heading">VIDEO LESSONS</span>
-                    <span class="vt-sub" id="vt-completed-txt">2 VIDEOS (0 / 2 Completed)</span>
+                    <h1 class="prog-panel-heading">BFS <span class="prog-gradient-text">Learning Progress</span></h1>
+                    <p class="prog-panel-subtext">Track your journey through BFS concepts, algorithms, problem solving, complexity, and practical applications.</p>
                   </div>
                 </div>
-                <button class="vt-link-btn" onclick="app.switchTab('visualize')">
-                  Open Video Section &rarr;
-                </button>
               </div>
 
-              <div class="vt-lessons-list">
-                <div class="vt-lesson-item" onclick="app.switchTab('visualize'); app.selectVideoLesson('intro', true)">
-                  <span class="vt-bullet-dot" id="vt-dot-intro">&bull;</span>
-                  <span class="vt-lesson-name">Video 1: BFS Visualization &amp; Traversal</span>
-                  <span class="vt-status-pill" id="vt-pill-intro">Not completed</span>
+              <div class="prog-panel-divider"></div>
+
+              <div class="prog-panel-completion-section">
+                <div class="prog-completion-header-row">
+                  <div class="prog-completion-label-wrap">
+                    <span class="prog-completion-label">OVERALL COMPLETION</span>
+                    <span class="prog-activity-badge" id="prog-badge-count">0 of 32 Activities</span>
+                  </div>
                 </div>
-                <div class="vt-lesson-item" onclick="app.switchTab('visualize'); app.selectVideoLesson('shortest_path', true)">
-                  <span class="vt-bullet-dot" id="vt-dot-collision">&bull;</span>
-                  <span class="vt-lesson-name">Video 2: BFS Algorithm &amp; Implementation</span>
-                  <span class="vt-status-pill" id="vt-pill-collision">Not completed</span>
+                <p class="prog-completion-hint">Complete all learning activities to master Breadth First Search and earn 100 points.</p>
+
+                <div class="prog-overall-bar-row">
+                  <div class="prog-track-main">
+                    <div class="prog-fill-main" id="prog-overall-bar" style="width: 0%;"></div>
+                  </div>
+                  <div class="prog-big-percentage" id="prog-overall-pct">0%</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- PANEL B: BFS Topic Score -->
+            <div class="prog-panel-card prog-panel-b">
+              <div class="prog-panel-top-row">
+                <div class="prog-panel-title-group">
+                  <div class="prog-glow-icon-box blue-purple">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                      <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                      <path d="M4 22h16"></path>
+                      <path d="M10 14.66V17c0 .55-.45 1-1 1H7v4h10v-4h-2c-.55 0-1-.45-1-1v-2.34"></path>
+                      <path d="M6 4h12a2 2 0 0 1 2 2v3a6 6 0 0 1-6 6h0a6 6 0 0 1-6-6V6a2 2 0 0 1 2-2Z"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 class="prog-panel-heading">BFS Topic Score</h2>
+                    <p class="prog-panel-subtext">Earned points are calculated from completed, persisted activities.</p>
+                  </div>
+                </div>
+
+                <div class="prog-total-score-badge">
+                  <div class="prog-star-box">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#fbbf24">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                  </div>
+                  <div class="prog-score-info">
+                    <div class="prog-total-score-val" id="prog-total-score-val">0 / 100</div>
+                    <div class="prog-total-score-label">TOTAL POINTS</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 4 Section Cards Grid -->
+              <div class="prog-sections-grid">
+                
+                <!-- Card 1: Learn -->
+                <div class="prog-subcard" onclick="app.switchTab('theory')">
+                  <div class="prog-subcard-header">
+                    <div class="prog-subcard-icon tint-blue">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                      </svg>
+                    </div>
+                    <div class="prog-subcard-title-wrap">
+                      <span class="prog-subcard-title">Learn</span>
+                      <span class="prog-subcard-score" id="prog-score-learn">0 / 12</span>
+                    </div>
+                  </div>
+                  <div class="prog-subcard-bar-row">
+                    <div class="prog-subtrack">
+                      <div class="prog-subfill gradient-blue" id="prog-fill-learn" style="width: 0%;"></div>
+                    </div>
+                    <span class="prog-subcard-pct" id="prog-pct-learn">0%</span>
+                  </div>
+                  <div class="prog-subcard-footer">
+                    <span class="prog-subcard-desc">Curriculum theory chapters</span>
+                    <span class="prog-subcard-meta" id="prog-sub-learn">0 / 12 topics completed</span>
+                  </div>
+                </div>
+
+                <!-- Card 2: Visualize -->
+                <div class="prog-subcard" onclick="app.switchTab('visualize')">
+                  <div class="prog-subcard-header">
+                    <div class="prog-subcard-icon tint-purple">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    </div>
+                    <div class="prog-subcard-title-wrap">
+                      <span class="prog-subcard-title">Visualize</span>
+                      <span class="prog-subcard-score" id="prog-score-visual">0 / 16</span>
+                    </div>
+                  </div>
+                  <div class="prog-subcard-bar-row">
+                    <div class="prog-subtrack">
+                      <div class="prog-subfill gradient-purple" id="prog-fill-visual" style="width: 0%;"></div>
+                    </div>
+                    <span class="prog-subcard-pct" id="prog-pct-visual">0%</span>
+                  </div>
+                  <div class="prog-subcard-footer">
+                    <span class="prog-subcard-desc">Complete walkthrough videos</span>
+                    <span class="prog-subcard-meta" id="prog-sub-visual">0 / 2 videos completed • 8 pts each</span>
+                  </div>
+                </div>
+
+                <!-- Card 3: Game -->
+                <div class="prog-subcard" onclick="app.switchTab('game')">
+                  <div class="prog-subcard-header">
+                    <div class="prog-subcard-icon tint-indigo">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="6" y1="12" x2="10" y2="12"></line>
+                        <line x1="8" y1="10" x2="8" y2="14"></line>
+                        <line x1="15" y1="13" x2="15.01" y2="13"></line>
+                        <line x1="18" y1="11" x2="18.01" y2="11"></line>
+                        <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                      </svg>
+                    </div>
+                    <div class="prog-subcard-title-wrap">
+                      <span class="prog-subcard-title">Game</span>
+                      <span class="prog-subcard-score" id="prog-score-game">0 / 64</span>
+                    </div>
+                  </div>
+                  <div class="prog-subcard-bar-row">
+                    <div class="prog-subtrack">
+                      <div class="prog-subfill gradient-indigo" id="prog-fill-game" style="width: 0%;"></div>
+                    </div>
+                    <span class="prog-subcard-pct" id="prog-pct-game">0%</span>
+                  </div>
+                  <div class="prog-subcard-footer">
+                    <span class="prog-subcard-desc">Complete 8 game challenges</span>
+                    <span class="prog-subcard-meta" id="prog-sub-game">0 / 8 levels cleared • 8 pts each</span>
+                  </div>
+                </div>
+
+                <!-- Card 4: Quiz -->
+                <div class="prog-subcard" onclick="app.switchTab('quiz')">
+                  <div class="prog-subcard-header">
+                    <div class="prog-subcard-icon tint-cyan">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                      </svg>
+                    </div>
+                    <div class="prog-subcard-title-wrap">
+                      <span class="prog-subcard-title">Quiz</span>
+                      <span class="prog-subcard-score" id="prog-score-quiz">0 / 20</span>
+                    </div>
+                  </div>
+                  <div class="prog-subcard-bar-row">
+                    <div class="prog-subtrack">
+                      <div class="prog-subfill gradient-cyan" id="prog-fill-quiz" style="width: 0%;"></div>
+                    </div>
+                    <span class="prog-subcard-pct" id="prog-pct-quiz">0%</span>
+                  </div>
+                  <div class="prog-subcard-footer">
+                    <span class="prog-subcard-desc">Knowledge assessment</span>
+                    <span class="prog-subcard-meta" id="prog-sub-quiz">0 correct, 0 incorrect, 10 unanswered</span>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Score Breakdown & Negative Marking Bar -->
+              <div class="prog-breakdown-bar">
+                <div class="prog-bb-item">
+                  <span class="prog-bb-label">Earned Positive Marks:</span>
+                  <span class="prog-bb-badge positive" id="prog-bb-pos">+0 pts</span>
+                </div>
+                <div class="prog-bb-item">
+                  <span class="prog-bb-label">Game Penalties:</span>
+                  <span class="prog-bb-badge penalty" id="prog-bb-game-pen">-0 pts</span>
+                </div>
+                <div class="prog-bb-item">
+                  <span class="prog-bb-label">Quiz Penalties:</span>
+                  <span class="prog-bb-badge penalty" id="prog-bb-quiz-pen">-0 pts</span>
+                </div>
+                <div class="prog-bb-item">
+                  <span class="prog-bb-label">Final Score:</span>
+                  <span class="prog-bb-badge final" id="prog-bb-final">0 / 100</span>
                 </div>
               </div>
             </div>
@@ -927,21 +1030,18 @@
 
                 <!-- Right: Action Buttons with SVG icons -->
                 <div class="prob-action-row">
-                  <button id="btn-problem-hint" class="prob-action-btn" onclick="if(window.game) window.game.provideNextHint()" title="Get Progressive Hint">
+                  <span id="active-problem-pts" class="active-problem-pts-pill">+8 pts</span>
+                  <button id="btn-problem-hint" class="prob-action-btn" onclick="if(window.game) window.game.provideNextHint()" title="Get Progressive Hint (-2 pts)">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                    Hint
+                    Hint (-2 pts)
                   </button>
-                  <button id="guided-mode-toggle-btn" class="prob-action-btn guided-solve-pill-btn" onclick="if(window.game&&window.game.guidedEngine){window.game.guidedEngine.toggle();window.game.updateGuidedSolveUI();}" title="Guided Solve">
+                  <button id="guided-mode-toggle-btn" class="prob-action-btn guided-solve-pill-btn" onclick="if(window.game&&window.game.guidedEngine){window.game.guidedEngine.toggle();window.game.updateGuidedSolveUI();}" title="Guided Solve (-3 pts)">
                     <svg class="guided-btn-bulb-icon" width="14" height="14" viewBox="0 0 24 24" fill="none">
                       <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7z" fill="#ea580c"/>
                       <line x1="9" y1="20" x2="15" y2="20" stroke="#ea580c" stroke-width="2" stroke-linecap="round"/>
                       <line x1="10" y1="22.5" x2="14" y2="22.5" stroke="#ea580c" stroke-width="2" stroke-linecap="round"/>
                     </svg>
-                    <span>GUIDED SOLVE</span>
-                  </button>
-                  <button id="restart-level-btn" class="prob-action-btn" title="Reset Challenge">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-                    Reset
+                    <span>GUIDED SOLVE (-3 pts)</span>
                   </button>
                 </div>
               </div>
@@ -1184,42 +1284,7 @@
     </div>
   </div>
 
-  <!-- 5. Reset Progress Confirmation Alert Modal (matching Image 2) -->
-  <div id="reset-progress-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="reset-modal-title">
-    <div class="reset-alert-card">
-      <!-- Warning Badge Icon -->
-      <div class="reset-alert-icon-box">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e1144b" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-          <line x1="12" y1="9" x2="12" y2="13"></line>
-          <line x1="12" y1="17" x2="12.01" y2="17"></line>
-        </svg>
-      </div>
 
-      <!-- Title -->
-      <h3 id="reset-modal-title" class="reset-alert-title">RESET PROGRESS?</h3>
-
-      <!-- Description text -->
-      <p class="reset-alert-desc">
-        Are you sure you want to reset your learning progress?<br>
-        All completed theory chapters, watched videos, completed game levels, quiz progress, and mastery progress will be reset.
-      </p>
-
-      <!-- Action buttons -->
-      <div class="reset-alert-actions">
-        <button id="cancel-reset-btn" class="reset-btn-exit" onclick="if(window.app) app.closeResetModal()">
-          EXIT
-        </button>
-        <button id="confirm-reset-btn" class="reset-btn-confirm" onclick="if(window.app) app.confirmResetProgress()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="23 4 23 10 17 10"></polyline>
-            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-          </svg>
-          RESET
-        </button>
-      </div>
-    </div>
-  </div>
 
   <!-- Toast Notification Container -->
   <div id="toast-container"></div>
@@ -1228,7 +1293,7 @@
   <script src="js/audio.js"></script>
   <script src="js/theory-data.js"></script>
   <script src="js/quiz-data.js"></script>
-  <script src="js/quiz-engine.js"></script>
+  <script src="js/quiz-engine.js?v=20261009-3"></script>
   <script src="js/levels-data.js"></script>
   <script src="js/graph-engine.js"></script>
   <script src="js/drag-drop.js"></script>
@@ -1239,7 +1304,7 @@
   <script src="js/applications-video-engine.js"></script>
   <script src="js/spanning-tree-studio.js"></script>
   <script src="js/ai-assistant.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/app.js?v=20261009-3"></script>
 
 </body>
 </html>

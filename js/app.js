@@ -4,6 +4,194 @@
  * Presentation Reference Layouts: Sidebar Drawer, Overview, Learn (12 Chapters), Visualize (Cinema Studio), Progress (Modules FN-01 to FN-10)
  */
 
+const BFS_SCORING = {
+  total: 100,
+
+  learn: {
+    total: 0,
+    topicCount: 12
+  },
+
+  visualisation: {
+    total: 16,
+    marksPerVideo: 8,
+    videoCount: 2
+  },
+
+  game: {
+    total: 64,
+    marksPerGame: 8,
+    gameCount: 8,
+    levels: {
+      treeTraversal: [8, 8],
+      graphTraversal: [8, 8, 8],
+      advancedGraphChallenges: [8, 8, 8]
+    },
+    penalties: {
+      hint: 2,
+      guidedSolve: 3
+    }
+  },
+
+  quiz: {
+    totalPositiveMarks: 20,
+    marksPerCorrectAnswer: 2,
+    penaltyPerIncorrectAnswer: 1,
+    questionCount: 10
+  }
+};
+window.BFS_SCORING = BFS_SCORING;
+
+const LEVEL_MARKS = {
+  1: 8, // Level 1 (8 pts)
+  2: 8, // Level 2 (8 pts)
+  3: 8, // Level 3 (8 pts)
+  4: 8, // Level 4 (8 pts)
+  5: 8, // Level 5 (8 pts)
+  6: 8, // Level 6 (8 pts)
+  7: 8, // Level 7 (8 pts)
+  8: 8  // Level 8 (8 pts)
+};
+window.LEVEL_MARKS = LEVEL_MARKS;
+
+function getCanonicalLevelSlot(lvl) {
+  const n = parseInt(lvl, 10);
+  if (n === 1) return 1;
+  if (n === 2) return 2;
+  if (n === 3) return 3;
+  if (n === 4) return 4;
+  if (n === 5) return 5;
+  if (n === 6 || n === 7) return 6; // Disconnected (id 6) / Misleading (id 7) -> Advanced Level 1 (6 marks)
+  if (n === 8) return 7;            // Large Network (id 8) -> Advanced Level 2 (7 marks)
+  if (n === 9) return 8;            // Master Challenge (id 9) -> Advanced Level 3 (7 marks)
+  return Math.min(8, Math.max(1, n || 1));
+}
+window.getCanonicalLevelSlot = getCanonicalLevelSlot;
+
+const LEARN_CHECKPOINTS = {
+  "graph-foundations": {
+    question: "In an Adjacency List representation of graph G = (V, E), what is the time complexity to retrieve all direct neighbors of vertex V?",
+    options: [
+      { id: "A", text: "O(deg(V)) proportional to the degree of V", correct: true },
+      { id: "B", text: "O(V²) scan across all vertices", correct: false },
+      { id: "C", text: "O(1) immediate constant lookup", correct: false },
+      { id: "D", text: "O(E²) nested iteration", correct: false }
+    ],
+    explanation: "An adjacency list stores only actual adjacent neighbors for vertex V, taking time proportional to deg(V)."
+  },
+  "what-is-bfs": {
+    question: "In what topological pattern does Breadth First Search discover vertices starting from the source?",
+    options: [
+      { id: "A", text: "Concentric wave rings by shortest hop distance (level-by-level)", correct: true },
+      { id: "B", text: "Deepest unvisited path first until a dead-end", correct: false },
+      { id: "C", text: "Lexicographical alphabetical label order", correct: false },
+      { id: "D", text: "Randomized neighbor selection", correct: false }
+    ],
+    explanation: "BFS explores all vertices at distance 1 before any vertex at distance 2, forming expanding concentric wave fronts."
+  },
+  "fifo-queue-engine": {
+    question: "Which data structure is required by standard BFS to maintain strict level-by-level discovery order?",
+    options: [
+      { id: "A", text: "FIFO Queue (First-In, First-Out)", correct: true },
+      { id: "B", text: "LIFO Stack (Last-In, First-Out)", correct: false },
+      { id: "C", text: "Priority Queue without edge weights", correct: false },
+      { id: "D", text: "Binary Search Tree", correct: false }
+    ],
+    explanation: "FIFO order guarantees that nodes discovered earlier are dequeued and expanded before nodes discovered later."
+  },
+  "level-by-level": {
+    question: "If vertex V is discovered at distance level d+1, what is the distance of the parent node that discovered it?",
+    options: [
+      { id: "A", text: "Distance level d", correct: true },
+      { id: "B", text: "Distance level 0", correct: false },
+      { id: "C", text: "Distance level d+2", correct: false },
+      { id: "D", text: "Arbitrary distance level", correct: false }
+    ],
+    explanation: "In an unweighted graph, each step across a discovery edge increases the shortest path hop distance by exactly 1."
+  },
+  "visited-tracking": {
+    question: "What failure occurs if BFS runs on an undirected or cyclic graph without maintaining a visited set?",
+    options: [
+      { id: "A", text: "Infinite loop caused by cyclic nodes continuously re-enqueuing each other", correct: true },
+      { id: "B", text: "Stack underflow exception", correct: false },
+      { id: "C", text: "Graph edges are permanently deleted", correct: false },
+      { id: "D", text: "Queue empties prematurely", correct: false }
+    ],
+    explanation: "Without a visited set, adjacent nodes in a cycle re-enqueue each other indefinitely, causing an infinite loop."
+  },
+  "edge-classification": {
+    question: "During BFS, when an edge leads to an already visited vertex at the same or adjacent level, what is this edge called?",
+    options: [
+      { id: "A", text: "Cross Edge (lateral link)", correct: true },
+      { id: "B", text: "Discovery / Tree Edge", correct: false },
+      { id: "C", text: "Back Edge in DFS", correct: false },
+      { id: "D", text: "Forward Edge", correct: false }
+    ],
+    explanation: "Cross edges connect vertices that are already visited and do not form new branches in the BFS spanning tree."
+  },
+  "spanning-tree": {
+    question: "How many discovery tree edges does a BFS Spanning Tree contain for a connected graph with |V| vertices?",
+    options: [
+      { id: "A", text: "|V| - 1 edges", correct: true },
+      { id: "B", text: "|V| edges", correct: false },
+      { id: "C", text: "|E| edges", correct: false },
+      { id: "D", text: "|V| + 1 edges", correct: false }
+    ],
+    explanation: "A spanning tree spanning |V| vertices is minimally connected and acyclic, always containing exactly |V| - 1 edges."
+  },
+  "shortest-path": {
+    question: "Why does BFS guarantee the shortest path between start node S and target node T in unweighted graphs?",
+    options: [
+      { id: "A", text: "It processes nodes in non-decreasing order of edge distance from S", correct: true },
+      { id: "B", text: "It relies on edge weight relaxation like Bellman-Ford", correct: false },
+      { id: "C", text: "It greedily visits the highest-degree neighbor", correct: false },
+      { id: "D", text: "It traverses the longest paths first and backtracks", correct: false }
+    ],
+    explanation: "Because BFS visits nodes in non-decreasing order of hop distance, the first time T is reached is guaranteed to be via a minimum-edge path."
+  },
+  "connected-components": {
+    question: "To identify all disconnected components in an undirected graph, how should BFS be executed?",
+    options: [
+      { id: "A", text: "Iterate over all vertices, restarting BFS from any vertex not yet visited", correct: true },
+      { id: "B", text: "Run BFS once from node 0 and stop", correct: false },
+      { id: "C", text: "Connect all vertices with dummy edges first", correct: false },
+      { id: "D", text: "Disconnected graphs cannot be analyzed with BFS", correct: false }
+    ],
+    explanation: "Running BFS from each unvisited vertex identifies each isolated island component until all vertices are marked."
+  },
+  "bfs-vs-dfs": {
+    question: "Which memory characteristic distinguishes standard BFS from recursive DFS?",
+    options: [
+      { id: "A", text: "BFS auxiliary queue memory is O(maximum graph width)", correct: true },
+      { id: "B", text: "BFS memory is O(maximum graph depth)", correct: false },
+      { id: "C", text: "BFS uses zero auxiliary memory", correct: false },
+      { id: "D", text: "BFS always uses O(1) constant memory", correct: false }
+    ],
+    explanation: "BFS stores frontier nodes in the queue, requiring memory proportional to the maximum breadth (width) of the graph."
+  },
+  "complexity-analysis": {
+    question: "What is the standard time complexity of BFS using an Adjacency List for graph G = (V, E)?",
+    options: [
+      { id: "A", text: "O(V + E) linear in vertices and edges", correct: true },
+      { id: "B", text: "O(V²)", correct: false },
+      { id: "C", text: "O(V × log E)", correct: false },
+      { id: "D", text: "O(E²)", correct: false }
+    ],
+    explanation: "Each vertex is enqueued/dequeued once (O(V)) and each edge is inspected from its incident vertices (O(E)), giving O(V + E)."
+  },
+  "real-world-apps": {
+    question: "In social networks, finding 2nd-degree connections ('friends of friends') directly maps to which BFS distance level?",
+    options: [
+      { id: "A", text: "Vertices discovered at Level 2 from the user root", correct: true },
+      { id: "B", text: "Vertices discovered at Level 0", correct: false },
+      { id: "C", text: "Cross edges only", correct: false },
+      { id: "D", text: "Unreachable disconnected components", correct: false }
+    ],
+    explanation: "Immediate friends are at distance 1 (1 hop); their friends who are not already direct friends are at distance 2 (2 hops)."
+  }
+};
+window.LEARN_CHECKPOINTS = LEARN_CHECKPOINTS;
+
 class AppController {
   constructor() {
     this.activeTab = "overview";
@@ -63,6 +251,14 @@ class AppController {
     this.completedVideos = new Set(JSON.parse(localStorage.getItem("algolearn_completed_videos") || "[]"));
     this.expandedGameModules = new Set();
     this.currentModuleIndex = null;
+
+    // Points System State & Game Assistance
+    this.pointsHistory = [];
+    this.penaltyHintsCount = 0;
+    this.penaltyGuidedCount = 0;
+    this.seedGameBonus = 0;
+    this.gameAssistance = JSON.parse(localStorage.getItem("algolearn_game_assistance") || "{}");
+    this.selectedCheckpointOptions = {};
 
     // 10 BFS Curriculum Modules Data (FN-01 to FN-10)
     this.modulesData = [
@@ -217,6 +413,8 @@ class AppController {
     this.renderActiveChapter();
     this.renderProgressModules();
     this.updateProgressStats();
+    this.initPointsSystem();
+    this.updatePointsUI();
     this.initVideoPlayer();
 
     // Render Game Hub Grid
@@ -604,11 +802,10 @@ class AppController {
 
   selectChapter(chapterId) {
     this.activeChapterId = chapterId;
-    this.completedChapters.add(chapterId);
-    localStorage.setItem("algolearn_completed_chapters", JSON.stringify([...this.completedChapters]));
+    // NOTE: Opening a chapter does NOT auto-complete it.
+    // Topics must be completed via the checkpoint assessment!
     this.renderTOC();
     this.renderActiveChapter();
-    this.updateProgressStats();
     this.playSound("pop");
   }
 
@@ -727,6 +924,9 @@ class AppController {
         </div>
         ` : ''}
 
+        <!-- Topic Learning Checkpoint Assessment (+3 Marks) -->
+        ${this.renderChapterCheckpointHTML(ch)}
+
         <!-- Bottom Chapter Navigation Action Bar (Exact UI Matching Reference Images 1 & 2) -->
         <div class="ch-bottom-nav-bar">
           <div class="ch-nav-left-group">
@@ -744,7 +944,7 @@ class AppController {
               <span>${isCompleted ? 'Completed' : 'Mark Completed'}</span>
             </button>
 
-            <button id="ch-nav-next-btn" class="ch-nav-btn ch-nav-btn-secondary ${!hasNext ? 'disabled' : ''}"
+            <button id="ch-nav-next-btn" class="ch-nav-btn ch-nav-btn-secondary ${!hasNext ? 'disabled' : ''}" 
                     ${hasNext ? `onclick="app.selectChapter('${nextId}')"` : 'disabled'}
                     title="Next Chapter">
               <span>Next</span>
@@ -764,6 +964,107 @@ class AppController {
 
       </div>
     `;
+  }
+
+  renderChapterCheckpointHTML(ch) {
+    const chk = LEARN_CHECKPOINTS[ch.id];
+    if (!chk) return "";
+
+    const isDone = this.completedChapters.has(ch.id);
+    const selectedOpt = this.selectedCheckpointOptions[ch.id];
+
+    return `
+      <div class="ch-checkpoint-card ${isDone ? 'completed' : ''}" id="checkpoint-card-${ch.id}">
+        <div class="ch-chk-header">
+          <span class="ch-chk-tag">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+            TOPIC CHECKPOINT ASSESSMENT (+3 MARKS)
+          </span>
+          <span class="ch-chk-status-pill ${isDone ? 'done' : ''}">
+            ${isDone ? '✓ Completed (+3 Marks Earned)' : 'Pending Assessment (3 Marks)'}
+          </span>
+        </div>
+
+        <div class="ch-chk-question">${chk.question}</div>
+
+        <div class="ch-chk-options">
+          ${chk.options.map(opt => {
+            const isSelected = selectedOpt === opt.id || (isDone && opt.correct);
+            const isCorrectAnswer = isDone && opt.correct;
+            return `
+              <div class="ch-chk-opt ${isSelected ? 'selected' : ''} ${isCorrectAnswer ? 'correct-answer' : ''}" 
+                   onclick="app.selectCheckpointOption('${ch.id}', '${opt.id}')">
+                <span class="ch-chk-opt-id">${opt.id}</span>
+                <span class="ch-chk-opt-text">${opt.text}</span>
+              </div>
+            `;
+          }).join("")}
+        </div>
+
+        <div class="ch-chk-footer">
+          <div id="chk-feedback-${ch.id}" class="ch-chk-feedback ${isDone ? 'success' : ''}">
+            ${isDone ? `✓ Verified Correct: ${chk.explanation}` : ''}
+          </div>
+          <button class="ch-chk-btn" id="chk-submit-btn-${ch.id}" 
+                  onclick="app.submitChapterCheckpoint('${ch.id}')"
+                  ${isDone ? 'disabled' : ''}>
+            ${isDone ? '✓ 3 Marks Earned' : 'Verify & Earn 3 Marks'}
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  selectCheckpointOption(chapterId, optionId) {
+    if (this.completedChapters.has(chapterId)) return;
+    this.selectedCheckpointOptions[chapterId] = optionId;
+    this.renderActiveChapter();
+    this.playSound("pop");
+  }
+
+  submitChapterCheckpoint(chapterId) {
+    if (this.completedChapters.has(chapterId)) return;
+    const chk = LEARN_CHECKPOINTS[chapterId];
+    if (!chk) return;
+
+    const selectedOptId = this.selectedCheckpointOptions[chapterId];
+    const feedbackEl = document.getElementById(`chk-feedback-${chapterId}`);
+
+    if (!selectedOptId) {
+      if (feedbackEl) {
+        feedbackEl.className = "ch-chk-feedback error";
+        feedbackEl.textContent = "Please select an answer choice before submitting.";
+      }
+      return;
+    }
+
+    const chosen = chk.options.find(o => o.id === selectedOptId);
+    if (chosen && chosen.correct) {
+      this.completedChapters.add(chapterId);
+      localStorage.setItem("algolearn_completed_chapters", JSON.stringify([...this.completedChapters]));
+      this.recordPointEvent({
+        type: "learn",
+        amount: 3,
+        title: `Completed Learn Checkpoint: ${chapterId}`,
+        sub: "TOPIC COMPLETED"
+      });
+      this.showToast("Checkpoint Passed! +3 Marks Earned.");
+      if (window.soundManager && typeof window.soundManager.playSuccess === "function") {
+        window.soundManager.playSuccess();
+      }
+      this.renderTOC();
+      this.renderActiveChapter();
+      this.updateProgressStats();
+      this.updatePointsUI();
+    } else {
+      if (feedbackEl) {
+        feedbackEl.className = "ch-chk-feedback error";
+        feedbackEl.textContent = "Incorrect. Review the lesson explanation above and try again!";
+      }
+      if (window.soundManager && typeof window.soundManager.playError === "function") {
+        window.soundManager.playError();
+      }
+    }
   }
 
   toggleChapterCompletion(chapterId) {
@@ -1695,30 +1996,94 @@ class AppController {
 
   /* ─── Visualize / HTML5 Video Player Engine ─────────────────── */
 
-  /* ─── Visualize / HTML5 Video Player Engine ─────────────────── */
-
   initVideoPlayer() {
     const v1 = document.getElementById("bfs-video-1");
     const v2 = document.getElementById("bfs-video-2");
 
+    if (!this.videoWatchStats) {
+      this.videoWatchStats = {};
+    }
+
     const setupPlayer = (player, key, otherPlayer) => {
       if (!player) return;
+
+      if (!this.videoWatchStats[key]) {
+        this.videoWatchStats[key] = {
+          maxWatchedTime: 0,
+          watchedSeconds: 0,
+          lastTime: 0
+        };
+      }
+      const tracker = this.videoWatchStats[key];
+
+      // Disallow fast-forwarding / speeding up
+      player.playbackRate = 1.0;
+      player.addEventListener("ratechange", () => {
+        if (player.playbackRate > 1.0) {
+          player.playbackRate = 1.0;
+        }
+      });
 
       player.addEventListener("play", () => {
         // Pause other video to prevent audio overlapping
         if (otherPlayer && !otherPlayer.paused) {
           otherPlayer.pause();
         }
-        this.completedVideos.add(key);
-        localStorage.setItem("algolearn_completed_videos", JSON.stringify([...this.completedVideos]));
-        this.updateProgressStats();
+        tracker.lastTime = player.currentTime;
+      });
+
+      // Backward navigation allowed; forward seeking beyond watched frontier is blocked
+      player.addEventListener("seeking", () => {
+        if (player.currentTime > tracker.maxWatchedTime + 0.5) {
+          player.currentTime = tracker.maxWatchedTime;
+          if (typeof this.showToast === "function") {
+            this.showToast("Forward seeking is disabled. Please watch until it finishes.");
+          }
+        }
+      });
+
+      player.addEventListener("timeupdate", () => {
+        const cur = player.currentTime;
+        if (cur > tracker.maxWatchedTime) {
+          if (cur - tracker.maxWatchedTime > 1.2) {
+            // Forward skip attempt detected
+            player.currentTime = tracker.maxWatchedTime;
+          } else {
+            tracker.maxWatchedTime = cur;
+            tracker.watchedSeconds += (cur - tracker.lastTime);
+          }
+        }
+        tracker.lastTime = cur;
       });
 
       player.addEventListener("ended", () => {
-        this.completedVideos.add(key);
-        localStorage.setItem("algolearn_completed_videos", JSON.stringify([...this.completedVideos]));
-        this.updateProgressStats();
+        const duration = player.duration;
+        // Verify full playback: video reached the end and watched frontier reached duration
+        const isVerifiedFullPlayback = (duration > 0) &&
+                                       (tracker.maxWatchedTime >= (duration - 1.5));
+
+        if (isVerifiedFullPlayback) {
+          if (!this.completedVideos.has(key)) {
+            this.completedVideos.add(key);
+            localStorage.setItem("algolearn_completed_videos", JSON.stringify([...this.completedVideos]));
+            this.recordPointEvent({
+              type: "visualize",
+              amount: 8,
+              title: `Completed Visualisation Video: ${key === 'intro' ? 'Video 1' : 'Video 2'}`,
+              sub: "VIDEO COMPLETED (+8 PTS)"
+            });
+            this.showToast(`Video Verified & Completed! +8 Points Earned.`);
+            if (window.soundManager && typeof window.soundManager.playSuccess === "function") {
+              window.soundManager.playSuccess();
+            }
+            this.updateProgressStats();
+            this.updatePointsUI();
+          }
+        } else {
+          console.log(`[Video Watch Tracking] Video "${key}" ended without full continuous watch. Incomplete videos award 0 points.`);
+        }
         player.currentTime = 0;
+        tracker.lastTime = 0;
       });
 
       player.addEventListener("error", (e) => {
@@ -1783,8 +2148,8 @@ class AppController {
       }
     }
 
-    this.completedVideos.add(canonicalKey);
-    localStorage.setItem("algolearn_completed_videos", JSON.stringify([...this.completedVideos]));
+    // Note: Opening or selecting a video lesson does NOT automatically award marks.
+    // Video completion requires verified natural playback from start to end!
     this.updateProgressStats();
     this.playSound("pop");
   }
@@ -1951,26 +2316,22 @@ class AppController {
   /* ─── Progress Section ──────────────────────────────────────── */
 
   updateProgressStats() {
-    const totalChapters = typeof THEORY_MODULES !== "undefined" ? THEORY_MODULES.length : 12;
-    const totalLevels = typeof LEVELS_DATA !== "undefined" ? LEVELS_DATA.length : 9;
+    // 1. Get complete scoring and progress metrics
+    const summary = typeof this.getPointsSummary === "function"
+      ? this.getPointsSummary()
+      : {
+          learnScore: 0, learnTopicsCompleted: 0,
+          visualScore: 0, videoCount: 0,
+          gameScore: 0, gameLevelsCleared: 0, gameTotalPenalties: 0,
+          quizRawScore: 0, quizCorrect: 0, quizIncorrect: 0, quizUnanswered: 10, quizAnsweredCount: 0, quizPenalties: 0,
+          totalPositiveMarks: 0, totalPenalties: 0, finalScore: 0
+        };
 
-    // 1. Get Game Levels Completed
     const completedLevels = (window.game && window.game.completedLevels)
       ? window.game.completedLevels
       : new Set(JSON.parse(localStorage.getItem("algolearn_completed_levels") || "[]"));
-    const gameWonCount = completedLevels.size;
 
-    // 2. Get Quiz Answers & Status
-    const quizAnswers = (window.quizEngine && window.quizEngine.userAnswers)
-      ? window.quizEngine.userAnswers
-      : JSON.parse(localStorage.getItem("algolearn_quiz_answers") || "{}");
-    const quizAnsweredCount = Object.keys(quizAnswers).length;
-    const totalQuizQuestions = (window.quizEngine && window.quizEngine.questions && window.quizEngine.questions.length)
-      ? window.quizEngine.questions.length
-      : 10;
-    const isQuizDone = (window.quizEngine && window.quizEngine.isCompleted) || localStorage.getItem("algolearn_quiz_completed") === "true";
-
-    // 3. Auto-sync curriculum modules (FN-01 to FN-10) based on accomplishments
+    // 2. Auto-sync curriculum modules (FN-01 to FN-10) based on accomplishments
     if (this.completedChapters.has("graph-foundations")) this.completedActivities.add("FN-01");
     if (this.completedChapters.has("what-is-bfs")) this.completedActivities.add("FN-02");
     if (completedLevels.has(1)) this.completedActivities.add("FN-03");
@@ -1980,66 +2341,98 @@ class AppController {
     if (this.completedChapters.has("shortest-path") || this.completedVideos.has("shortest_path") || this.completedVideos.has("collision")) this.completedActivities.add("FN-07");
     if (this.completedChapters.has("connected-components") || completedLevels.has(6)) this.completedActivities.add("FN-08");
     if (this.completedChapters.has("complexity-analysis") || completedLevels.has(8) || completedLevels.has(9)) this.completedActivities.add("FN-09");
-    if (isQuizDone || quizAnsweredCount >= 10) this.completedActivities.add("FN-10");
+    if (summary.quizAnsweredCount >= 10 || localStorage.getItem("algolearn_quiz_completed") === "true") this.completedActivities.add("FN-10");
 
-    // 4. Calculate Total and Completed Activities
-    const totalActivities = totalChapters + 2 + totalLevels + 1; // 12 + 2 + 9 + 1 = 24
-    const quizCompletedWeight = (isQuizDone || quizAnsweredCount >= 10) ? 1 : 0;
-    const completedCount = Math.min(totalActivities, this.completedChapters.size + this.completedVideos.size + gameWonCount + quizCompletedWeight);
-    const overallPct = Math.min(100, Math.round((completedCount / totalActivities) * 100));
+    // 3. Calculate 32 Activity Units: 12 Learn + 2 Videos + 8 Game Levels + 10 Quiz Questions
+    const learnDone = this.completedChapters ? this.completedChapters.size : 0;
+    const videoDone = this.completedVideos ? this.completedVideos.size : 0;
+    const gameDone = summary.gameLevelsCleared;
+    const quizDone = summary.quizAnsweredCount;
+    const completed32 = Math.min(32, learnDone + videoDone + gameDone + quizDone);
+    const overallPct = Math.min(100, Math.round((completed32 / 32) * 100));
 
-    // Update Overall Completion Card
-    const pctEl = document.getElementById("prog-overall-pct");
-    const countEl = document.getElementById("prog-overall-count");
-    const barEl = document.getElementById("prog-overall-bar");
+    // 4. Update PANEL A: BFS Learning Progress
+    const badgeCountEl = document.getElementById("prog-badge-count");
+    const overallBarEl = document.getElementById("prog-overall-bar");
+    const overallPctEl = document.getElementById("prog-overall-pct");
 
-    if (pctEl) pctEl.textContent = `${overallPct}%`;
-    if (countEl) countEl.textContent = `(${completedCount} of ${totalActivities} Activities)`;
-    if (barEl) barEl.style.width = `${overallPct}%`;
+    if (badgeCountEl) badgeCountEl.textContent = `${completed32} of 32 Activities`;
+    if (overallBarEl) overallBarEl.style.width = `${overallPct}%`;
+    if (overallPctEl) overallPctEl.textContent = `${overallPct}%`;
 
-    // Update Performance Stats Card
-    const perfAct = document.getElementById("perf-activities-count");
-    const perfMastered = document.getElementById("perf-mastered-count");
-    const perfLevels = document.getElementById("perf-levels-count");
-    const perfChallenges = document.getElementById("perf-challenges-txt");
+    // Backward compatibility for legacy elements if present
+    const legacyCountEl = document.getElementById("prog-overall-count");
+    if (legacyCountEl) legacyCountEl.textContent = `(${completed32} of 32 Activities)`;
 
-    if (perfAct) perfAct.textContent = `${completedCount} / ${totalActivities}`;
-    if (perfMastered) {
-      const masteredVal = gameWonCount + (this.completedChapters.size >= 12 ? 1 : 0) + (isQuizDone ? 1 : 0);
-      perfMastered.textContent = String(masteredVal);
+    // 5. Update PANEL B: BFS Topic Score
+    const totalScoreEl = document.getElementById("prog-total-score-val");
+    if (totalScoreEl) totalScoreEl.textContent = `${summary.finalScore} / 100`;
+
+    // Card 1: Learn (Curriculum 12 topics)
+    const scoreLearnEl = document.getElementById("prog-score-learn");
+    const fillLearnEl = document.getElementById("prog-fill-learn");
+    const pctLearnEl = document.getElementById("prog-pct-learn");
+    const subLearnEl = document.getElementById("prog-sub-learn");
+    const learnPct = Math.min(100, Math.round((summary.learnTopicsCompleted / 12) * 100));
+
+    if (scoreLearnEl) scoreLearnEl.textContent = `${summary.learnTopicsCompleted} / 12`;
+    if (fillLearnEl) fillLearnEl.style.width = `${learnPct}%`;
+    if (pctLearnEl) pctLearnEl.textContent = `${learnPct}%`;
+    if (subLearnEl) subLearnEl.textContent = `${summary.learnTopicsCompleted} / 12 topics completed`;
+
+    // Card 2: Visualize (16 points total, 2 videos × 8 pts)
+    const scoreVisualEl = document.getElementById("prog-score-visual");
+    const fillVisualEl = document.getElementById("prog-fill-visual");
+    const pctVisualEl = document.getElementById("prog-pct-visual");
+    const subVisualEl = document.getElementById("prog-sub-visual");
+    const visualPct = Math.min(100, Math.round((summary.visualScore / 16) * 100));
+
+    if (scoreVisualEl) scoreVisualEl.textContent = `${summary.visualScore} / 16`;
+    if (fillVisualEl) fillVisualEl.style.width = `${visualPct}%`;
+    if (pctVisualEl) pctVisualEl.textContent = `${visualPct}%`;
+    if (subVisualEl) subVisualEl.textContent = `${summary.videoCount} / 2 videos completed • 8 pts each`;
+
+    // Card 3: Game (64 points total, 8 games × 8 pts)
+    const scoreGameEl = document.getElementById("prog-score-game");
+    const fillGameEl = document.getElementById("prog-fill-game");
+    const pctGameEl = document.getElementById("prog-pct-game");
+    const subGameEl = document.getElementById("prog-sub-game");
+    const gamePct = Math.min(100, Math.max(0, Math.round((summary.gameScore / 64) * 100)));
+
+    if (scoreGameEl) scoreGameEl.textContent = `${summary.gameScore} / 64`;
+    if (fillGameEl) fillGameEl.style.width = `${gamePct}%`;
+    if (pctGameEl) pctGameEl.textContent = `${gamePct}%`;
+    if (subGameEl) {
+      const penText = summary.gameTotalPenalties > 0 ? ` (-${summary.gameTotalPenalties} penalty)` : "";
+      subGameEl.textContent = `${summary.gameLevelsCleared} / 8 levels cleared • 8 pts each${penText}`;
     }
-    if (perfLevels) perfLevels.textContent = `${gameWonCount} / ${totalLevels}`;
 
-    const challengeIds = [6, 7, 8, 9];
-    const challengesWon = challengeIds.filter(id => completedLevels.has(id)).length;
-    if (perfChallenges) perfChallenges.textContent = `${challengesWon} / 4 Challenges`;
+    // Card 4: Quiz (20 points total, 10 questions × 2 pts, -1 wrong, 0 timeout)
+    const scoreQuizEl = document.getElementById("prog-score-quiz");
+    const fillQuizEl = document.getElementById("prog-fill-quiz");
+    const pctQuizEl = document.getElementById("prog-pct-quiz");
+    const subQuizEl = document.getElementById("prog-sub-quiz");
+    const quizPct = Math.min(100, Math.max(0, Math.round((summary.quizRawScore / 20) * 100)));
 
-    // Video Section in Progress Tracker
-    const videoCount = this.completedVideos.size;
-    const vtTxt = document.getElementById("vt-completed-txt");
-    if (vtTxt) vtTxt.textContent = `2 VIDEOS (${videoCount} / 2 Completed)`;
-
-    const dotIntro = document.getElementById("vt-dot-intro");
-    const pillIntro = document.getElementById("vt-pill-intro");
-    if (this.completedVideos.has("intro")) {
-      if (dotIntro) { dotIntro.textContent = "✓"; dotIntro.style.color = "#10b981"; }
-      if (pillIntro) { pillIntro.textContent = "Completed"; pillIntro.style.color = "#10b981"; }
-    } else {
-      if (dotIntro) { dotIntro.textContent = "○"; dotIntro.style.color = ""; }
-      if (pillIntro) { pillIntro.textContent = "Pending"; pillIntro.style.color = ""; }
+    if (scoreQuizEl) scoreQuizEl.textContent = `${summary.quizRawScore} / 20`;
+    if (fillQuizEl) fillQuizEl.style.width = `${quizPct}%`;
+    if (pctQuizEl) pctQuizEl.textContent = `${quizPct}%`;
+    if (subQuizEl) {
+      subQuizEl.textContent = `${summary.quizCorrect} correct (+2), ${summary.quizIncorrect} wrong (-1), ${summary.quizUnanswered} unanswered`;
     }
 
-    const dotColl = document.getElementById("vt-dot-collision");
-    const pillColl = document.getElementById("vt-pill-collision");
-    if (this.completedVideos.has("shortest_path") || this.completedVideos.has("collision")) {
-      if (dotColl) { dotColl.textContent = "✓"; dotColl.style.color = "#10b981"; }
-      if (pillColl) { pillColl.textContent = "Completed"; pillColl.style.color = "#10b981"; }
-    } else {
-      if (dotColl) { dotColl.textContent = "○"; dotColl.style.color = ""; }
-      if (pillColl) { pillColl.textContent = "Pending"; pillColl.style.color = ""; }
-    }
+    // Breakdown Bar
+    const bbPosEl = document.getElementById("prog-bb-pos");
+    const bbGamePenEl = document.getElementById("prog-bb-game-pen");
+    const bbQuizPenEl = document.getElementById("prog-bb-quiz-pen");
+    const bbFinalEl = document.getElementById("prog-bb-final");
 
-    // Update Sidebar Navigation Badges ("Dash Bar")
+    if (bbPosEl) bbPosEl.textContent = `+${summary.totalPositiveMarks} pts`;
+    if (bbGamePenEl) bbGamePenEl.textContent = `-${summary.gameTotalPenalties} pts`;
+    if (bbQuizPenEl) bbQuizPenEl.textContent = `-${summary.quizPenalties} pts`;
+    if (bbFinalEl) bbFinalEl.textContent = `${summary.finalScore} / 100`;
+
+    // 6. Update Sidebar Navigation Badges ("Dash Bar")
     const badgeOverview = document.getElementById("nav-badge-overview");
     const badgeLearn = document.getElementById("nav-badge-learn");
     const badgeVisualize = document.getElementById("nav-badge-visualize");
@@ -2048,14 +2441,19 @@ class AppController {
     const badgeProgress = document.getElementById("nav-badge-progress");
 
     if (badgeOverview) badgeOverview.textContent = "Overview";
-    if (badgeLearn) badgeLearn.textContent = `${this.completedChapters.size} / ${totalChapters}`;
+    if (badgeLearn) badgeLearn.textContent = `${this.completedChapters.size} / 12`;
     if (badgeVisualize) badgeVisualize.textContent = `${this.completedVideos.size} / 2`;
-    if (badgeGame) badgeGame.textContent = `${gameWonCount} / ${totalLevels}`;
-    if (badgeQuiz) badgeQuiz.textContent = `${quizAnsweredCount} / ${totalQuizQuestions}`;
+    if (badgeGame) badgeGame.textContent = `${summary.gameLevelsCleared} / 8`;
+    if (badgeQuiz) badgeQuiz.textContent = `${summary.quizAnsweredCount} / 10`;
     if (badgeProgress) badgeProgress.textContent = `${overallPct}%`;
 
     const vPill = document.getElementById("v-completed-counter-pill");
     if (vPill) vPill.textContent = `${this.completedVideos.size} / 2 Completed`;
+
+    // 7. Synchronize legacy points UI if present
+    if (typeof this.updatePointsUI === "function") {
+      this.updatePointsUI();
+    }
   }
 
   filterProgressModules(category) {
@@ -2167,6 +2565,390 @@ class AppController {
     this.resetAllProgress();
   }
 
+  /* ─── Central Scoring & Points System (100 Marks with Negative Marking) ─── */
+
+  recordPointEvent(item) {
+    if (!item) return;
+    const eventObj = {
+      id: item.id || (item.type + "-" + Date.now() + "-" + Math.random().toString(36).substr(2, 4)),
+      type: item.type || "points",
+      level: item.level,
+      amount: item.amount || 0,
+      title: item.title || "Points Activity",
+      sub: item.sub || "ACTIVITY",
+      timeText: "Just now",
+      timestamp: Date.now()
+    };
+    if (!this.pointsHistory) this.pointsHistory = [];
+    this.pointsHistory.unshift(eventObj);
+    this.savePointsData();
+  }
+
+  initPointsSystem() {
+    this.gameAssistance = JSON.parse(localStorage.getItem("algolearn_game_assistance") || "{}");
+    const stored = localStorage.getItem("algolearn_points_history");
+    if (!stored) {
+      this.penaltyHintsCount = 0;
+      this.penaltyGuidedCount = 0;
+      this.seedGameBonus = 0;
+      this.pointsHistory = [];
+      this.savePointsData();
+    } else {
+      try {
+        const parsed = JSON.parse(stored);
+        this.pointsHistory = Array.isArray(parsed.history) ? parsed.history : [];
+        this.penaltyHintsCount = typeof parsed.penaltyHintsCount === "number" ? parsed.penaltyHintsCount : 0;
+        this.penaltyGuidedCount = typeof parsed.penaltyGuidedCount === "number" ? parsed.penaltyGuidedCount : 0;
+        this.seedGameBonus = 0;
+      } catch (e) {
+        this.pointsHistory = [];
+        this.penaltyHintsCount = 0;
+        this.penaltyGuidedCount = 0;
+        this.seedGameBonus = 0;
+      }
+    }
+  }
+
+  savePointsData() {
+    try {
+      localStorage.setItem("algolearn_points_history", JSON.stringify({
+        history: this.pointsHistory,
+        penaltyHintsCount: this.penaltyHintsCount,
+        penaltyGuidedCount: this.penaltyGuidedCount,
+        seedGameBonus: 0
+      }));
+    } catch (e) {
+      console.warn("Could not save points data", e);
+    }
+  }
+
+  getPointsSummary() {
+    // 1. LEARN SECTION — 12 Chapters Curriculum Tracking
+    const learnTopicsCompleted = this.completedChapters ? this.completedChapters.size : 0;
+    const learnScore = learnTopicsCompleted;
+
+    // 2. VISUALISATION SECTION — 16 Points (2 videos × 8 pts)
+    const videoCount = this.completedVideos ? this.completedVideos.size : 0;
+    const visualScore = Math.min(16, videoCount * 8);
+
+    // 3. GAME SECTION — 64 Points Before Penalties (8 games × 8 pts)
+    const completedLevels = (window.game && window.game.completedLevels)
+      ? window.game.completedLevels
+      : new Set(JSON.parse(localStorage.getItem("algolearn_completed_levels") || "[]"));
+
+    let gamePositiveMarks = 0;
+    let gameTotalPenalties = 0;
+    let gameScore = 0;
+    let gameLevelsCleared = 0;
+    let totalHintsUsed = 0;
+    let totalGuidedUsed = 0;
+
+    for (let slot = 1; slot <= 8; slot++) {
+      const slotMarks = LEVEL_MARKS[slot] || 8;
+
+      // Determine if completed
+      let isDone = false;
+      if (slot === 1 && completedLevels.has(1)) isDone = true;
+      else if (slot === 2 && completedLevels.has(2)) isDone = true;
+      else if (slot === 3 && completedLevels.has(3)) isDone = true;
+      else if (slot === 4 && completedLevels.has(4)) isDone = true;
+      else if (slot === 5 && completedLevels.has(5)) isDone = true;
+      else if (slot === 6 && (completedLevels.has(6) || completedLevels.has(7))) isDone = true;
+      else if (slot === 7 && completedLevels.has(8)) isDone = true;
+      else if (slot === 8 && completedLevels.has(9)) isDone = true;
+      if (completedLevels.has(slot)) isDone = true;
+
+      if (isDone) gameLevelsCleared++;
+
+      const positive = isDone ? slotMarks : 0;
+      gamePositiveMarks += positive;
+
+      // Assistance tracking per level
+      const ast = (this.gameAssistance && this.gameAssistance[slot]) ? this.gameAssistance[slot] : {};
+      const hintUsed = !!ast.hintUsed;
+      const guidedUsed = !!ast.guidedUsed;
+
+      if (hintUsed) totalHintsUsed++;
+      if (guidedUsed) totalGuidedUsed++;
+
+      const hintPenalty = hintUsed ? 2 : 0;
+      const guidedPenalty = guidedUsed ? 3 : 0;
+      const levelPenalties = hintPenalty + guidedPenalty;
+      gameTotalPenalties += levelPenalties;
+
+      const levelContrib = Math.max(0, positive - levelPenalties);
+      gameScore += levelContrib;
+    }
+
+    this.penaltyHintsCount = totalHintsUsed;
+    this.penaltyGuidedCount = totalGuidedUsed;
+
+    // 4. QUIZ SECTION — 20 Points (10 questions × 2 pts, -1 wrong, 0 timeout)
+    let quizCorrect = 0;
+    let quizIncorrect = 0;
+    let quizTimedOut = 0;
+    const quizAnswers = (window.quizEngine && window.quizEngine.userAnswers)
+      ? window.quizEngine.userAnswers
+      : JSON.parse(localStorage.getItem("algolearn_quiz_answers") || "{}");
+
+    Object.values(quizAnswers).forEach(ans => {
+      if (!ans) return;
+      if (ans.timedOut) {
+        quizTimedOut++;
+      } else if (ans.isCorrect === true) {
+        quizCorrect++;
+      } else if (ans.isCorrect === false) {
+        quizIncorrect++;
+      }
+    });
+
+    const quizAnsweredCount = quizCorrect + quizIncorrect + quizTimedOut;
+    const quizUnanswered = Math.max(0, 10 - quizAnsweredCount);
+    const quizPositiveMarks = Math.min(20, quizCorrect * 2);
+    const quizPenalties = quizIncorrect * 1;
+    const quizRawScore = Math.max(0, Math.min(20, (quizCorrect * 2) - quizPenalties));
+
+    // 5. CENTRAL OVERALL CALCULATION: Total = Visual (16) + Game (64) + Quiz (20) = 100
+    const totalPositiveMarks = visualScore + gamePositiveMarks + quizPositiveMarks;
+    const totalPenalties = gameTotalPenalties + quizPenalties;
+    const rawCalculatedScore = visualScore + gameScore + quizRawScore;
+    const finalScore = Math.max(0, Math.min(100, rawCalculatedScore));
+
+    return {
+      learnScore,
+      learnTopicsCompleted,
+      learnMax: 12,
+
+      visualScore,
+      videoCount,
+      visualMax: 16,
+
+      gamePositiveMarks,
+      gameTotalPenalties,
+      gameScore,
+      gameLevelsCleared,
+      gameMax: 64,
+      penaltyHintsCount: totalHintsUsed,
+      penaltyGuidedCount: totalGuidedUsed,
+
+      quizCorrect,
+      quizIncorrect,
+      quizTimedOut,
+      quizUnanswered,
+      quizAnsweredCount,
+      quizRawScore,
+      quizPositiveMarks,
+      quizPenalties,
+      quizMax: 20,
+
+      totalPositiveMarks,
+      totalPenalties,
+      finalScore,
+      maxAvailable: 100
+    };
+  }
+
+  updatePointsUI() {
+    const summary = this.getPointsSummary();
+
+    // 1. Sidebar Nav Badge Pill ("Dash Bar")
+    const badgePoints = document.getElementById("nav-badge-points");
+    if (badgePoints) {
+      badgePoints.textContent = `${summary.finalScore} / 100`;
+    }
+
+    // 2. Hero Card Total Points
+    const heroNum = document.getElementById("pts-hero-num");
+    if (heroNum) {
+      heroNum.textContent = String(summary.finalScore);
+    }
+    const heroSub = document.getElementById("pts-hero-sub");
+    if (heroSub) {
+      heroSub.textContent = `BFS Final Score: ${summary.finalScore} / 100 Points`;
+    }
+
+    // 3. Points Breakdown Card & Subtitles
+    const valTheory = document.getElementById("pts-val-theory");
+    if (valTheory) valTheory.textContent = `${summary.learnTopicsCompleted}`;
+    const subTheory = document.getElementById("pts-sub-theory");
+    if (subTheory) subTheory.textContent = `${summary.learnTopicsCompleted}/12 topics completed`;
+
+    const valVisualize = document.getElementById("pts-val-visualize");
+    if (valVisualize) valVisualize.textContent = `+${summary.visualScore}`;
+    const subVisualize = document.getElementById("pts-sub-visualize");
+    if (subVisualize) subVisualize.textContent = `${summary.visualScore}/16 pts \u2022 ${summary.videoCount}/2 videos completed • 8 pts each`;
+
+    const valGames = document.getElementById("pts-val-games");
+    if (valGames) valGames.textContent = `+${summary.gameScore}`;
+    const subGames = document.getElementById("pts-sub-games");
+    if (subGames) subGames.textContent = `${summary.gameScore}/64 pts after penalties \u2022 ${summary.gameLevelsCleared}/8 levels cleared • 8 pts each`;
+
+    const valQuiz = document.getElementById("pts-val-quiz");
+    if (valQuiz) valQuiz.textContent = `${summary.quizRawScore >= 0 ? '+' : ''}${summary.quizRawScore}`;
+    const subQuiz = document.getElementById("pts-sub-quiz");
+    if (subQuiz) subQuiz.textContent = `${summary.quizRawScore}/20 pts \u2022 ${summary.quizCorrect} correct (+2), ${summary.quizIncorrect} incorrect (-1)`;
+
+    const valPenalties = document.getElementById("pts-val-penalties");
+    if (valPenalties) valPenalties.textContent = `-${summary.totalPenalties}`;
+    const subPenalties = document.getElementById("pts-sub-penalties");
+    if (subPenalties) subPenalties.textContent = `Game penalties: -${summary.gameTotalPenalties} (Hints: -${summary.penaltyHintsCount * 2}, Guided: -${summary.penaltyGuidedCount * 3}) \u2022 Quiz penalties: -${summary.quizPenalties}`;
+
+    const valPositive = document.getElementById("pts-val-positive");
+    if (valPositive) valPositive.textContent = `+${summary.totalPositiveMarks} / 100`;
+
+    const valTotal = document.getElementById("pts-val-total");
+    if (valTotal) valTotal.textContent = `${summary.finalScore} / 100`;
+
+    // 4. Recent Activity
+    this.renderPointsActivityList();
+  }
+
+  renderPointsActivityList() {
+    const countEl = document.getElementById("pac-events-count");
+    const listEl = document.getElementById("pac-activity-list");
+    if (!listEl) return;
+
+    const events = this.pointsHistory || [];
+    if (countEl) {
+      countEl.textContent = `${events.length} events`;
+    }
+
+    if (events.length === 0) {
+      listEl.innerHTML = `
+        <div style="text-align:center; padding: 24px; color: var(--text-muted); font-size: 0.88rem;">
+          No points activity recorded yet. Complete Learn topic checkpoints, watch videos, solve game levels, or take quizzes to earn marks!
+        </div>
+      `;
+      return;
+    }
+
+    listEl.innerHTML = events.map(item => {
+      const isNeg = item.amount < 0;
+      const badgeClass = isNeg ? "pac-badge-neg" : "pac-badge-pos";
+      const displayAmount = isNeg ? String(item.amount) : `+${item.amount}`;
+      const timeStr = this.formatRelativeTime(item.timestamp, item.timeText);
+
+      return `
+        <div class="pac-item">
+          <div class="pac-item-left">
+            <span class="pac-badge ${badgeClass}">${displayAmount}</span>
+            <div class="pac-item-info">
+              <span class="pac-item-title">${item.title}</span>
+              <span class="pac-item-sub">${item.sub}</span>
+            </div>
+          </div>
+          <span class="pac-item-time">${timeStr}</span>
+        </div>
+      `;
+    }).join("");
+  }
+
+  formatRelativeTime(timestamp, fallback) {
+    if (!timestamp) return fallback || "Just now";
+    const diffMs = Date.now() - timestamp;
+    if (diffMs < 0) return fallback || "Just now";
+    const diffSec = Math.floor(diffMs / 1000);
+    if (diffSec < 60) return "Just now";
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin}m ago`;
+    const diffHour = Math.floor(diffMin / 60);
+    if (diffHour < 24) return `${diffHour}h ago`;
+    const diffDay = Math.floor(diffHour / 24);
+    return `${diffDay}d ago`;
+  }
+
+  recordHintPenalty(levelNum = 1) {
+    const slot = getCanonicalLevelSlot(levelNum);
+    if (!this.gameAssistance) this.gameAssistance = {};
+    if (!this.gameAssistance[slot]) {
+      this.gameAssistance[slot] = { hintUsed: false, guidedUsed: false };
+    }
+
+    // Default rule: Max 1 hint penalty per level (prevents duplicate deductions)
+    if (this.gameAssistance[slot].hintUsed) {
+      return;
+    }
+
+    this.gameAssistance[slot].hintUsed = true;
+    localStorage.setItem("algolearn_game_assistance", JSON.stringify(this.gameAssistance));
+
+    const newEvent = {
+      id: "hint-" + Date.now() + "-" + Math.random().toString(36).substr(2, 4),
+      type: "hint",
+      level: slot,
+      amount: -2,
+      title: `Used Hint: Level ${slot}`,
+      sub: "HINT USED (-2 MARKS)",
+      timeText: "Just now",
+      timestamp: Date.now()
+    };
+    if (!this.pointsHistory) this.pointsHistory = [];
+    this.pointsHistory.unshift(newEvent);
+    this.savePointsData();
+    this.updatePointsUI();
+    this.updateProgressStats();
+    this.showToast(`Hint Revealed: -2 Penalty Applied to Level ${slot}.`);
+  }
+
+  recordGuidedPenalty(levelNum = 1) {
+    const slot = getCanonicalLevelSlot(levelNum);
+    if (!this.gameAssistance) this.gameAssistance = {};
+    if (!this.gameAssistance[slot]) {
+      this.gameAssistance[slot] = { hintUsed: false, guidedUsed: false };
+    }
+
+    // Default rule: Max 1 Guided Solve penalty per level (prevents duplicate deductions)
+    if (this.gameAssistance[slot].guidedUsed) {
+      return;
+    }
+
+    this.gameAssistance[slot].guidedUsed = true;
+    localStorage.setItem("algolearn_game_assistance", JSON.stringify(this.gameAssistance));
+
+    const newEvent = {
+      id: "guided-" + Date.now() + "-" + Math.random().toString(36).substr(2, 4),
+      type: "guided",
+      level: slot,
+      amount: -3,
+      title: `Used Guided Solve: Level ${slot}`,
+      sub: "GUIDED SOLVE (-3 MARKS)",
+      timeText: "Just now",
+      timestamp: Date.now()
+    };
+    if (!this.pointsHistory) this.pointsHistory = [];
+    this.pointsHistory.unshift(newEvent);
+    this.savePointsData();
+    this.updatePointsUI();
+    this.updateProgressStats();
+    this.showToast(`Guided Solve Activated: -3 Penalty Applied to Level ${slot}.`);
+  }
+
+  recordGameLevelVictory(levelNum = 1) {
+    const slot = getCanonicalLevelSlot(levelNum);
+    const marks = LEVEL_MARKS[slot] || 8;
+
+    // Check if points history already recorded victory for this slot to avoid duplicate positive marks
+    if (!this.pointsHistory) this.pointsHistory = [];
+    const alreadyRecorded = this.pointsHistory.some(e => e.type === "game" && e.level === slot);
+    if (!alreadyRecorded) {
+      const newEvent = {
+        id: "game-" + Date.now() + "-" + Math.random().toString(36).substr(2, 4),
+        type: "game",
+        level: slot,
+        amount: marks,
+        title: `Completed Game Level: Level ${slot}`,
+        sub: `LEVEL COMPLETED (+${marks} PTS)`,
+        timeText: "Just now",
+        timestamp: Date.now()
+      };
+      this.pointsHistory.unshift(newEvent);
+      this.savePointsData();
+      this.updatePointsUI();
+      this.updateProgressStats();
+      this.showToast(`Level ${slot} Complete! +${marks} Marks Earned.`);
+    }
+  }
+
   resetAllProgress() {
     // 1. Clear curriculum and video progress
     this.completedChapters.clear();
@@ -2176,10 +2958,14 @@ class AppController {
     localStorage.removeItem("algolearn_completed_activities");
     localStorage.removeItem("algolearn_completed_videos");
     localStorage.removeItem("algolearn_completed_levels");
+    localStorage.removeItem("algolearn_game_assistance");
     localStorage.removeItem("algolearn_quiz_answers");
     localStorage.removeItem("algolearn_quiz_score");
     localStorage.removeItem("algolearn_quiz_completed");
     localStorage.removeItem("algolearn_score");
+    localStorage.removeItem("algolearn_points_history");
+    this.gameAssistance = {};
+    if (this.videoWatchStats) this.videoWatchStats = {};
 
     // 2. Reset active chapter back to the first chapter
     if (typeof THEORY_MODULES !== "undefined" && THEORY_MODULES.length > 0) {
@@ -2239,7 +3025,11 @@ class AppController {
       window.spanningTreeStudio.restart();
     }
 
-    // 7. Re-render all views and statistics to 0%
+    // 7. Re-initialize Points System
+    this.initPointsSystem();
+    this.updatePointsUI();
+
+    // 8. Re-render all views and statistics to 0%
     if (this.expandedGameModules) this.expandedGameModules.clear();
     this.updateProgressStats();
     this.renderTOC();
@@ -2247,7 +3037,7 @@ class AppController {
     this.renderProgressModules();
     this.renderLevelsGrid();
 
-    // 8. Visual button feedback & notification
+    // 9. Visual button feedback & notification
     const btn = document.getElementById("reset-state-btn");
     if (btn) {
       btn.classList.add("btn-spinning");
@@ -2528,6 +3318,7 @@ class AppController {
           <div class="module-meta-row">
             <span class="module-meta-chip difficulty-chip">● ${mod.difficulty}</span>
             <span class="module-meta-chip count-chip">${allModIndices.length} Interactive Levels</span>
+            <span class="module-meta-chip points-chip" style="background: rgba(99, 102, 241, 0.12); color: var(--primary, #4f46e5); font-weight: 700;">+8 pts / level</span>
           </div>
 
           <div class="module-topics-row">
@@ -2583,10 +3374,13 @@ class AppController {
       `).join("");
 
       return `
-        <div class="module-sublevel-section ${isDone ? 'is-done' : ''}" onclick="app.openLevelProblem(${lvlIdx})" title="Play Level ${subLevelNum}: ${lvl.title}">
+        <div class="module-sublevel-section ${isDone ? 'is-done' : ''}" onclick="app.openLevelProblem(${lvlIdx})" title="Play Level ${subLevelNum}: ${lvl.title} (+8 pts)">
           <div class="module-sublevel-header">
             <div class="module-sublevel-meta">
-              <span class="module-level-tag ${isDone ? 'tag-done' : ''}">${isDone ? '✓ ' : ''}LEVEL ${subLevelNum}</span>
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <span class="module-level-tag ${isDone ? 'tag-done' : ''}">${isDone ? '✓ ' : ''}LEVEL ${subLevelNum}</span>
+                <span class="level-pts-badge">+8 pts</span>
+              </div>
               <h4 class="module-sublevel-name">${lvl.title}</h4>
             </div>
             <div class="module-sublevel-play-icon">
@@ -2617,10 +3411,13 @@ class AppController {
         `).join("");
 
         capstoneHtml = `
-          <div class="module-sublevel-section module-capstone-section ${isCapstoneDone ? 'is-done' : ''}" onclick="app.openLevelProblem(${mod.finalChallengeIndex})" title="Play Final Challenge: Level ${capstoneSubNum} - ${capstoneLvl.title}">
+          <div class="module-sublevel-section module-capstone-section ${isCapstoneDone ? 'is-done' : ''}" onclick="app.openLevelProblem(${mod.finalChallengeIndex})" title="Play Final Challenge: Level ${capstoneSubNum} - ${capstoneLvl.title} (+8 pts)">
             <div class="module-sublevel-header">
               <div class="module-sublevel-meta">
-                <span class="module-level-tag tag-capstone ${isCapstoneDone ? 'tag-done' : ''}">${isCapstoneDone ? '✓ ' : '★ '}FINAL CHALLENGE &bull; LEVEL ${capstoneSubNum}</span>
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                  <span class="module-level-tag tag-capstone ${isCapstoneDone ? 'tag-done' : ''}">${isCapstoneDone ? '✓ ' : '★ '}FINAL CHALLENGE &bull; LEVEL ${capstoneSubNum}</span>
+                  <span class="level-pts-badge">+8 pts</span>
+                </div>
                 <h4 class="module-sublevel-name">${capstoneLvl.title}</h4>
               </div>
               <div class="module-sublevel-play-icon">
@@ -2715,6 +3512,7 @@ class AppController {
     this.gameMode = mode;
   }
 }
+window.AppController = AppController;
 
 // Global App Initialization
 document.addEventListener("DOMContentLoaded", () => {

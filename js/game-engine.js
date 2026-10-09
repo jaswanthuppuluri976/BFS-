@@ -452,6 +452,12 @@ class GameEngine {
 
   provideNextHint() {
     this.currentHintStage++;
+    const lvlNum = (this.currentLevelIndex !== undefined && this.currentLevelIndex !== null)
+      ? (this.currentLevelIndex + 1)
+      : (this.currentLevelData ? this.currentLevelData.id : 1);
+    if (typeof window.app !== "undefined" && typeof window.app.recordHintPenalty === "function") {
+      window.app.recordHintPenalty(lvlNum);
+    }
     const startNode = this.currentLevelData.startNode;
 
     let hintTitle = `Hint ${this.currentHintStage}`;
@@ -505,6 +511,11 @@ class GameEngine {
     this.updateGuidedSolveUI();
 
     if (window.soundManager) soundManager.playSuccess();
+
+    // Record game level victory points
+    if (typeof window.app !== "undefined" && typeof window.app.recordGameLevelVictory === "function") {
+      window.app.recordGameLevelVictory(this.currentLevelData.id);
+    }
 
     // Notify main app to update progress, badges, and dashboard
     if (typeof app !== "undefined") {

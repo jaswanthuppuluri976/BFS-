@@ -1,6 +1,12 @@
 /**
  * BFS Adventure - Interactive Quiz Engine
  * Redesigned to match professional educational assessment UI standards
+ * Scoring Rules:
+ * - 10 Questions total, 20 maximum points
+ * - Correct answer: +2 pts
+ * - Wrong answer: -1 pt penalty
+ * - Timeout: 0 pts
+ * - Time limit: 30 seconds per question
  */
 
 class QuizEngine {
@@ -21,6 +27,11 @@ class QuizEngine {
     this.expandedQuestions = new Set([2]);
     this.container = null;
     this.initialized = false;
+
+    // 30 seconds countdown per question
+    this.questionTimeLimit = 30;
+    this.timeLeft = 30;
+    this.timerInterval = null;
   }
 
   init(containerEl) {
@@ -33,6 +44,7 @@ class QuizEngine {
   }
 
   reset() {
+    this.clearQuestionTimer();
     this.currentIndex = 0;
     this.score = 0;
     this.userAnswers = {};
@@ -66,8 +78,89 @@ class QuizEngine {
     this.render();
   }
 
+  startQuestionTimer() {
+    this.clearQuestionTimer();
+    const q = this.questions[this.currentIndex];
+    if (!q) return;
+
+    // If question is already answered or quiz completed, no active timer
+    if (this.userAnswers[q.id] !== undefined || this.isCompleted) {
+      return;
+    }
+
+    this.timeLeft = this.questionTimeLimit;
+    this.updateTimerDisplay();
+
+    this.timerInterval = setInterval(() => {
+      this.timeLeft--;
+      this.updateTimerDisplay();
+
+      if (this.timeLeft <= 0) {
+        this.clearQuestionTimer();
+        this.handleTimeout();
+      }
+    }, 1000);
+  }
+
+  clearQuestionTimer() {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+      this.timerInterval = null;
+    }
+  }
+
+  updateTimerDisplay() {
+    const timerEl = document.getElementById("quiz-question-timer");
+    if (!timerEl) return;
+    const isWarning = this.timeLeft <= 10;
+    timerEl.className = `q-timer-badge ${isWarning ? 'is-warning' : ''}`;
+    timerEl.innerHTML = `
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 16 14"></polyline>
+      </svg>
+      <span>00:${String(this.timeLeft).padStart(2, '0')}s</span>
+    `;
+  }
+
+  handleTimeout() {
+    const q = this.questions[this.currentIndex];
+    if (!q || this.userAnswers[q.id] !== undefined) return;
+
+    // Timed out: award zero points (0 pts)
+    this.userAnswers[q.id] = {
+      optionId: null,
+      isCorrect: false,
+      timedOut: true,
+      explanation: q.explanation || "Time limit of 30s expired before an answer was chosen. 0 points awarded."
+    };
+
+    const stats = this.calculateScore();
+    this.score = stats.rawScore;
+
+    if (typeof soundManager !== 'undefined' && soundManager.playError) {
+      soundManager.playError();
+    }
+
+    try {
+      localStorage.setItem("algolearn_quiz_answers", JSON.stringify(this.userAnswers));
+      localStorage.setItem("algolearn_quiz_score", String(this.score));
+    } catch (e) {}
+
+    if (typeof app !== 'undefined') {
+      if (typeof app.updateProgressStats === 'function') app.updateProgressStats();
+      if (typeof app.updatePointsUI === 'function') app.updatePointsUI();
+      if (typeof app.showToast === 'function') {
+        app.showToast(`Time expired on Question ${this.currentIndex + 1}! 0 points awarded.`);
+      }
+    }
+
+    this.render();
+  }
+
   goToQuestion(index) {
     if (index >= 0 && index < this.questions.length) {
+      this.clearQuestionTimer();
       this.currentIndex = index;
       if (this.unansweredWarning && this.unansweredWarning.unansweredIndices.includes(index)) {
         this.unansweredWarning.targetQuestionNum = index + 1;
@@ -104,6 +197,8 @@ class QuizEngine {
     if (!pending) return; // No selection yet
     if (this.userAnswers[q.id] !== undefined) return; // Already answered
 
+    this.clearQuestionTimer();
+
     const chosen = q.options.find(o => o.id === pending);
     const isCorrect = Boolean(chosen && chosen.correct);
 
@@ -113,8 +208,10 @@ class QuizEngine {
       explanation: q.explanation
     };
 
+    const stats = this.calculateScore();
+    this.score = stats.rawScore;
+
     if (isCorrect) {
-      this.score += 10;
       if (typeof soundManager !== 'undefined' && soundManager.playSuccess) {
         soundManager.playSuccess();
       }
@@ -141,17 +238,53 @@ class QuizEngine {
       localStorage.setItem("algolearn_quiz_score", String(this.score));
     } catch (e) {}
 
-    // Update app progress & dash bar badge (e.g. 1 / 10)
-    if (typeof app !== 'undefined' && typeof app.updateProgressStats === 'function') {
-      app.updateProgressStats();
+    // Update app progress & dashboard immediately
+    if (typeof app !== 'undefined') {
+      if (typeof app.updateProgressStats === 'function') app.updateProgressStats();
+      if (typeof app.updatePointsUI === 'function') app.updatePointsUI();
+      if (typeof app.showToast === 'function') {
+        app.showToast(isCorrect ? `Correct answer! +2 points earned.` : `Incorrect answer! -1 point deducted.`);
+      }
     }
 
     this.render();
   }
 
+  calculateScore() {
+    let correct = 0;
+    let incorrect = 0;
+    let timedOut = 0;
+    const totalQ = this.questions ? this.questions.length : 10;
+    if (this.userAnswers) {
+      Object.values(this.userAnswers).forEach(ans => {
+        if (!ans) return;
+        if (ans.timedOut) {
+          timedOut++;
+        } else if (ans.isCorrect === true) {
+          correct++;
+        } else if (ans.isCorrect === false) {
+          incorrect++;
+        }
+      });
+    }
+    const answeredTotal = correct + incorrect + timedOut;
+    const unanswered = Math.max(0, totalQ - answeredTotal);
+    // Correct: +2 pts, Incorrect: -1 pt, Timed out / unanswered: 0 pts
+    const rawScore = Math.max(0, Math.min(20, (correct * 2) - (incorrect * 1)));
+    return {
+      correct,
+      incorrect,
+      timedOut,
+      unanswered,
+      rawScore,
+      totalQ
+    };
+  }
+
   nextQuestion() {
     const totalQ = this.questions.length;
     if (this.currentIndex < totalQ - 1) {
+      this.clearQuestionTimer();
       this.currentIndex++;
       this.render();
       if (typeof soundManager !== 'undefined' && soundManager.playPop) {
@@ -163,6 +296,7 @@ class QuizEngine {
   }
 
   completeQuiz() {
+    this.clearQuestionTimer();
     const unanswered = this.getUnansweredIndices();
     if (unanswered.length > 0) {
       // User has not answered all questions: direct to first unanswered question
@@ -195,7 +329,7 @@ class QuizEngine {
 
     // Notify app of completion
     if (typeof app !== 'undefined') {
-      if (this.score >= 80 || Object.keys(this.userAnswers).length === this.questions.length) {
+      if (Object.keys(this.userAnswers).length === this.questions.length) {
         app.completedActivities.add("FN-10");
         try {
           localStorage.setItem("algolearn_completed_activities", JSON.stringify([...app.completedActivities]));
@@ -233,6 +367,7 @@ class QuizEngine {
 
   prevQuestion() {
     if (this.currentIndex > 0) {
+      this.clearQuestionTimer();
       this.currentIndex--;
       this.render();
       if (typeof soundManager !== 'undefined' && soundManager.playPop) {
@@ -245,6 +380,7 @@ class QuizEngine {
     if (!this.container) return;
 
     if (this.isCompleted) {
+      this.clearQuestionTimer();
       this.renderSummary();
       return;
     }
@@ -260,6 +396,26 @@ class QuizEngine {
 
     this.container.innerHTML = `
       <div class="assessment-layout-container">
+
+        <!-- SCORING RULES BANNER (MASTER PROMPT Requirement 4.1) -->
+        <div class="quiz-scoring-rules-banner">
+          <div class="qsr-left">
+            <span class="qsr-badge-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            </span>
+            <div class="qsr-details">
+              <div class="qsr-title">QUIZ SCORING RULES &amp; TIME LIMITS</div>
+              <div class="qsr-rules-row">
+                <span class="qsr-rule-pill qsr-pill-correct"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Correct answer: +2 pts</span>
+                <span class="qsr-rule-pill qsr-pill-wrong"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Wrong answer: -1 pt</span>
+                <span class="qsr-rule-pill qsr-pill-timeout"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Timeout: 0 pts</span>
+                <span class="qsr-rule-pill qsr-pill-timer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Time Limit: 30s / Question</span>
+                <span class="qsr-rule-pill qsr-pill-total">Total: 20 pts (10 Questions)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- TOP ASSESSMENT HEADER & NAVIGATION CARD -->
         <div class="assessment-header-card" id="assessment-header-card">
           <div class="assessment-top-row">
@@ -268,7 +424,7 @@ class QuizEngine {
               <span>KNOWLEDGE ASSESSMENT</span>
             </div>
             <div class="assessment-meta">
-              Breadth First Search (BFS) Quiz (${totalQ} Questions)
+              Breadth First Search (BFS) Quiz (10 Questions &bull; 20 Points Total)
             </div>
           </div>
 
@@ -289,7 +445,7 @@ class QuizEngine {
             ${answeredCount === totalQ ? `
               <button type="button" class="btn-review-complete" onclick="quizEngine.completeQuiz()">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                Complete & Review Results
+                Complete &amp; Review Results
               </button>
             ` : ''}
           </div>
@@ -306,7 +462,12 @@ class QuizEngine {
               if (isCurrent) {
                 navClass += " is-current";
                 if (isAnswered) {
-                  if (ans.isCorrect) {
+                  if (ans.timedOut) {
+                    contentHTML = `
+                      <span class="q-nav-num">Q${idx + 1}</span>
+                      <span class="q-nav-mark" style="color:#eab308;">⏱</span>
+                    `;
+                  } else if (ans.isCorrect) {
                     contentHTML = `
                       <span class="q-nav-num">Q${idx + 1}</span>
                       <span class="q-nav-mark">✓</span>
@@ -321,7 +482,13 @@ class QuizEngine {
                   contentHTML = `<span class="q-nav-num">Q${idx + 1}</span>`;
                 }
               } else if (isAnswered) {
-                if (ans.isCorrect) {
+                if (ans.timedOut) {
+                  navClass += " is-timeout";
+                  contentHTML = `
+                    <span class="q-nav-num">Q${idx + 1}</span>
+                    <span class="q-nav-mark" style="color:#eab308;">⏱</span>
+                  `;
+                } else if (ans.isCorrect) {
                   navClass += " is-pass";
                   contentHTML = `
                     <span class="q-nav-num">Q${idx + 1}</span>
@@ -391,7 +558,7 @@ class QuizEngine {
         ` : ''}
 
         <!-- CURRENT QUESTION CARD -->
-        <div class="assessment-question-card ${answer ? (answer.isCorrect ? 'card-state-correct' : 'card-state-incorrect') : ''}" id="assessment-question-card">
+        <div class="assessment-question-card ${answer ? (answer.timedOut ? 'card-state-timeout' : (answer.isCorrect ? 'card-state-correct' : 'card-state-incorrect')) : ''}" id="assessment-question-card">
           <div class="q-card-header">
             <div class="q-card-header-left">
               <span class="q-num-pill">Question ${currentQNum} of ${totalQ}</span>
@@ -399,16 +566,27 @@ class QuizEngine {
             </div>
             <div class="q-card-header-right">
               ${answer ? (
-                answer.isCorrect 
-                  ? `<span class="q-status-badge badge-correct">
-                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                       Correct
+                answer.timedOut
+                  ? `<span class="q-status-badge badge-timeout">
+                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                       Time Expired (0 pts)
                      </span>`
-                  : `<span class="q-status-badge badge-incorrect">
-                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-                       Incorrect
-                     </span>`
-              ) : ''}
+                  : (answer.isCorrect 
+                    ? `<span class="q-status-badge badge-correct">
+                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                         Correct (+2 pts)
+                       </span>`
+                    : `<span class="q-status-badge badge-incorrect">
+                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                         Incorrect (-1 pt)
+                       </span>`
+                  )
+              ) : `
+                <div id="quiz-question-timer" class="q-timer-badge">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <span>00:30s</span>
+                </div>
+              `}
             </div>
           </div>
 
@@ -472,7 +650,7 @@ class QuizEngine {
             ` : (this.currentIndex === totalQ - 1 || answeredCount === totalQ ? `
               <button type="button" class="btn-quiz-nav btn-quiz-complete-review" onclick="quizEngine.completeQuiz()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-                COMPLETE & REVIEW
+                COMPLETE &amp; REVIEW
               </button>
             ` : `
               <button type="button" class="btn-quiz-nav btn-quiz-next" onclick="quizEngine.nextQuestion()">
@@ -505,6 +683,11 @@ class QuizEngine {
         </div>
       </div>
     `;
+
+    // Start timer for the current question if not yet answered
+    if (!answer) {
+      this.startQuestionTimer();
+    }
   }
 
   toggleExplanation(id) {
@@ -526,18 +709,16 @@ class QuizEngine {
   }
 
   renderSummary() {
-    const totalQ = this.questions.length;
-    let correctCount = 0;
-    this.questions.forEach(q => {
-      const ans = this.userAnswers[q.id];
-      if (ans && ans.isCorrect) correctCount++;
-    });
+    const stats = this.calculateScore();
+    const totalQ = stats.totalQ;
+    const correctCount = stats.correct;
+    const incorrectCount = stats.incorrect;
+    const timedOutCount = stats.timedOut || 0;
+    const unansweredCount = stats.unanswered;
+    const rawScore = stats.rawScore;
 
-    const incorrectCount = totalQ - correctCount;
-    const percentage = totalQ > 0 ? Math.round((correctCount / totalQ) * 100) : 0;
-
-    const gradeText = "★ OUTSTANDING MASTERY (GRADE A+) ★";
-    const subtitleText = "Incredible performance! You demonstrated thorough command of BFS operations and algorithmic constraints.";
+    const gradeText = rawScore >= 16 ? "★ OUTSTANDING MASTERY (GRADE A+) ★" : (rawScore >= 10 ? "★ PROFICIENT (GRADE B) ★" : "★ PRACTICE RECOMMENDED ★");
+    const subtitleText = `Quiz assessment complete. Earned +${correctCount * 2} points for correct answers, deducted -${incorrectCount * 1} point for incorrect answers.`;
 
     if (!this.expandedQuestions) {
       this.expandedQuestions = new Set([2]);
@@ -546,7 +727,7 @@ class QuizEngine {
     this.container.innerHTML = `
       <div class="quiz-review-image-format-container">
 
-        <!-- TOP KNOWLEDGE ASSESSMENT CARD (AS SHOWN IN REFERENCE IMAGE 2) -->
+        <!-- TOP KNOWLEDGE ASSESSMENT CARD -->
         <div class="assessment-header-card" id="assessment-header-card">
           <div class="assessment-top-row">
             <div class="assessment-badge">
@@ -554,14 +735,14 @@ class QuizEngine {
               <span>KNOWLEDGE ASSESSMENT</span>
             </div>
             <div class="assessment-meta-group">
-              <span class="assessment-meta">Breadth First Search (BFS) Quiz (${totalQ} Questions)</span>
+              <span class="assessment-meta">Breadth First Search (BFS) Quiz (10 Questions &bull; 20 Points Total)</span>
               <span class="assessment-completed-pill">Completed</span>
             </div>
           </div>
 
           <h1 class="assessment-title">Breadth First Search (BFS) Knowledge Check</h1>
           <p class="assessment-desc">
-            Test your understanding of level-by-level traversal, FIFO queue mechanics, visited sets, shortest unweighted paths, and time/space complexity.
+            Scoring: +2 points for each correct answer, -1 point penalty for each incorrect answer, 0 for timeout / unanswered.
           </p>
 
           <div class="assessment-progress-bar-row">
@@ -569,23 +750,27 @@ class QuizEngine {
               <svg class="sparkle-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5">
                 <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
               </svg>
-              <span class="progress-label">Progress: <strong>${totalQ} / ${totalQ} Answered</strong></span>
+              <span class="progress-label">Progress: <strong>${totalQ - unansweredCount} / ${totalQ} Evaluated</strong></span>
             </div>
             <div class="assessment-progress-right">
-              <span class="progress-correct-text"><strong>${correctCount}</strong> / ${totalQ} Correct</span>
+              <span class="progress-correct-text"><strong>${rawScore}</strong> / 20 Points</span>
             </div>
           </div>
 
           <div class="q-nav-row" role="navigation" aria-label="Question Review Navigation">
             ${this.questions.map((quest, idx) => {
               const ans = this.userAnswers[quest.id];
+              const isAnswered = ans !== undefined;
               const isCorrect = Boolean(ans && ans.isCorrect);
+              const isTimedOut = Boolean(ans && ans.timedOut);
+              const statusClass = !isAnswered ? 'is-unanswered' : (isTimedOut ? 'is-timeout' : (isCorrect ? 'is-pass' : 'is-fail'));
+              const markSymbol = !isAnswered ? '○' : (isTimedOut ? '⏱' : (isCorrect ? '✓' : '✕'));
               return `
-                <button type="button" class="q-nav-btn ${isCorrect ? 'is-pass' : 'is-fail'}" 
+                <button type="button" class="q-nav-btn ${statusClass}" 
                         onclick="document.getElementById('review-q-${quest.id}')?.scrollIntoView({behavior: 'smooth', block: 'center'})"
-                        title="Jump to Question ${idx + 1} (${isCorrect ? 'Correct' : 'Missed'})">
+                        title="Jump to Question ${idx + 1} (${!isAnswered ? 'Unanswered' : (isTimedOut ? 'Timed out 0 pts' : (isCorrect ? 'Correct +2 pts' : 'Incorrect -1 pt'))})">
                   <span class="q-nav-num">Q${idx + 1}</span>
-                  <span class="q-nav-mark">${isCorrect ? '✓' : '✕'}</span>
+                  <span class="q-nav-mark">${markSymbol}</span>
                 </button>
               `;
             }).join('')}
@@ -617,33 +802,29 @@ class QuizEngine {
 
           <!-- Highlighted Score Box -->
           <div class="result-score-card">
-            <div class="result-score-label">FINAL HIGHLIGHTED SCORE</div>
-            <div class="result-score-value">${percentage}%</div>
-            <div class="result-score-fraction-pill">${correctCount} &nbsp;/&nbsp; ${totalQ} Questions Correct</div>
+            <div class="result-score-label">FINAL RAW QUIZ SCORE</div>
+            <div class="result-score-value">${rawScore} / 20</div>
+            <div class="result-score-fraction-pill">+${correctCount * 2} pts (${correctCount} Correct) &bull; &minus;${incorrectCount * 1} pts (${incorrectCount} Incorrect) &bull; ${unansweredCount + timedOutCount} Unanswered / Timeout</div>
           </div>
 
-          <!-- 3 Stat Cards Row: CORRECT, INCORRECT, ACCURACY -->
+          <!-- 3 Stat Cards Row: CORRECT (+2), INCORRECT (-1), TIMEOUT (0) -->
           <div class="result-stats-row">
             <div class="result-stat-card">
-              <div class="stat-card-label">CORRECT</div>
-              <div class="stat-card-val val-green">✓ ${correctCount}</div>
+              <div class="stat-card-label">CORRECT (+2 pts)</div>
+              <div class="stat-card-val val-green">✓ +${correctCount * 2} pts</div>
             </div>
             <div class="result-stat-card">
-              <div class="stat-card-label">INCORRECT</div>
-              <div class="stat-card-val val-red">${incorrectCount}</div>
+              <div class="stat-card-label">INCORRECT (-1 pt)</div>
+              <div class="stat-card-val val-red">✕ -${incorrectCount * 1} pts</div>
             </div>
             <div class="result-stat-card">
-              <div class="stat-card-label">ACCURACY</div>
-              <div class="stat-card-val val-accuracy">${percentage}%</div>
+              <div class="stat-card-label">TIMEOUT (0 pts)</div>
+              <div class="stat-card-val" style="color: var(--text-muted);">⏱️ ${timedOutCount} (0 pts)</div>
             </div>
           </div>
 
-          <!-- Actions: Retake Quiz and Back to Home -->
+          <!-- Action: Back to Home (Retake Quiz button removed as per Requirement 6) -->
           <div class="result-actions-row">
-            <button type="button" class="btn-result-retake" onclick="quizEngine.reset()">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-              Retake Quiz
-            </button>
             <button type="button" class="btn-result-home" onclick="if(window.app && app.switchTab){ app.switchTab('overview'); } else { window.location.reload(); }">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
               Back to Home
@@ -652,7 +833,7 @@ class QuizEngine {
 
         </div>
 
-        <!-- FULL QUESTION-BY-QUESTION REVIEW HEADER (EXACT IMAGE 1 FORMAT) -->
+        <!-- FULL QUESTION-BY-QUESTION REVIEW HEADER -->
         <div class="review-section-header" id="quiz-full-review-header">
           <div class="review-header-title">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -675,8 +856,9 @@ class QuizEngine {
           ${this.questions.map((quest, idx) => {
             const ans = this.userAnswers[quest.id];
             const isCorrect = Boolean(ans && ans.isCorrect);
+            const isTimedOut = Boolean(ans && ans.timedOut);
             const userOpt = ans ? quest.options.find(o => o.id === ans.optionId) : null;
-            const userOptText = userOpt ? `${userOpt.id}: ${userOpt.text}` : 'No answer submitted';
+            const userOptText = isTimedOut ? 'Timed out (0 pts)' : (userOpt ? `${userOpt.id}: ${userOpt.text}` : 'No answer submitted');
             const correctOpt = quest.options.find(o => o.correct);
             const correctOptText = correctOpt ? `${correctOpt.id}: ${correctOpt.text}` : '';
             const qNumFormatted = String(idx + 1).padStart(2, '0');
@@ -690,17 +872,21 @@ class QuizEngine {
                     <span class="rev-pill-code">${codeTag}</span>
                   </div>
                   <div>
-                    ${isCorrect ? `
+                    ${isTimedOut ? `
+                      <span class="rev-status-pill pill-timeout" style="background: rgba(234, 179, 8, 0.15); color: #ca8a04; border: 1px solid rgba(234, 179, 8, 0.4);">
+                        ⏱️ Timed Out (0 pts)
+                      </span>
+                    ` : (isCorrect ? `
                       <span class="rev-status-pill pill-correct">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"><polyline points="20 6 9 17 4 12"/></svg>
-                        Correct
+                        Correct (+2 pts)
                       </span>
                     ` : `
                       <span class="rev-status-pill pill-incorrect">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                        Missed Answer
+                        Incorrect (-1 pt)
                       </span>
-                    `}
+                    `)}
                   </div>
                 </div>
 
@@ -728,13 +914,13 @@ class QuizEngine {
                   </div>
                   <div class="rev-expl-text">${quest.explanation}</div>
                   <div class="rev-expl-links">
-                    <button type="button" class="rev-expl-link" onclick="if(window.app && app.switchTab){ app.switchTab('tutorial'); }">
+                    <button type="button" class="rev-expl-link" onclick="if(window.app && app.switchTab){ app.switchTab('theory'); }">
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
                       Review in Theory Guide →
                     </button>
-                    <button type="button" class="rev-expl-link" onclick="if(window.app && app.switchTab){ app.switchTab('visualizer'); }">
+                    <button type="button" class="rev-expl-link" onclick="if(window.app && app.switchTab){ app.switchTab('visualize'); }">
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
-                      Practice in Visualizer →
+                      Practice in Visualizations →
                     </button>
                   </div>
                 </div>
