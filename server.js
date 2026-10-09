@@ -57,11 +57,11 @@ function requestHandler(req, res) {
       // Check for video1.mp4 / video2.mp4 fallback alias
       if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
         const basename = path.basename(filePath).toLowerCase();
-        if (basename === 'video1.mp4') {
-          const v1 = path.join(videosDir, '1791106906036252.mp4');
+        if (basename === 'video1.mp4' || basename === 'video-1.mp4' || basename === 'video final 1.mp4') {
+          const v1 = path.join(videosDir, 'video final 1.mp4');
           if (fs.existsSync(v1) && fs.statSync(v1).isFile()) filePath = v1;
-        } else if (basename === 'video2.mp4') {
-          const v2 = path.join(videosDir, 'WhatsApp Video 2026-09-07 at 15.50.48.mp4');
+        } else if (basename === 'video2.mp4' || basename === 'video-2.mp4' || basename === 'video final 2.mp4') {
+          const v2 = path.join(videosDir, 'video final 2.mp4');
           if (fs.existsSync(v2) && fs.statSync(v2).isFile()) filePath = v2;
         }
       }

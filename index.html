@@ -673,144 +673,82 @@
         <section id="view-visualize" class="tab-view-container hidden">
           <div class="visualize-view-wrapper">
             
-            <!-- Top Lesson Selector Cards Row -->
-            <div class="visualize-lessons-row">
-              
-              <!-- Lesson 01 Card (Active State) -->
-              <div class="lesson-select-card active" id="lesson-card-01" data-video-src="videos/1791106906036252.mp4" onclick="app.selectVideoLesson('intro', false)">
-                <div class="lesson-card-top">
-                  <span class="lesson-tag">Video 1</span>
-                  <span class="lesson-icon-video">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-                  </span>
+            <!-- Visualisation Header Banner -->
+            <div class="visualize-header-banner">
+              <div class="v-banner-text">
+                <div class="v-banner-badge-row">
+                  <span class="v-section-pill">VISUALISATION STUDIO</span>
+                  <span class="v-counter-pill" id="v-completed-counter-pill">0 / 2 Completed</span>
                 </div>
-                <h3 class="lesson-card-title">BFS Visualization &amp; Traversal</h3>
-                <p class="lesson-card-desc">Watch BFS explore graph nodes level-by-level using an animated concentric wave and FIFO queue.</p>
-                <div class="lesson-chips-row">
-                  <span class="lesson-pill">Concentric Ripple Wave</span>
-                  <span class="lesson-pill">FIFO Queue Invariant</span>
-                  <span class="lesson-pill">Level 0 &rarr; 1 &rarr; 2</span>
-                  <span class="lesson-pill">Linear Time O(V + E)</span>
-                </div>
-                <button class="lesson-action-btn solid" id="btn-watch-lesson-01" onclick="event.stopPropagation(); app.selectVideoLesson('intro', true)">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block;vertical-align:middle;margin-right:5px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>CLICK TO WATCH
-                </button>
+                <h2>Breadth First Search Visualisations</h2>
+                <p>Explore original, high-definition algorithmic video walkthroughs. Watch BFS explore graph levels dynamically and inspect queue invariants, discovery edges, and shortest path backtracking.</p>
               </div>
-
-              <!-- Lesson 02 Card -->
-              <div class="lesson-select-card" id="lesson-card-02" data-video-src="videos/WhatsApp Video 2026-09-07 at 15.50.48.mp4" onclick="app.selectVideoLesson('shortest_path', false)">
-                <div class="lesson-card-top">
-                  <span class="lesson-tag">Video 2</span>
-                  <span class="lesson-icon-video">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-                  </span>
-                </div>
-                <h3 class="lesson-card-title">BFS Algorithm &amp; Implementation</h3>
-                <p class="lesson-card-desc">Understand discovery edges, cross edge handling, visited set protection, and optimal path backtracking.</p>
-                <div class="lesson-chips-row">
-                  <span class="lesson-pill">Discovery vs Cross Edges</span>
-                  <span class="lesson-pill">Visited Set Tracking</span>
-                  <span class="lesson-pill">Parent Backtracking</span>
-                  <span class="lesson-pill">Spanning Tree Formation</span>
-                </div>
-                <button class="lesson-action-btn outline" id="btn-watch-lesson-02" onclick="event.stopPropagation(); app.selectVideoLesson('shortest_path', true)">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block;vertical-align:middle;margin-right:5px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>CLICK TO WATCH
-                </button>
-              </div>
-
             </div>
 
-            <!-- Video Player & Cinema Display Card -->
-            <div class="video-player-main-card">
+            <!-- Two Dedicated Video Cards in a Responsive Grid -->
+            <div class="visualize-video-grid video-grid">
               
-              <div class="v-player-header-row">
-                <div class="v-player-status-tag">
-                  <span class="v-screen-icon">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
-                  </span>
-                  <span class="v-status-lbl">CURRENT LESSON</span>
-                </div>
-                <h4 id="v-player-title" class="v-player-heading">NOW PLAYING: BFS VISUALIZATION &amp; TRAVERSAL</h4>
-                <span id="v-player-file-tag" class="v-file-badge">1791106906036252.mp4</span>
-              </div>
-
-              <!-- Video Screen Container -->
-              <div class="video-screen-container" id="video-screen-container" style="position: relative; width: 100%; height: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: #000; display: block;">
-                <video id="bfs-main-video" class="bfs-video-player" playsinline webkit-playsinline x5-playsinline preload="metadata" src="videos/1791106906036252.mp4" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center center; display: block; border: none; border-radius: 0; margin: 0; padding: 0; background: #000;">
-                  <source src="videos/1791106906036252.mp4" type="video/mp4">
-                  <source src="videos/video1.mp4" type="video/mp4">
-                  <source src="/videos/1791106906036252.mp4" type="video/mp4">
-                  <source src="/videos/video1.mp4" type="video/mp4">
-                  Your browser does not support HTML5 video.
-                </video>
-
-              </div>
-
-              <!-- ── Controls Bar: always visible BELOW the video ── -->
-              <div class="video-controls-toolbar" id="video-controls-toolbar">
-
-                <!-- Progress Scrub Bar -->
-                <div class="v-scrubber-row">
-                  <div class="v-progress-track" id="v-progress-track" onclick="app.seekVideo(event)">
-                    <div id="v-progress-fill" class="v-progress-fill" style="width: 0%;"></div>
-                    <div id="v-progress-thumb" class="v-progress-thumb" style="left: 0%;"></div>
+              <!-- Video 1 Card -->
+              <article class="visualize-video-card video-card" id="lesson-card-01">
+                <div class="v-card-header">
+                  <div class="v-card-tag-row">
+                    <span class="lesson-tag">Video 1</span>
+                    <span class="v-file-badge">video final 1.mp4</span>
+                  </div>
+                  <h3 class="v-card-title">Video 1: BFS Visualization &amp; Traversal</h3>
+                  <p class="v-card-desc">Watch BFS explore graph nodes level-by-level using an animated concentric wave and FIFO queue.</p>
+                  <div class="lesson-chips-row">
+                    <span class="lesson-pill">Concentric Ripple Wave</span>
+                    <span class="lesson-pill">FIFO Queue Invariant</span>
+                    <span class="lesson-pill">Level 0 &rarr; 1 &rarr; 2</span>
+                    <span class="lesson-pill">Linear Time O(V + E)</span>
                   </div>
                 </div>
-
-                <!-- Time + Actions Row -->
-                <div class="v-time-actions-row">
-                  <span id="v-time-current" class="v-time-text">00:00</span>
-
-                  <div class="v-main-actions-row">
-                    <button class="v-btn-icon-circle" onclick="app.skipVideo(-10)" title="Replay 10s">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="1 4 1 10 7 10"></polyline>
-                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
-                      </svg>
-                    </button>
-
-                    <button id="v-play-pause-btn" class="v-pill-play-btn" onclick="app.toggleVideoPlay()">
-                      <span id="v-play-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
-                      <span id="v-play-text">PLAY</span>
-                    </button>
-
-                    <button class="v-btn-icon-circle" onclick="app.skipVideo(10)" title="Forward 10s">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="23 4 23 10 17 10"></polyline>
-                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                      </svg>
-                    </button>
-                  </div>
-
-                  <span id="v-time-total" class="v-time-text">00:00</span>
+                <div class="v-player-container">
+                  <video
+                    id="bfs-video-1"
+                    class="bfs-embedded-player"
+                    controls
+                    preload="metadata"
+                    playsinline
+                  >
+                    <source src="videos/video final 1.mp4" type="video/mp4">
+                    <source src="/videos/video%20final%201.mp4" type="video/mp4">
+                    Your browser does not support HTML5 video.
+                  </video>
                 </div>
+              </article>
 
-                <!-- Speed pills + Volume + Fullscreen Row -->
-                <div class="v-bottom-bar-row">
-                  <div class="v-speed-pills-wrap">
-                    <button class="v-speed-pill" data-speed="0.5" onclick="app.setVideoSpeed(0.5)">0.5x</button>
-                    <button class="v-speed-pill active" data-speed="1.0" onclick="app.setVideoSpeed(1.0)">1x</button>
-                    <button class="v-speed-pill" data-speed="1.5" onclick="app.setVideoSpeed(1.5)">1.5x</button>
-                    <button class="v-speed-pill" data-speed="2.0" onclick="app.setVideoSpeed(2.0)">2x</button>
+              <!-- Video 2 Card -->
+              <article class="visualize-video-card video-card" id="lesson-card-02">
+                <div class="v-card-header">
+                  <div class="v-card-tag-row">
+                    <span class="lesson-tag">Video 2</span>
+                    <span class="v-file-badge">video final 2.mp4</span>
                   </div>
-
-                  <div class="v-aux-controls-wrap">
-                    <button class="v-btn-icon-plain" onclick="app.toggleMuteVideo()" title="Mute / Unmute">
-                      <svg id="v-vol-icon-svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                      </svg>
-                    </button>
-
-                    <button class="v-btn-icon-plain" onclick="app.toggleVideoFullscreen()" title="Toggle Fullscreen">
-                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-                      </svg>
-                    </button>
+                  <h3 class="v-card-title">Video 2: BFS Algorithm &amp; Implementation</h3>
+                  <p class="v-card-desc">Understand discovery edges, cross edge handling, visited set protection, and optimal path backtracking.</p>
+                  <div class="lesson-chips-row">
+                    <span class="lesson-pill">Discovery vs Cross Edges</span>
+                    <span class="lesson-pill">Visited Set Tracking</span>
+                    <span class="lesson-pill">Parent Backtracking</span>
+                    <span class="lesson-pill">Spanning Tree Formation</span>
                   </div>
                 </div>
-
-              </div>
+                <div class="v-player-container">
+                  <video
+                    id="bfs-video-2"
+                    class="bfs-embedded-player"
+                    controls
+                    preload="metadata"
+                    playsinline
+                  >
+                    <source src="videos/video final 2.mp4" type="video/mp4">
+                    <source src="/videos/video%20final%202.mp4" type="video/mp4">
+                    Your browser does not support HTML5 video.
+                  </video>
+                </div>
+              </article>
 
             </div>
 

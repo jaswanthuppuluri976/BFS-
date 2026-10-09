@@ -15,35 +15,36 @@ class AppController {
     this.activeCodeLanguage = "c"; // Default active programming language tab
 
     // Video Player State & Dedicated Sources (Added Videos in videos/ directory)
-    this.video1File = "1791106906036252.mp4";
-    this.video2File = "WhatsApp Video 2026-09-07 at 15.50.48.mp4";
+    // Video Player State & Dedicated Sources (Added Videos in videos/ directory)
+    this.video1File = "video final 1.mp4";
+    this.video2File = "video final 2.mp4";
 
-    this.video1Src = `videos/${this.video1File}`;
-    this.video2Src = `videos/${this.video2File}`;
+    this.video1Src = `videos/${encodeURIComponent(this.video1File)}`;
+    this.video2Src = `videos/${encodeURIComponent(this.video2File)}`;
 
     this.videoLessons = {
       intro: {
         id: "video1",
-        title: "NOW PLAYING: BFS VISUALIZATION & TRAVERSAL",
+        title: "Video 1: BFS Visualization & Traversal",
         fileTag: this.video1File,
-        src: this.video1Src,
+        src: "videos/video final 1.mp4",
         fallbacks: [
-          this.video1Src,
-          "videos/video1.mp4",
-          `/${this.video1Src}`,
-          "/videos/video1.mp4"
+          "videos/video final 1.mp4",
+          "/videos/video final 1.mp4",
+          "/videos/video%20final%201.mp4",
+          "videos/video%20final%201.mp4"
         ]
       },
       shortest_path: {
         id: "video2",
-        title: "NOW PLAYING: BFS ALGORITHM & IMPLEMENTATION",
+        title: "Video 2: BFS Algorithm & Implementation",
         fileTag: this.video2File,
-        src: this.video2Src,
+        src: "videos/video final 2.mp4",
         fallbacks: [
-          this.video2Src,
-          "videos/video2.mp4",
-          `/${this.video2Src}`,
-          "/videos/video2.mp4"
+          "videos/video final 2.mp4",
+          "/videos/video final 2.mp4",
+          "/videos/video%20final%202.mp4",
+          "videos/video%20final%202.mp4"
         ]
       }
     };
@@ -381,11 +382,13 @@ class AppController {
   switchTab(tabName) {
     this.activeTab = tabName;
 
-    // Immediately stop and pause HTML5 video whenever switching tabs or leaving visualize
+    // Immediately stop and pause HTML5 videos whenever switching tabs or leaving visualize
+    const v1 = document.getElementById("bfs-video-1");
+    const v2 = document.getElementById("bfs-video-2");
+    if (v1 && !v1.paused) v1.pause();
+    if (v2 && !v2.paused) v2.pause();
     const video = document.getElementById("bfs-main-video");
-    if (video && !video.paused) {
-      video.pause();
-    }
+    if (video && !video.paused) video.pause();
     this.isVideoPlaying = false;
     this.syncPlayButtonUI();
 
@@ -1679,126 +1682,55 @@ class AppController {
 
   /* ─── Visualize / HTML5 Video Player Engine ─────────────────── */
 
+  /* ─── Visualize / HTML5 Video Player Engine ─────────────────── */
+
   initVideoPlayer() {
-    const video = document.getElementById("bfs-main-video");
-    const screen = document.getElementById("video-screen-container");
-    if (!video) return;
+    const v1 = document.getElementById("bfs-video-1");
+    const v2 = document.getElementById("bfs-video-2");
 
-    // Ensure video src is initialized to current lesson
-    const initialLesson = this.videoLessons[this.activeLesson] || this.videoLessons.intro;
-    const currentSrcDecoded = decodeURIComponent(video.currentSrc || video.src || "");
-    if (!video.src || video.src === "" || video.src.endsWith("/") || (!currentSrcDecoded.includes(initialLesson.fileTag) && !currentSrcDecoded.includes(initialLesson.id))) {
-      video.src = initialLesson.src;
-    }
+    const setupPlayer = (player, key, otherPlayer) => {
+      if (!player) return;
 
-    // Click on video screen or center play overlay toggles play/pause
-    if (screen) {
-      screen.addEventListener("click", (e) => {
-        if (e.target && e.target.closest && e.target.closest("#video-controls-toolbar")) {
-          return;
+      player.addEventListener("play", () => {
+        // Pause other video to prevent audio overlapping
+        if (otherPlayer && !otherPlayer.paused) {
+          otherPlayer.pause();
         }
-        this.toggleVideoPlay();
+        this.completedVideos.add(key);
+        localStorage.setItem("algolearn_completed_videos", JSON.stringify([...this.completedVideos]));
+        this.updateProgressStats();
       });
-      // Double-click enters fullscreen
-      screen.addEventListener("dblclick", (e) => {
-        e.preventDefault();
-        this.toggleVideoFullscreen();
-      });
-    }
 
-    // Fallback cascade if a source fails to load
-    video.addEventListener("error", () => {
-      const lesson = this.videoLessons[this.activeLesson] || this.videoLessons.intro;
-      if (lesson && lesson.fallbacks) {
-        const decodedSrc = decodeURIComponent(video.src || "");
-        const idx = lesson.fallbacks.findIndex(f => decodedSrc.includes(f) || video.src.includes(encodeURI(f)));
-        if (idx !== -1 && idx < lesson.fallbacks.length - 1) {
-          const nextSrc = lesson.fallbacks[idx + 1];
-          console.warn(`[Video Player] Error loading ${video.src}, trying fallback: ${nextSrc}`);
-          video.src = nextSrc;
-          video.load();
-          return;
-        }
-      }
-      console.warn("[Video Player] Video source load error:", video.error, video.src);
-    });
+      player.addEventListener("ended", () => {
+        this.completedVideos.add(key);
+        localStorage.setItem("algolearn_completed_videos", JSON.stringify([...this.completedVideos]));
+        this.updateProgressStats();
+      });
+
+      player.addEventListener("error", (e) => {
+        console.warn(`[Video Player] Error loading ${key}:`, player.error);
+      });
+    };
+
+    setupPlayer(v1, "intro", v2);
+    setupPlayer(v2, "shortest_path", v1);
 
     // Pause video if user switches browser tab or window loses visibility
     document.addEventListener("visibilitychange", () => {
-      if (document.hidden && video && !video.paused) {
-        video.pause();
-        this.isVideoPlaying = false;
-        this.syncPlayButtonUI();
+      if (document.hidden) {
+        if (v1 && !v1.paused) v1.pause();
+        if (v2 && !v2.paused) v2.pause();
       }
     });
 
-    video.addEventListener("timeupdate", () => {
-      this.updateVideoProgressUI();
-    });
-
-    video.addEventListener("loadedmetadata", () => {
-      this.updateVideoDurationUI();
-      this.updateVideoProgressUI();
-    });
-
-    video.addEventListener("durationchange", () => {
-      this.updateVideoDurationUI();
-    });
-
-    video.addEventListener("play", () => {
-      this.isVideoPlaying = true;
-      this.syncPlayButtonUI();
-    });
-
-    video.addEventListener("pause", () => {
-      this.isVideoPlaying = false;
-      this.syncPlayButtonUI();
-    });
-
-    video.addEventListener("ended", () => {
-      this.isVideoPlaying = false;
-      this.syncPlayButtonUI();
-      this.completedVideos.add(this.activeLesson);
-      localStorage.setItem("algolearn_completed_videos", JSON.stringify([...this.completedVideos]));
-      this.updateProgressStats();
-    });
-
-    // Explicitly start in paused state
-    if (!video.paused) {
-      video.pause();
-    }
-    this.isVideoPlaying = false;
-    video.volume = this.videoVolume;
-    video.playbackRate = this.videoSpeed;
-    this.syncPlayButtonUI();
+    this.updateProgressStats();
   }
 
   startVideoPlayback() {
-    const video = document.getElementById("bfs-main-video");
-    if (!video) return;
-    const lessonKey = (this.activeLesson === "shortest_path" || this.activeLesson === "video2" || this.activeLesson === "algorithm")
-      ? "shortest_path"
-      : "intro";
-    const lessonData = this.videoLessons[lessonKey] || this.videoLessons.intro;
-
-    const currentSrcDecoded = decodeURIComponent(video.currentSrc || video.src || "");
-    const matchesCurrent = currentSrcDecoded.includes(lessonData.fileTag) || 
-                           currentSrcDecoded.includes(lessonData.id) ||
-                           (lessonData.fallbacks && lessonData.fallbacks.some(f => currentSrcDecoded.includes(f)));
-
-    if (!video.src || video.src === "" || video.src.endsWith("/") || !matchesCurrent) {
-      video.src = lessonData.src;
-      video.load();
+    const v1 = document.getElementById("bfs-video-1");
+    if (v1 && v1.paused) {
+      v1.play().catch(e => console.warn("Auto-playback deferred by browser:", e));
     }
-    video.playbackRate = this.videoSpeed || 1;
-    video.volume = this.videoVolume !== undefined ? this.videoVolume : 0.8;
-
-    // Do NOT autoplay when entering visualization tab; video only plays when user clicks play or watch button
-    if (!video.paused) {
-      video.pause();
-    }
-    this.isVideoPlaying = false;
-    this.syncPlayButtonUI();
   }
 
   selectVideoLesson(lessonKey, autoPlay = false) {
@@ -1807,61 +1739,24 @@ class AppController {
       : "intro";
     this.activeLesson = canonicalKey;
     const isVideo1 = (canonicalKey === "intro");
-    const lessonData = this.videoLessons[canonicalKey] || this.videoLessons.intro;
 
-    // Toggle Card Active States
-    const card01 = document.getElementById("lesson-card-01");
-    const card02 = document.getElementById("lesson-card-02");
-    const btn01  = document.getElementById("btn-watch-lesson-01");
-    const btn02  = document.getElementById("btn-watch-lesson-02");
+    const targetCardId = isVideo1 ? "lesson-card-01" : "lesson-card-02";
+    const targetVideo = document.getElementById(isVideo1 ? "bfs-video-1" : "bfs-video-2");
+    const otherVideo = document.getElementById(isVideo1 ? "bfs-video-2" : "bfs-video-1");
 
-    if (card01 && card02) {
-      card01.classList.toggle("active", isVideo1);
-      card02.classList.toggle("active", !isVideo1);
+    const targetCard = document.getElementById(targetCardId);
+    if (targetCard) {
+      targetCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      targetCard.classList.add("active");
+      setTimeout(() => targetCard.classList.remove("active"), 2000);
     }
 
-    if (btn01 && btn02) {
-      btn01.className = `lesson-action-btn ${isVideo1 ? "solid" : "outline"}`;
-      btn02.className = `lesson-action-btn ${!isVideo1 ? "solid" : "outline"}`;
+    if (otherVideo && !otherVideo.paused) {
+      otherVideo.pause();
     }
 
-    // Update Player Title & Badge
-    const titleEl = document.getElementById("v-player-title");
-    const fileEl  = document.getElementById("v-player-file-tag");
-    const video = document.getElementById("bfs-main-video");
-
-    if (titleEl) {
-      titleEl.textContent = lessonData.title;
-    }
-    if (fileEl) {
-      fileEl.textContent = lessonData.fileTag;
-    }
-
-    if (video) {
-      const targetSrc = lessonData.src;
-      const currentSrcDecoded = decodeURIComponent(video.currentSrc || video.src || "");
-      const isAlreadyLoaded = currentSrcDecoded.includes(lessonData.fileTag) || 
-                              (lessonData.fallbacks && lessonData.fallbacks.some(f => currentSrcDecoded.includes(f)));
-
-      // If switching to a different video source
-      if (!isAlreadyLoaded) {
-        video.pause();
-        video.src = targetSrc;
-        video.load();
-        video.currentTime = 0;
-        video.playbackRate = this.videoSpeed || 1.0;
-        video.volume = this.videoVolume !== undefined ? this.videoVolume : 0.8;
-      }
-      
-      if (autoPlay) {
-        this.playVideo();
-      } else {
-        if (!video.paused) {
-          video.pause();
-        }
-        this.isVideoPlaying = false;
-        this.syncPlayButtonUI();
-      }
+    if (targetVideo && autoPlay) {
+      targetVideo.play().catch(e => console.warn("Playback prevented by browser policy:", e));
     }
 
     this.completedVideos.add(canonicalKey);
@@ -2134,6 +2029,9 @@ class AppController {
     if (badgeGame) badgeGame.textContent = `${gameWonCount} / ${totalLevels}`;
     if (badgeQuiz) badgeQuiz.textContent = `${quizAnsweredCount} / ${totalQuizQuestions}`;
     if (badgeProgress) badgeProgress.textContent = `${overallPct}%`;
+
+    const vPill = document.getElementById("v-completed-counter-pill");
+    if (vPill) vPill.textContent = `${this.completedVideos.size} / 2 Completed`;
   }
 
   filterProgressModules(category) {
@@ -2299,18 +2197,15 @@ class AppController {
       window.quizEngine.reset();
     }
 
-    // 5. Reset Interactive Video Player
+    // 5. Reset Interactive Video Players
+    const v1 = document.getElementById("bfs-video-1");
+    const v2 = document.getElementById("bfs-video-2");
+    if (v1) { v1.pause(); v1.currentTime = 0; }
+    if (v2) { v2.pause(); v2.currentTime = 0; }
     const video = document.getElementById("bfs-main-video");
-    if (video) {
-      video.pause();
-      video.currentTime = 0;
-    }
+    if (video) { video.pause(); video.currentTime = 0; }
     this.isVideoPlaying = false;
     this.syncPlayButtonUI();
-    const vFill = document.getElementById("v-progress-fill");
-    const vThumb = document.getElementById("v-progress-thumb");
-    if (vFill) vFill.style.width = "0%";
-    if (vThumb) vThumb.style.left = "0%";
 
     // 6. Reset Visualizer Engines
     if (window.applicationsDemoEngine && typeof window.applicationsDemoEngine.restart === "function") {

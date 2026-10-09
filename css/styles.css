@@ -2648,7 +2648,187 @@ body.dark-theme .ch-nav-btn-outline:hover {
 .visualize-view-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 10px 0 30px;
+}
+
+/* Header Banner */
+.visualize-header-banner {
+  background: linear-gradient(135deg, rgba(238, 242, 255, 0.95) 0%, rgba(224, 231, 255, 0.7) 100%);
+  border: 1.5px solid #c7d2fe;
+  border-radius: var(--radius-xl);
+  padding: 24px 28px;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.08);
+}
+
+body.dark-theme .visualize-header-banner {
+  background: linear-gradient(135deg, #181d28 0%, #1e2433 100%);
+  border-color: #2e384d;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.v-banner-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.v-section-pill {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.05em;
+}
+
+.v-counter-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+}
+
+.v-banner-text h2 {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+  margin: 0 0 6px;
+}
+
+.v-banner-text p {
+  font-size: 0.9rem;
+  color: var(--text-sub);
+  line-height: 1.5;
+  margin: 0;
+  max-width: 800px;
+}
+
+/* Dual Video Grid */
+.visualize-video-grid,
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  align-items: stretch;
+}
+
+@media (max-width: 960px) {
+  .visualize-video-grid,
+  .video-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+.visualize-video-card,
+.video-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.visualize-video-card:hover,
+.video-card:hover {
+  transform: translateY(-2px);
+  border-color: #6366f1;
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.14);
+}
+
+.visualize-video-card.active,
+.video-card.active {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4), 0 10px 25px rgba(99, 102, 241, 0.18);
+}
+
+body.dark-theme .visualize-video-card,
+body.dark-theme .video-card {
+  background: #181d28;
+  border-color: #2a3346;
+}
+
+body.dark-theme .visualize-video-card:hover,
+body.dark-theme .video-card:hover {
+  border-color: #818cf8;
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.25);
+}
+
+.visualize-video-card .v-card-header,
+.video-card .v-card-header {
+  padding: 22px 24px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-grow: 1;
+}
+
+.visualize-video-card .v-card-tag-row,
+.video-card .v-card-tag-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.visualize-video-card .v-card-title,
+.video-card .v-card-title,
+.video-card h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.visualize-video-card .v-card-desc,
+.video-card .v-card-desc {
+  font-size: 0.85rem;
+  color: var(--text-sub);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.visualize-video-card .v-player-container,
+.video-card .v-player-container {
+  background: #000;
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: 1px solid var(--border-color);
+}
+
+body.dark-theme .visualize-video-card .v-player-container,
+body.dark-theme .video-card .v-player-container {
+  border-top-color: #2a3346;
+}
+
+.visualize-video-card video,
+.video-card video,
+.bfs-embedded-player {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  display: block;
+  background: #000;
+  border: none;
+  outline: none;
 }
 
 /* Top Lesson Selector Cards Row (Pic 5) */
