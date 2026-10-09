@@ -380,15 +380,28 @@ class AppController {
   /* ─── Tab Switching ─────────────────────────────────────────── */
 
   switchTab(tabName) {
+    const previousTab = this.activeTab;
     this.activeTab = tabName;
 
-    // Immediately stop and pause HTML5 videos whenever switching tabs or leaving visualize
+    // Immediately stop, pause, and rewind HTML5 videos to the beginning whenever leaving or entering visualize
     const v1 = document.getElementById("bfs-video-1");
     const v2 = document.getElementById("bfs-video-2");
-    if (v1 && !v1.paused) v1.pause();
-    if (v2 && !v2.paused) v2.pause();
     const video = document.getElementById("bfs-main-video");
-    if (video && !video.paused) video.pause();
+
+    if (tabName !== "visualize" || previousTab !== "visualize") {
+      if (v1) {
+        v1.pause();
+        v1.currentTime = 0;
+      }
+      if (v2) {
+        v2.pause();
+        v2.currentTime = 0;
+      }
+      if (video) {
+        video.pause();
+        video.currentTime = 0;
+      }
+    }
     this.isVideoPlaying = false;
     this.syncPlayButtonUI();
 
@@ -1705,6 +1718,7 @@ class AppController {
         this.completedVideos.add(key);
         localStorage.setItem("algolearn_completed_videos", JSON.stringify([...this.completedVideos]));
         this.updateProgressStats();
+        player.currentTime = 0;
       });
 
       player.addEventListener("error", (e) => {
@@ -1728,8 +1742,14 @@ class AppController {
 
   startVideoPlayback() {
     const v1 = document.getElementById("bfs-video-1");
-    if (v1 && v1.paused) {
-      v1.play().catch(e => console.warn("Auto-playback deferred by browser:", e));
+    const v2 = document.getElementById("bfs-video-2");
+    if (v1) {
+      v1.pause();
+      v1.currentTime = 0;
+    }
+    if (v2) {
+      v2.pause();
+      v2.currentTime = 0;
     }
   }
 
@@ -1751,12 +1771,16 @@ class AppController {
       setTimeout(() => targetCard.classList.remove("active"), 2000);
     }
 
-    if (otherVideo && !otherVideo.paused) {
+    if (otherVideo) {
       otherVideo.pause();
+      otherVideo.currentTime = 0;
     }
 
-    if (targetVideo && autoPlay) {
-      targetVideo.play().catch(e => console.warn("Playback prevented by browser policy:", e));
+    if (targetVideo) {
+      targetVideo.currentTime = 0;
+      if (autoPlay) {
+        targetVideo.play().catch(e => console.warn("Playback prevented by browser policy:", e));
+      }
     }
 
     this.completedVideos.add(canonicalKey);
