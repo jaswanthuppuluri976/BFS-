@@ -5,8 +5,6 @@
  */
 
 const BFS_SCORING = {
-  total: 100,
-
   learn: {
     total: 0,
     topicCount: 12
@@ -28,7 +26,7 @@ const BFS_SCORING = {
       advancedGraphChallenges: [8, 8, 8]
     },
     penalties: {
-      hint: 2,
+      hint: 3,
       guidedSolve: 3
     }
   },
@@ -40,6 +38,11 @@ const BFS_SCORING = {
     questionCount: 10
   }
 };
+// Calculate total possible score dynamically from remaining modules (Visualize: 16 + Game: 64 + Quiz: 20 = 100)
+BFS_SCORING.total = ((BFS_SCORING.visualisation && BFS_SCORING.visualisation.total) || 16)
+  + ((BFS_SCORING.game && BFS_SCORING.game.total) || 64)
+  + ((BFS_SCORING.quiz && BFS_SCORING.quiz.totalPositiveMarks) || 20);
+
 window.BFS_SCORING = BFS_SCORING;
 
 const LEVEL_MARKS = {
@@ -68,128 +71,7 @@ function getCanonicalLevelSlot(lvl) {
 }
 window.getCanonicalLevelSlot = getCanonicalLevelSlot;
 
-const LEARN_CHECKPOINTS = {
-  "graph-foundations": {
-    question: "In an Adjacency List representation of graph G = (V, E), what is the time complexity to retrieve all direct neighbors of vertex V?",
-    options: [
-      { id: "A", text: "O(deg(V)) proportional to the degree of V", correct: true },
-      { id: "B", text: "O(V²) scan across all vertices", correct: false },
-      { id: "C", text: "O(1) immediate constant lookup", correct: false },
-      { id: "D", text: "O(E²) nested iteration", correct: false }
-    ],
-    explanation: "An adjacency list stores only actual adjacent neighbors for vertex V, taking time proportional to deg(V)."
-  },
-  "what-is-bfs": {
-    question: "In what topological pattern does Breadth First Search discover vertices starting from the source?",
-    options: [
-      { id: "A", text: "Concentric wave rings by shortest hop distance (level-by-level)", correct: true },
-      { id: "B", text: "Deepest unvisited path first until a dead-end", correct: false },
-      { id: "C", text: "Lexicographical alphabetical label order", correct: false },
-      { id: "D", text: "Randomized neighbor selection", correct: false }
-    ],
-    explanation: "BFS explores all vertices at distance 1 before any vertex at distance 2, forming expanding concentric wave fronts."
-  },
-  "fifo-queue-engine": {
-    question: "Which data structure is required by standard BFS to maintain strict level-by-level discovery order?",
-    options: [
-      { id: "A", text: "FIFO Queue (First-In, First-Out)", correct: true },
-      { id: "B", text: "LIFO Stack (Last-In, First-Out)", correct: false },
-      { id: "C", text: "Priority Queue without edge weights", correct: false },
-      { id: "D", text: "Binary Search Tree", correct: false }
-    ],
-    explanation: "FIFO order guarantees that nodes discovered earlier are dequeued and expanded before nodes discovered later."
-  },
-  "level-by-level": {
-    question: "If vertex V is discovered at distance level d+1, what is the distance of the parent node that discovered it?",
-    options: [
-      { id: "A", text: "Distance level d", correct: true },
-      { id: "B", text: "Distance level 0", correct: false },
-      { id: "C", text: "Distance level d+2", correct: false },
-      { id: "D", text: "Arbitrary distance level", correct: false }
-    ],
-    explanation: "In an unweighted graph, each step across a discovery edge increases the shortest path hop distance by exactly 1."
-  },
-  "visited-tracking": {
-    question: "What failure occurs if BFS runs on an undirected or cyclic graph without maintaining a visited set?",
-    options: [
-      { id: "A", text: "Infinite loop caused by cyclic nodes continuously re-enqueuing each other", correct: true },
-      { id: "B", text: "Stack underflow exception", correct: false },
-      { id: "C", text: "Graph edges are permanently deleted", correct: false },
-      { id: "D", text: "Queue empties prematurely", correct: false }
-    ],
-    explanation: "Without a visited set, adjacent nodes in a cycle re-enqueue each other indefinitely, causing an infinite loop."
-  },
-  "edge-classification": {
-    question: "During BFS, when an edge leads to an already visited vertex at the same or adjacent level, what is this edge called?",
-    options: [
-      { id: "A", text: "Cross Edge (lateral link)", correct: true },
-      { id: "B", text: "Discovery / Tree Edge", correct: false },
-      { id: "C", text: "Back Edge in DFS", correct: false },
-      { id: "D", text: "Forward Edge", correct: false }
-    ],
-    explanation: "Cross edges connect vertices that are already visited and do not form new branches in the BFS spanning tree."
-  },
-  "spanning-tree": {
-    question: "How many discovery tree edges does a BFS Spanning Tree contain for a connected graph with |V| vertices?",
-    options: [
-      { id: "A", text: "|V| - 1 edges", correct: true },
-      { id: "B", text: "|V| edges", correct: false },
-      { id: "C", text: "|E| edges", correct: false },
-      { id: "D", text: "|V| + 1 edges", correct: false }
-    ],
-    explanation: "A spanning tree spanning |V| vertices is minimally connected and acyclic, always containing exactly |V| - 1 edges."
-  },
-  "shortest-path": {
-    question: "Why does BFS guarantee the shortest path between start node S and target node T in unweighted graphs?",
-    options: [
-      { id: "A", text: "It processes nodes in non-decreasing order of edge distance from S", correct: true },
-      { id: "B", text: "It relies on edge weight relaxation like Bellman-Ford", correct: false },
-      { id: "C", text: "It greedily visits the highest-degree neighbor", correct: false },
-      { id: "D", text: "It traverses the longest paths first and backtracks", correct: false }
-    ],
-    explanation: "Because BFS visits nodes in non-decreasing order of hop distance, the first time T is reached is guaranteed to be via a minimum-edge path."
-  },
-  "connected-components": {
-    question: "To identify all disconnected components in an undirected graph, how should BFS be executed?",
-    options: [
-      { id: "A", text: "Iterate over all vertices, restarting BFS from any vertex not yet visited", correct: true },
-      { id: "B", text: "Run BFS once from node 0 and stop", correct: false },
-      { id: "C", text: "Connect all vertices with dummy edges first", correct: false },
-      { id: "D", text: "Disconnected graphs cannot be analyzed with BFS", correct: false }
-    ],
-    explanation: "Running BFS from each unvisited vertex identifies each isolated island component until all vertices are marked."
-  },
-  "bfs-vs-dfs": {
-    question: "Which memory characteristic distinguishes standard BFS from recursive DFS?",
-    options: [
-      { id: "A", text: "BFS auxiliary queue memory is O(maximum graph width)", correct: true },
-      { id: "B", text: "BFS memory is O(maximum graph depth)", correct: false },
-      { id: "C", text: "BFS uses zero auxiliary memory", correct: false },
-      { id: "D", text: "BFS always uses O(1) constant memory", correct: false }
-    ],
-    explanation: "BFS stores frontier nodes in the queue, requiring memory proportional to the maximum breadth (width) of the graph."
-  },
-  "complexity-analysis": {
-    question: "What is the standard time complexity of BFS using an Adjacency List for graph G = (V, E)?",
-    options: [
-      { id: "A", text: "O(V + E) linear in vertices and edges", correct: true },
-      { id: "B", text: "O(V²)", correct: false },
-      { id: "C", text: "O(V × log E)", correct: false },
-      { id: "D", text: "O(E²)", correct: false }
-    ],
-    explanation: "Each vertex is enqueued/dequeued once (O(V)) and each edge is inspected from its incident vertices (O(E)), giving O(V + E)."
-  },
-  "real-world-apps": {
-    question: "In social networks, finding 2nd-degree connections ('friends of friends') directly maps to which BFS distance level?",
-    options: [
-      { id: "A", text: "Vertices discovered at Level 2 from the user root", correct: true },
-      { id: "B", text: "Vertices discovered at Level 0", correct: false },
-      { id: "C", text: "Cross edges only", correct: false },
-      { id: "D", text: "Unreachable disconnected components", correct: false }
-    ],
-    explanation: "Immediate friends are at distance 1 (1 hop); their friends who are not already direct friends are at distance 2 (2 hops)."
-  }
-};
+const LEARN_CHECKPOINTS = {};
 window.LEARN_CHECKPOINTS = LEARN_CHECKPOINTS;
 
 class AppController {
@@ -802,8 +684,6 @@ class AppController {
 
   selectChapter(chapterId) {
     this.activeChapterId = chapterId;
-    // NOTE: Opening a chapter does NOT auto-complete it.
-    // Topics must be completed via the checkpoint assessment!
     this.renderTOC();
     this.renderActiveChapter();
     this.playSound("pop");
@@ -924,9 +804,6 @@ class AppController {
         </div>
         ` : ''}
 
-        <!-- Topic Learning Checkpoint Assessment (+3 Marks) -->
-        ${this.renderChapterCheckpointHTML(ch)}
-
         <!-- Bottom Chapter Navigation Action Bar (Exact UI Matching Reference Images 1 & 2) -->
         <div class="ch-bottom-nav-bar">
           <div class="ch-nav-left-group">
@@ -967,105 +844,12 @@ class AppController {
   }
 
   renderChapterCheckpointHTML(ch) {
-    const chk = LEARN_CHECKPOINTS[ch.id];
-    if (!chk) return "";
-
-    const isDone = this.completedChapters.has(ch.id);
-    const selectedOpt = this.selectedCheckpointOptions[ch.id];
-
-    return `
-      <div class="ch-checkpoint-card ${isDone ? 'completed' : ''}" id="checkpoint-card-${ch.id}">
-        <div class="ch-chk-header">
-          <span class="ch-chk-tag">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-            TOPIC CHECKPOINT ASSESSMENT (+3 MARKS)
-          </span>
-          <span class="ch-chk-status-pill ${isDone ? 'done' : ''}">
-            ${isDone ? '✓ Completed (+3 Marks Earned)' : 'Pending Assessment (3 Marks)'}
-          </span>
-        </div>
-
-        <div class="ch-chk-question">${chk.question}</div>
-
-        <div class="ch-chk-options">
-          ${chk.options.map(opt => {
-            const isSelected = selectedOpt === opt.id || (isDone && opt.correct);
-            const isCorrectAnswer = isDone && opt.correct;
-            return `
-              <div class="ch-chk-opt ${isSelected ? 'selected' : ''} ${isCorrectAnswer ? 'correct-answer' : ''}" 
-                   onclick="app.selectCheckpointOption('${ch.id}', '${opt.id}')">
-                <span class="ch-chk-opt-id">${opt.id}</span>
-                <span class="ch-chk-opt-text">${opt.text}</span>
-              </div>
-            `;
-          }).join("")}
-        </div>
-
-        <div class="ch-chk-footer">
-          <div id="chk-feedback-${ch.id}" class="ch-chk-feedback ${isDone ? 'success' : ''}">
-            ${isDone ? `✓ Verified Correct: ${chk.explanation}` : ''}
-          </div>
-          <button class="ch-chk-btn" id="chk-submit-btn-${ch.id}" 
-                  onclick="app.submitChapterCheckpoint('${ch.id}')"
-                  ${isDone ? 'disabled' : ''}>
-            ${isDone ? '✓ 3 Marks Earned' : 'Verify & Earn 3 Marks'}
-          </button>
-        </div>
-      </div>
-    `;
+    return "";
   }
 
-  selectCheckpointOption(chapterId, optionId) {
-    if (this.completedChapters.has(chapterId)) return;
-    this.selectedCheckpointOptions[chapterId] = optionId;
-    this.renderActiveChapter();
-    this.playSound("pop");
-  }
+  selectCheckpointOption(chapterId, optionId) {}
 
-  submitChapterCheckpoint(chapterId) {
-    if (this.completedChapters.has(chapterId)) return;
-    const chk = LEARN_CHECKPOINTS[chapterId];
-    if (!chk) return;
-
-    const selectedOptId = this.selectedCheckpointOptions[chapterId];
-    const feedbackEl = document.getElementById(`chk-feedback-${chapterId}`);
-
-    if (!selectedOptId) {
-      if (feedbackEl) {
-        feedbackEl.className = "ch-chk-feedback error";
-        feedbackEl.textContent = "Please select an answer choice before submitting.";
-      }
-      return;
-    }
-
-    const chosen = chk.options.find(o => o.id === selectedOptId);
-    if (chosen && chosen.correct) {
-      this.completedChapters.add(chapterId);
-      localStorage.setItem("algolearn_completed_chapters", JSON.stringify([...this.completedChapters]));
-      this.recordPointEvent({
-        type: "learn",
-        amount: 3,
-        title: `Completed Learn Checkpoint: ${chapterId}`,
-        sub: "TOPIC COMPLETED"
-      });
-      this.showToast("Checkpoint Passed! +3 Marks Earned.");
-      if (window.soundManager && typeof window.soundManager.playSuccess === "function") {
-        window.soundManager.playSuccess();
-      }
-      this.renderTOC();
-      this.renderActiveChapter();
-      this.updateProgressStats();
-      this.updatePointsUI();
-    } else {
-      if (feedbackEl) {
-        feedbackEl.className = "ch-chk-feedback error";
-        feedbackEl.textContent = "Incorrect. Review the lesson explanation above and try again!";
-      }
-      if (window.soundManager && typeof window.soundManager.playError === "function") {
-        window.soundManager.playError();
-      }
-    }
-  }
+  submitChapterCheckpoint(chapterId) {}
 
   toggleChapterCompletion(chapterId) {
     if (this.completedChapters.has(chapterId)) {
@@ -2320,12 +2104,13 @@ class AppController {
     const summary = typeof this.getPointsSummary === "function"
       ? this.getPointsSummary()
       : {
-          learnScore: 0, learnTopicsCompleted: 0,
-          visualScore: 0, videoCount: 0,
-          gameScore: 0, gameLevelsCleared: 0, gameTotalPenalties: 0,
-          quizRawScore: 0, quizCorrect: 0, quizIncorrect: 0, quizUnanswered: 10, quizAnsweredCount: 0, quizPenalties: 0,
-          totalPositiveMarks: 0, totalPenalties: 0, finalScore: 0
+          visualScore: 0, videoCount: 0, visualMax: 16,
+          gameScore: 0, gameLevelsCleared: 0, gameTotalPenalties: 0, gameMax: 64,
+          quizRawScore: 0, quizCorrect: 0, quizIncorrect: 0, quizUnanswered: 10, quizAnsweredCount: 0, quizPenalties: 0, quizMax: 20,
+          totalPositiveMarks: 0, totalPenalties: 0, finalScore: 0, maxAvailable: 100
         };
+
+    const maxScore = summary.maxAvailable || 100;
 
     const completedLevels = (window.game && window.game.completedLevels)
       ? window.game.completedLevels
@@ -2343,63 +2128,55 @@ class AppController {
     if (this.completedChapters.has("complexity-analysis") || completedLevels.has(8) || completedLevels.has(9)) this.completedActivities.add("FN-09");
     if (summary.quizAnsweredCount >= 10 || localStorage.getItem("algolearn_quiz_completed") === "true") this.completedActivities.add("FN-10");
 
-    // 3. Calculate 32 Activity Units: 12 Learn + 2 Videos + 8 Game Levels + 10 Quiz Questions
-    const learnDone = this.completedChapters ? this.completedChapters.size : 0;
+    // 3. Calculate Activity Units for remaining dashboard modules: 2 Videos + 8 Game Levels + 10 Quiz Questions = 20 total
     const videoDone = this.completedVideos ? this.completedVideos.size : 0;
     const gameDone = summary.gameLevelsCleared;
     const quizDone = summary.quizAnsweredCount;
-    const completed32 = Math.min(32, learnDone + videoDone + gameDone + quizDone);
-    const overallPct = Math.min(100, Math.round((completed32 / 32) * 100));
+    const totalActivities = 20;
+    const completedCount = Math.min(totalActivities, videoDone + gameDone + quizDone);
+    const overallPct = Math.min(100, Math.round((completedCount / totalActivities) * 100));
 
     // 4. Update PANEL A: BFS Learning Progress
     const badgeCountEl = document.getElementById("prog-badge-count");
     const overallBarEl = document.getElementById("prog-overall-bar");
     const overallPctEl = document.getElementById("prog-overall-pct");
 
-    if (badgeCountEl) badgeCountEl.textContent = `${completed32} of 32 Activities`;
+    if (badgeCountEl) badgeCountEl.textContent = `${completedCount} of ${totalActivities} Activities`;
     if (overallBarEl) overallBarEl.style.width = `${overallPct}%`;
     if (overallPctEl) overallPctEl.textContent = `${overallPct}%`;
 
     // Backward compatibility for legacy elements if present
     const legacyCountEl = document.getElementById("prog-overall-count");
-    if (legacyCountEl) legacyCountEl.textContent = `(${completed32} of 32 Activities)`;
+    if (legacyCountEl) legacyCountEl.textContent = `(${completedCount} of ${totalActivities} Activities)`;
 
     // 5. Update PANEL B: BFS Topic Score
     const totalScoreEl = document.getElementById("prog-total-score-val");
-    if (totalScoreEl) totalScoreEl.textContent = `${summary.finalScore} / 100`;
+    if (totalScoreEl) totalScoreEl.textContent = `${summary.finalScore} / ${maxScore}`;
 
-    // Card 1: Learn (Curriculum 12 topics)
-    const scoreLearnEl = document.getElementById("prog-score-learn");
-    const fillLearnEl = document.getElementById("prog-fill-learn");
-    const pctLearnEl = document.getElementById("prog-pct-learn");
-    const subLearnEl = document.getElementById("prog-sub-learn");
-    const learnPct = Math.min(100, Math.round((summary.learnTopicsCompleted / 12) * 100));
+    // Note: Learn card is completely removed from the BFS Topic Score Dashboard.
 
-    if (scoreLearnEl) scoreLearnEl.textContent = `${summary.learnTopicsCompleted} / 12`;
-    if (fillLearnEl) fillLearnEl.style.width = `${learnPct}%`;
-    if (pctLearnEl) pctLearnEl.textContent = `${learnPct}%`;
-    if (subLearnEl) subLearnEl.textContent = `${summary.learnTopicsCompleted} / 12 topics completed`;
-
-    // Card 2: Visualize (16 points total, 2 videos × 8 pts)
+    // Card 1: Visualize (16 points total, 2 videos × 8 pts)
     const scoreVisualEl = document.getElementById("prog-score-visual");
     const fillVisualEl = document.getElementById("prog-fill-visual");
     const pctVisualEl = document.getElementById("prog-pct-visual");
     const subVisualEl = document.getElementById("prog-sub-visual");
-    const visualPct = Math.min(100, Math.round((summary.visualScore / 16) * 100));
+    const visualMax = summary.visualMax || 16;
+    const visualPct = Math.min(100, Math.round((summary.visualScore / visualMax) * 100));
 
-    if (scoreVisualEl) scoreVisualEl.textContent = `${summary.visualScore} / 16`;
+    if (scoreVisualEl) scoreVisualEl.textContent = `${summary.visualScore} / ${visualMax}`;
     if (fillVisualEl) fillVisualEl.style.width = `${visualPct}%`;
     if (pctVisualEl) pctVisualEl.textContent = `${visualPct}%`;
     if (subVisualEl) subVisualEl.textContent = `${summary.videoCount} / 2 videos completed • 8 pts each`;
 
-    // Card 3: Game (64 points total, 8 games × 8 pts)
+    // Card 2: Game (64 points total, 8 games × 8 pts)
     const scoreGameEl = document.getElementById("prog-score-game");
     const fillGameEl = document.getElementById("prog-fill-game");
     const pctGameEl = document.getElementById("prog-pct-game");
     const subGameEl = document.getElementById("prog-sub-game");
-    const gamePct = Math.min(100, Math.max(0, Math.round((summary.gameScore / 64) * 100)));
+    const gameMax = summary.gameMax || 64;
+    const gamePct = Math.min(100, Math.max(0, Math.round((summary.gameScore / gameMax) * 100)));
 
-    if (scoreGameEl) scoreGameEl.textContent = `${summary.gameScore} / 64`;
+    if (scoreGameEl) scoreGameEl.textContent = `${summary.gameScore} / ${gameMax}`;
     if (fillGameEl) fillGameEl.style.width = `${gamePct}%`;
     if (pctGameEl) pctGameEl.textContent = `${gamePct}%`;
     if (subGameEl) {
@@ -2407,14 +2184,15 @@ class AppController {
       subGameEl.textContent = `${summary.gameLevelsCleared} / 8 levels cleared • 8 pts each${penText}`;
     }
 
-    // Card 4: Quiz (20 points total, 10 questions × 2 pts, -1 wrong, 0 timeout)
+    // Card 3: Quiz (20 points total, 10 questions × 2 pts, -1 wrong, 0 timeout)
     const scoreQuizEl = document.getElementById("prog-score-quiz");
     const fillQuizEl = document.getElementById("prog-fill-quiz");
     const pctQuizEl = document.getElementById("prog-pct-quiz");
     const subQuizEl = document.getElementById("prog-sub-quiz");
-    const quizPct = Math.min(100, Math.max(0, Math.round((summary.quizRawScore / 20) * 100)));
+    const quizMax = summary.quizMax || 20;
+    const quizPct = Math.min(100, Math.max(0, Math.round((summary.quizRawScore / quizMax) * 100)));
 
-    if (scoreQuizEl) scoreQuizEl.textContent = `${summary.quizRawScore} / 20`;
+    if (scoreQuizEl) scoreQuizEl.textContent = `${summary.quizRawScore} / ${quizMax}`;
     if (fillQuizEl) fillQuizEl.style.width = `${quizPct}%`;
     if (pctQuizEl) pctQuizEl.textContent = `${quizPct}%`;
     if (subQuizEl) {
@@ -2430,7 +2208,7 @@ class AppController {
     if (bbPosEl) bbPosEl.textContent = `+${summary.totalPositiveMarks} pts`;
     if (bbGamePenEl) bbGamePenEl.textContent = `-${summary.gameTotalPenalties} pts`;
     if (bbQuizPenEl) bbQuizPenEl.textContent = `-${summary.quizPenalties} pts`;
-    if (bbFinalEl) bbFinalEl.textContent = `${summary.finalScore} / 100`;
+    if (bbFinalEl) bbFinalEl.textContent = `${summary.finalScore} / ${maxScore}`;
 
     // 6. Update Sidebar Navigation Badges ("Dash Bar")
     const badgeOverview = document.getElementById("nav-badge-overview");
@@ -2599,7 +2377,7 @@ class AppController {
         this.pointsHistory = Array.isArray(parsed.history) ? parsed.history : [];
         this.penaltyHintsCount = typeof parsed.penaltyHintsCount === "number" ? parsed.penaltyHintsCount : 0;
         this.penaltyGuidedCount = typeof parsed.penaltyGuidedCount === "number" ? parsed.penaltyGuidedCount : 0;
-        this.seedGameBonus = 0;
+        this.seedGameBonus = typeof parsed.seedGameBonus === "number" ? parsed.seedGameBonus : 0;
       } catch (e) {
         this.pointsHistory = [];
         this.penaltyHintsCount = 0;
@@ -2615,7 +2393,7 @@ class AppController {
         history: this.pointsHistory,
         penaltyHintsCount: this.penaltyHintsCount,
         penaltyGuidedCount: this.penaltyGuidedCount,
-        seedGameBonus: 0
+        seedGameBonus: typeof this.seedGameBonus === "number" ? this.seedGameBonus : 0
       }));
     } catch (e) {
       console.warn("Could not save points data", e);
@@ -2623,22 +2401,19 @@ class AppController {
   }
 
   getPointsSummary() {
-    // 1. LEARN SECTION — 12 Chapters Curriculum Tracking
-    const learnTopicsCompleted = this.completedChapters ? this.completedChapters.size : 0;
-    const learnScore = learnTopicsCompleted;
-
-    // 2. VISUALISATION SECTION — 16 Points (2 videos × 8 pts)
+    // 1. VISUALISATION SECTION — 16 Points (2 videos × 8 pts)
     const videoCount = this.completedVideos ? this.completedVideos.size : 0;
-    const visualScore = Math.min(16, videoCount * 8);
+    const visualMax = (BFS_SCORING.visualisation && BFS_SCORING.visualisation.total) || 16;
+    const marksPerVideo = (BFS_SCORING.visualisation && BFS_SCORING.visualisation.marksPerVideo) || 8;
+    const visualScore = Math.min(visualMax, videoCount * marksPerVideo);
 
-    // 3. GAME SECTION — 64 Points Before Penalties (8 games × 8 pts)
+    // 2. GAME SECTION — 64 Points Before Penalties (8 games × 8 pts)
     const completedLevels = (window.game && window.game.completedLevels)
       ? window.game.completedLevels
       : new Set(JSON.parse(localStorage.getItem("algolearn_completed_levels") || "[]"));
 
     let gamePositiveMarks = 0;
     let gameTotalPenalties = 0;
-    let gameScore = 0;
     let gameLevelsCleared = 0;
     let totalHintsUsed = 0;
     let totalGuidedUsed = 0;
@@ -2665,25 +2440,25 @@ class AppController {
 
       // Assistance tracking per level
       const ast = (this.gameAssistance && this.gameAssistance[slot]) ? this.gameAssistance[slot] : {};
-      const hintUsed = !!ast.hintUsed;
-      const guidedUsed = !!ast.guidedUsed;
+      const hintCount = typeof ast.hintCount === "number" ? ast.hintCount : (ast.hintUsed ? 1 : 0);
+      const guidedCount = typeof ast.guidedCount === "number" ? ast.guidedCount : (ast.guidedUsed ? 1 : 0);
 
-      if (hintUsed) totalHintsUsed++;
-      if (guidedUsed) totalGuidedUsed++;
+      totalHintsUsed += hintCount;
+      totalGuidedUsed += guidedCount;
 
-      const hintPenalty = hintUsed ? 2 : 0;
-      const guidedPenalty = guidedUsed ? 3 : 0;
+      const hintPenalty = hintCount * ((BFS_SCORING.game && BFS_SCORING.game.penalties && BFS_SCORING.game.penalties.hint) || 3);
+      const guidedPenalty = guidedCount * ((BFS_SCORING.game && BFS_SCORING.game.penalties && BFS_SCORING.game.penalties.guidedSolve) || 3);
       const levelPenalties = hintPenalty + guidedPenalty;
       gameTotalPenalties += levelPenalties;
-
-      const levelContrib = Math.max(0, positive - levelPenalties);
-      gameScore += levelContrib;
     }
+
+    const gameMax = (BFS_SCORING.game && BFS_SCORING.game.total) || 64;
+    const gameScore = gamePositiveMarks - gameTotalPenalties;
 
     this.penaltyHintsCount = totalHintsUsed;
     this.penaltyGuidedCount = totalGuidedUsed;
 
-    // 4. QUIZ SECTION — 20 Points (10 questions × 2 pts, -1 wrong, 0 timeout)
+    // 3. QUIZ SECTION — 20 Points (10 questions × 2 pts, -1 wrong, 0 timeout)
     let quizCorrect = 0;
     let quizIncorrect = 0;
     let quizTimedOut = 0;
@@ -2704,30 +2479,37 @@ class AppController {
 
     const quizAnsweredCount = quizCorrect + quizIncorrect + quizTimedOut;
     const quizUnanswered = Math.max(0, 10 - quizAnsweredCount);
-    const quizPositiveMarks = Math.min(20, quizCorrect * 2);
-    const quizPenalties = quizIncorrect * 1;
-    const quizRawScore = Math.max(0, Math.min(20, (quizCorrect * 2) - quizPenalties));
+    const quizMax = (BFS_SCORING.quiz && BFS_SCORING.quiz.totalPositiveMarks) || 20;
+    const marksPerCorrect = (BFS_SCORING.quiz && BFS_SCORING.quiz.marksPerCorrectAnswer) || 2;
+    const penaltyPerIncorrect = (BFS_SCORING.quiz && BFS_SCORING.quiz.penaltyPerIncorrectAnswer) || 1;
+    const quizPositiveMarks = Math.min(quizMax, quizCorrect * marksPerCorrect);
+    const quizPenalties = quizIncorrect * penaltyPerIncorrect;
+    const quizRawScore = Math.max(0, Math.min(quizMax, quizPositiveMarks - quizPenalties));
 
-    // 5. CENTRAL OVERALL CALCULATION: Total = Visual (16) + Game (64) + Quiz (20) = 100
-    const totalPositiveMarks = visualScore + gamePositiveMarks + quizPositiveMarks;
+    // 4. CENTRAL OVERALL CALCULATION: Total dynamically derived from remaining modules (16 + 64 + 20 = 100)
+    const maxAvailable = visualMax + gameMax + quizMax;
+    const baseScore = typeof this.seedGameBonus === "number" ? this.seedGameBonus : 0;
+    const totalPositiveMarks = baseScore + visualScore + gamePositiveMarks + quizPositiveMarks;
     const totalPenalties = gameTotalPenalties + quizPenalties;
-    const rawCalculatedScore = visualScore + gameScore + quizRawScore;
-    const finalScore = Math.max(0, Math.min(100, rawCalculatedScore));
+    const rawCalculatedScore = totalPositiveMarks - totalPenalties;
+    const finalScore = Math.min(maxAvailable, rawCalculatedScore);
+
+    const learnTopicsCompleted = this.completedChapters ? this.completedChapters.size : 0;
 
     return {
-      learnScore,
+      learnScore: 0,
       learnTopicsCompleted,
-      learnMax: 12,
+      learnMax: 0,
 
       visualScore,
       videoCount,
-      visualMax: 16,
+      visualMax,
 
       gamePositiveMarks,
       gameTotalPenalties,
       gameScore,
       gameLevelsCleared,
-      gameMax: 64,
+      gameMax,
       penaltyHintsCount: totalHintsUsed,
       penaltyGuidedCount: totalGuidedUsed,
 
@@ -2739,22 +2521,23 @@ class AppController {
       quizRawScore,
       quizPositiveMarks,
       quizPenalties,
-      quizMax: 20,
+      quizMax,
 
       totalPositiveMarks,
       totalPenalties,
       finalScore,
-      maxAvailable: 100
+      maxAvailable
     };
   }
 
   updatePointsUI() {
     const summary = this.getPointsSummary();
+    const maxScore = summary.maxAvailable || 100;
 
     // 1. Sidebar Nav Badge Pill ("Dash Bar")
     const badgePoints = document.getElementById("nav-badge-points");
     if (badgePoints) {
-      badgePoints.textContent = `${summary.finalScore} / 100`;
+      badgePoints.textContent = `${summary.finalScore} / ${maxScore}`;
     }
 
     // 2. Hero Card Total Points
@@ -2764,10 +2547,10 @@ class AppController {
     }
     const heroSub = document.getElementById("pts-hero-sub");
     if (heroSub) {
-      heroSub.textContent = `BFS Final Score: ${summary.finalScore} / 100 Points`;
+      heroSub.textContent = `BFS Final Score: ${summary.finalScore} / ${maxScore} Points`;
     }
 
-    // 3. Points Breakdown Card & Subtitles
+    // 3. Points Breakdown Card & Subtitles (if present)
     const valTheory = document.getElementById("pts-val-theory");
     if (valTheory) valTheory.textContent = `${summary.learnTopicsCompleted}`;
     const subTheory = document.getElementById("pts-sub-theory");
@@ -2776,30 +2559,33 @@ class AppController {
     const valVisualize = document.getElementById("pts-val-visualize");
     if (valVisualize) valVisualize.textContent = `+${summary.visualScore}`;
     const subVisualize = document.getElementById("pts-sub-visualize");
-    if (subVisualize) subVisualize.textContent = `${summary.visualScore}/16 pts \u2022 ${summary.videoCount}/2 videos completed • 8 pts each`;
+    if (subVisualize) subVisualize.textContent = `${summary.visualScore}/${summary.visualMax} pts \u2022 ${summary.videoCount}/2 videos completed • 8 pts each`;
 
     const valGames = document.getElementById("pts-val-games");
-    if (valGames) valGames.textContent = `+${summary.gameScore}`;
+    if (valGames) valGames.textContent = `${summary.gameScore >= 0 ? '+' : ''}${summary.gameScore}`;
     const subGames = document.getElementById("pts-sub-games");
-    if (subGames) subGames.textContent = `${summary.gameScore}/64 pts after penalties \u2022 ${summary.gameLevelsCleared}/8 levels cleared • 8 pts each`;
+    if (subGames) subGames.textContent = `${summary.gameScore}/${summary.gameMax} pts after penalties \u2022 ${summary.gameLevelsCleared}/8 levels cleared • 8 pts each`;
 
     const valQuiz = document.getElementById("pts-val-quiz");
     if (valQuiz) valQuiz.textContent = `${summary.quizRawScore >= 0 ? '+' : ''}${summary.quizRawScore}`;
     const subQuiz = document.getElementById("pts-sub-quiz");
-    if (subQuiz) subQuiz.textContent = `${summary.quizRawScore}/20 pts \u2022 ${summary.quizCorrect} correct (+2), ${summary.quizIncorrect} incorrect (-1)`;
+    if (subQuiz) subQuiz.textContent = `${summary.quizRawScore}/${summary.quizMax} pts \u2022 ${summary.quizCorrect} correct (+2), ${summary.quizIncorrect} incorrect (-1)`;
 
     const valPenalties = document.getElementById("pts-val-penalties");
     if (valPenalties) valPenalties.textContent = `-${summary.totalPenalties}`;
     const subPenalties = document.getElementById("pts-sub-penalties");
-    if (subPenalties) subPenalties.textContent = `Game penalties: -${summary.gameTotalPenalties} (Hints: -${summary.penaltyHintsCount * 2}, Guided: -${summary.penaltyGuidedCount * 3}) \u2022 Quiz penalties: -${summary.quizPenalties}`;
+    if (subPenalties) subPenalties.textContent = `Game penalties: -${summary.gameTotalPenalties} (Hints: -${summary.penaltyHintsCount * 3}, Guided: -${summary.penaltyGuidedCount * 3}) \u2022 Quiz penalties: -${summary.quizPenalties}`;
 
     const valPositive = document.getElementById("pts-val-positive");
-    if (valPositive) valPositive.textContent = `+${summary.totalPositiveMarks} / 100`;
+    if (valPositive) valPositive.textContent = `+${summary.totalPositiveMarks} / ${maxScore}`;
 
     const valTotal = document.getElementById("pts-val-total");
-    if (valTotal) valTotal.textContent = `${summary.finalScore} / 100`;
+    if (valTotal) valTotal.textContent = `${summary.finalScore} / ${maxScore}`;
 
-    // 4. Recent Activity
+    // 4. Live Game Scoreboard Sync
+    this.updateGameScoreboard();
+
+    // 5. Recent Activity
     this.renderPointsActivityList();
   }
 
@@ -2816,7 +2602,7 @@ class AppController {
     if (events.length === 0) {
       listEl.innerHTML = `
         <div style="text-align:center; padding: 24px; color: var(--text-muted); font-size: 0.88rem;">
-          No points activity recorded yet. Complete Learn topic checkpoints, watch videos, solve game levels, or take quizzes to earn marks!
+          No points activity recorded yet. Watch videos, solve game levels, or take quizzes to earn marks!
         </div>
       `;
       return;
@@ -2861,14 +2647,13 @@ class AppController {
     const slot = getCanonicalLevelSlot(levelNum);
     if (!this.gameAssistance) this.gameAssistance = {};
     if (!this.gameAssistance[slot]) {
-      this.gameAssistance[slot] = { hintUsed: false, guidedUsed: false };
+      this.gameAssistance[slot] = { hintCount: 0, guidedCount: 0, hintUsed: false, guidedUsed: false };
     }
 
-    // Default rule: Max 1 hint penalty per level (prevents duplicate deductions)
-    if (this.gameAssistance[slot].hintUsed) {
-      return;
-    }
+    const deductionAmount = (BFS_SCORING.game && BFS_SCORING.game.penalties && BFS_SCORING.game.penalties.hint) || 3;
+    const currentScore = this.getPointsSummary().finalScore;
 
+    this.gameAssistance[slot].hintCount = (this.gameAssistance[slot].hintCount || 0) + 1;
     this.gameAssistance[slot].hintUsed = true;
     localStorage.setItem("algolearn_game_assistance", JSON.stringify(this.gameAssistance));
 
@@ -2876,32 +2661,42 @@ class AppController {
       id: "hint-" + Date.now() + "-" + Math.random().toString(36).substr(2, 4),
       type: "hint",
       level: slot,
-      amount: -2,
+      amount: -deductionAmount,
       title: `Used Hint: Level ${slot}`,
-      sub: "HINT USED (-2 MARKS)",
+      sub: `HINT USED (-${deductionAmount} MARKS)`,
       timeText: "Just now",
       timestamp: Date.now()
     };
     if (!this.pointsHistory) this.pointsHistory = [];
     this.pointsHistory.unshift(newEvent);
     this.savePointsData();
+
+    if (window.game) {
+      window.game.score = currentScore - deductionAmount;
+      if (typeof window.game.updateStatsUI === "function") {
+        window.game.updateStatsUI();
+      }
+    }
+
     this.updatePointsUI();
     this.updateProgressStats();
-    this.showToast(`Hint Revealed: -2 Penalty Applied to Level ${slot}.`);
+    this.updateGameScoreboard();
+
+    this.showDeductionNotification(-deductionAmount, "Hint Used");
+    return true;
   }
 
   recordGuidedPenalty(levelNum = 1) {
     const slot = getCanonicalLevelSlot(levelNum);
     if (!this.gameAssistance) this.gameAssistance = {};
     if (!this.gameAssistance[slot]) {
-      this.gameAssistance[slot] = { hintUsed: false, guidedUsed: false };
+      this.gameAssistance[slot] = { hintCount: 0, guidedCount: 0, hintUsed: false, guidedUsed: false };
     }
 
-    // Default rule: Max 1 Guided Solve penalty per level (prevents duplicate deductions)
-    if (this.gameAssistance[slot].guidedUsed) {
-      return;
-    }
+    const deductionAmount = (BFS_SCORING.game && BFS_SCORING.game.penalties && BFS_SCORING.game.penalties.guidedSolve) || 3;
+    const currentScore = this.getPointsSummary().finalScore;
 
+    this.gameAssistance[slot].guidedCount = (this.gameAssistance[slot].guidedCount || 0) + 1;
     this.gameAssistance[slot].guidedUsed = true;
     localStorage.setItem("algolearn_game_assistance", JSON.stringify(this.gameAssistance));
 
@@ -2909,18 +2704,157 @@ class AppController {
       id: "guided-" + Date.now() + "-" + Math.random().toString(36).substr(2, 4),
       type: "guided",
       level: slot,
-      amount: -3,
+      amount: -deductionAmount,
       title: `Used Guided Solve: Level ${slot}`,
-      sub: "GUIDED SOLVE (-3 MARKS)",
+      sub: `GUIDED SOLVE (-${deductionAmount} MARKS)`,
       timeText: "Just now",
       timestamp: Date.now()
     };
     if (!this.pointsHistory) this.pointsHistory = [];
     this.pointsHistory.unshift(newEvent);
     this.savePointsData();
+
+    if (window.game) {
+      window.game.score = currentScore - deductionAmount;
+      if (typeof window.game.updateStatsUI === "function") {
+        window.game.updateStatsUI();
+      }
+    }
+
     this.updatePointsUI();
     this.updateProgressStats();
-    this.showToast(`Guided Solve Activated: -3 Penalty Applied to Level ${slot}.`);
+    this.updateGameScoreboard();
+
+    this.showDeductionNotification(-deductionAmount, "Guided Solve Used");
+    return true;
+  }
+
+  updateGameScoreboard() {
+    const summary = this.getPointsSummary();
+
+    const liveScoreVal = document.getElementById("game-live-score-val");
+    if (liveScoreVal) {
+      liveScoreVal.textContent = String(summary.finalScore);
+    }
+
+    const scoreValue = document.getElementById("score-value");
+    if (scoreValue) {
+      scoreValue.textContent = String(summary.finalScore);
+    }
+
+    if (window.game) {
+      window.game.score = summary.finalScore;
+    }
+
+    const lvlSlot = (window.game && window.game.currentLevelIndex !== undefined)
+      ? getCanonicalLevelSlot(window.game.currentLevelIndex + 1)
+      : 1;
+    const slotMarks = (typeof LEVEL_MARKS !== "undefined" && LEVEL_MARKS[lvlSlot]) || 8;
+    const ast = (this.gameAssistance && this.gameAssistance[lvlSlot]) ? this.gameAssistance[lvlSlot] : {};
+    const hCount = typeof ast.hintCount === "number" ? ast.hintCount : (ast.hintUsed ? 1 : 0);
+    const gCount = typeof ast.guidedCount === "number" ? ast.guidedCount : (ast.guidedUsed ? 1 : 0);
+    const hPen = (BFS_SCORING.game && BFS_SCORING.game.penalties && BFS_SCORING.game.penalties.hint) || 3;
+    const gPen = (BFS_SCORING.game && BFS_SCORING.game.penalties && BFS_SCORING.game.penalties.guidedSolve) || 3;
+    const lvlPenalties = (hCount * hPen) + (gCount * gPen);
+    const netMarks = slotMarks - lvlPenalties;
+
+    const activeProbPts = document.getElementById("active-problem-pts");
+    if (activeProbPts) {
+      activeProbPts.textContent = `${netMarks >= 0 ? '+' : ''}${netMarks} pts`;
+      activeProbPts.title = `Level Base: +${slotMarks} pts | Deductions: -${lvlPenalties} pts`;
+    }
+  }
+
+  showDeductionNotification(amount, reason, isInsufficient = false) {
+    let container = document.getElementById("deduction-notification-container");
+    if (!container) {
+      container = document.createElement("div");
+      container.id = "deduction-notification-container";
+      document.body.appendChild(container);
+    }
+
+    // Limit maximum stacked notification pills to 3 so screen is never overwhelmed
+    while (container.children.length >= 3) {
+      const oldest = container.children[0] || container.firstElementChild;
+      if (oldest) {
+        if (oldest._dismissTimer) clearTimeout(oldest._dismissTimer);
+        if (oldest.parentNode) oldest.parentNode.removeChild(oldest);
+        else container.removeChild(oldest);
+      } else {
+        break;
+      }
+    }
+
+    const id = "dnotif-" + Date.now() + "-" + Math.random().toString(36).substr(2, 4);
+    const pill = document.createElement("div");
+    pill.id = id;
+    pill.className = "deduction-notification-pill";
+    pill.setAttribute("role", "alert");
+    pill.setAttribute("aria-live", "assertive");
+
+    const amountDisplay = isInsufficient
+      ? "0 Points"
+      : (amount < 0 ? `${amount} Points` : `-${amount} Points`);
+
+    pill.innerHTML = `
+      <div class="deduction-notif-icon-box" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="#e11d48" stroke-width="2.5"></circle>
+          <line x1="12" y1="8" x2="12" y2="12" stroke="#e11d48" stroke-width="2.5" stroke-linecap="round"></line>
+          <circle cx="12" cy="16" r="1.25" fill="#e11d48"></circle>
+        </svg>
+      </div>
+      <span class="deduction-notif-amount">${amountDisplay}</span>
+      <span class="deduction-notif-sep" aria-hidden="true">—</span>
+      <span class="deduction-notif-reason">${reason}</span>
+      <button class="deduction-notif-close-btn" aria-label="Close notification" type="button">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    `;
+
+    const closeBtn = pill.querySelector(".deduction-notif-close-btn");
+    const dismiss = () => {
+      if (pill._dismissTimer) clearTimeout(pill._dismissTimer);
+      pill.classList.add("fade-out");
+      setTimeout(() => {
+        if (pill.parentNode) {
+          pill.parentNode.removeChild(pill);
+        }
+      }, 250);
+    };
+
+    if (closeBtn) {
+      closeBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dismiss();
+      });
+    }
+
+    // Auto dismiss after 3.5 seconds
+    pill._dismissTimer = setTimeout(dismiss, 3500);
+    container.appendChild(pill);
+  }
+
+  setScore(targetScore) {
+    const target = Math.max(0, parseInt(targetScore, 10) || 0);
+    const summary = this.getPointsSummary();
+    const currentBase = typeof this.seedGameBonus === "number" ? this.seedGameBonus : 0;
+    const currentWithoutSeed = summary.finalScore - currentBase;
+    this.seedGameBonus = Math.max(0, target - currentWithoutSeed);
+    if (window.game) {
+      window.game.score = target;
+      if (typeof window.game.updateStatsUI === "function") {
+        window.game.updateStatsUI();
+      }
+    }
+    this.savePointsData();
+    this.updatePointsUI();
+    this.updateProgressStats();
+    this.updateGameScoreboard();
+    return target;
   }
 
   recordGameLevelVictory(levelNum = 1) {
@@ -3103,6 +3037,7 @@ class AppController {
       if (badge) badge.textContent = `LEVEL ${subLevel}`;
       if (name) name.textContent = lvl.title;
     }
+    this.updateGameScoreboard();
     this.playSound("pop");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -3114,6 +3049,7 @@ class AppController {
     if (hub) { hub.classList.add("hidden"); hub.style.display = "none"; }
     if (modView) { modView.classList.add("hidden"); modView.style.display = "none"; }
     if (work) { work.classList.remove("hidden"); work.style.display = "block"; }
+    this.updateGameScoreboard();
   }
 
   showLevelsHub() {
@@ -3194,35 +3130,50 @@ class AppController {
     return [
       {
         id: "module-tree-traversal",
+        numCode: "01",
         themeClass: "theme-tree",
-        title: "Tree Traversal",
-        description: "Hierarchical acyclic topologies with strict FIFO parent-child branch exploration.",
-        difficulty: "Foundational",
+        title: "Level 01: Core FIFO Operations & Boundary Guardrails",
+        shortTitle: "Tree Traversal",
+        subtitle: "REAR Enqueue, FRONT Dequeue, Capacity Limits & Underflow Defense",
+        description: "Explore the operational foundation of queue data structures: append incoming items at the REAR pointer, dispatch departing elements from the FRONT pointer in strict FIFO order, identify capacity overflow, and prevent underflow exceptions.",
+        difficulty: "BEGINNER",
+        points: 16,
+        pointsLabel: "+16 points",
         topics: ["Acyclic Trees", "FIFO Enqueue", "Level-by-Level"],
         iconGradient: "linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%)",
-        iconSvg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`,
+        iconSvg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`,
         levelIndices: [0, 1] // Level 1 (Simple Tree Traversal), Level 2 (Binary Tree Exploration)
       },
       {
         id: "module-graph-traversal",
+        numCode: "02",
         themeClass: "theme-graph",
-        title: "Graph Traversal",
-        description: "Interconnected multi-path networks featuring cycles, back-edges, and visited set guards.",
-        difficulty: "Core Concepts",
+        title: "Level 02: Visited Set & Cycle Prevention Guardrails",
+        shortTitle: "Graph Traversal",
+        subtitle: "Cycle Detection, Visited Set Tracking & Multi-Path Defense",
+        description: "Master interconnected multi-path networks featuring cycles, back-edges, and visited set guards to prevent duplicate queue insertions and eliminate infinite loop traps.",
+        difficulty: "INTERMEDIATE",
+        points: 24,
+        pointsLabel: "+24 points",
         topics: ["Cycle Detection", "Visited Sets", "Dense Adjacency"],
         iconGradient: "linear-gradient(135deg, #4338ca 0%, #6366f1 100%)",
-        iconSvg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`,
+        iconSvg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`,
         levelIndices: [2, 3, 4] // Level 1 (Undirected Graph), Level 2 (Cyclic Graph), Level 3 (Dense Graph)
       },
       {
         id: "module-advanced-graph",
+        numCode: "03",
         themeClass: "theme-advanced",
-        title: "Advanced Graph Challenges",
-        description: "Complex frontiers including disconnected islands, anti-DFS invariants, and peak queue scales.",
-        difficulty: "Mastery & Capstone",
+        title: "Level 03: Advanced Graph & Labyrinth Challenges",
+        shortTitle: "Advanced Graph Challenges",
+        subtitle: "Disconnected Islands, BFS Invariant Defense & Capstone Labyrinth",
+        description: "Navigate complex frontiers including disconnected components, level-order parent backtracking for shortest paths, anti-DFS invariants, and peak queue scales.",
+        difficulty: "ADVANCED",
+        points: 24,
+        pointsLabel: "+24 points",
         topics: ["Disconnected Islands", "BFS Invariant", "Final Labyrinth"],
         iconGradient: "linear-gradient(135deg, #4f46e5 0%, #818cf8 100%)",
-        iconSvg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+        iconSvg: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
         levelIndices: [6, 7], // Level 1 (Misleading Paths), Level 2 (Large Network)
         finalChallengeIndex: 8 // Level 4 (Capstone Final Challenge)
       }
@@ -3284,53 +3235,52 @@ class AppController {
       }).length;
       const isAllDone = completedCount === allModIndices.length;
 
-      const nextIdx = allModIndices.find(idx => {
-        const lvl = LEVELS_DATA[idx];
-        return lvl && !completed.has(lvl.id) && !completed.has(idx);
-      });
-      const playableIdx = nextIdx !== undefined ? nextIdx : allModIndices[0];
-      const playableSubNum = allModIndices.indexOf(playableIdx) + 1;
-
-      let actionText = "Enter Module";
+      let statusText = "○ Not Started";
+      let statusClass = "";
       if (isAllDone) {
-        actionText = "Review Module";
+        statusText = "✓ Completed";
+        statusClass = "badge-done";
       } else if (completedCount > 0) {
-        actionText = `Resume Level ${playableSubNum > 0 ? playableSubNum : 1}`;
+        statusText = `○ In Progress (${completedCount}/${allModIndices.length})`;
+        statusClass = "badge-progress";
       }
 
       return `
         <div class="module-master-card ${mod.themeClass} ${isAllDone ? 'is-all-done' : ''}" 
              id="${mod.id}" 
              onclick="app.enterModule(${modIdx})"
-             title="Enter ${mod.title} to view all levels">
+             title="Enter ${mod.title}">
           
           <div class="module-card-header">
-            <div class="module-icon-box" style="background: ${mod.iconGradient}; color: #ffffff;">${mod.iconSvg}</div>
-            <span class="module-badge-pill ${isAllDone ? 'badge-done' : ''}">
-              <span class="module-badge-dot"></span>
-              ${isAllDone ? '✓ ALL CLEARED' : `${completedCount}/${allModIndices.length} CLEARED`}
+            <div class="module-header-left">
+              <span class="module-number-code">${mod.numCode}</span>
+              <div class="module-icon-box" style="background: ${mod.iconGradient};">${mod.iconSvg}</div>
+            </div>
+            <span class="module-badge-pill ${statusClass}">
+              ${statusText}
             </span>
           </div>
 
           <h3 class="module-card-title">${mod.title}</h3>
+          <div class="module-card-subtitle">${mod.subtitle}</div>
           <p class="module-card-desc">${mod.description}</p>
 
-          <div class="module-meta-row">
-            <span class="module-meta-chip difficulty-chip">● ${mod.difficulty}</span>
-            <span class="module-meta-chip count-chip">${allModIndices.length} Interactive Levels</span>
-            <span class="module-meta-chip points-chip" style="background: rgba(99, 102, 241, 0.12); color: var(--primary, #4f46e5); font-weight: 700;">+8 pts / level</span>
+          <div class="module-badge-row">
+            <span class="module-diff-pill diff-${mod.difficulty.toLowerCase()}">${mod.difficulty}</span>
+            <span class="module-points-pill-gold">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#d97706" stroke-width="1.5">
+                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+              </svg>
+              <span>+${mod.points} points</span>
+            </span>
           </div>
 
-          <div class="module-topics-row">
-            ${mod.topics.map(t => `<span class="module-topic-tag">${t}</span>`).join("")}
-          </div>
-
-          <div class="module-card-footer" onclick="event.stopPropagation(); app.enterModule(${modIdx})" title="${actionText}">
-            <span class="module-footer-action-text">${actionText}</span>
-            <button class="tm-card-action-btn" aria-label="${actionText}">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-            </button>
-          </div>
+          <button class="module-play-action-btn" onclick="event.stopPropagation(); app.enterModule(${modIdx})">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+            <span>PLAY GAME</span>
+          </button>
         </div>
       `;
     }).join("");
@@ -3454,10 +3404,16 @@ class AppController {
         <div class="module-view-hero-card ${mod.themeClass}">
           <div class="module-view-hero-header">
             <div class="module-view-hero-title-group">
-              <div class="module-icon-box" style="background: ${mod.iconGradient}; color: #ffffff;">${mod.iconSvg}</div>
+              <div class="module-icon-box" style="background: ${mod.iconGradient};">${mod.iconSvg}</div>
               <div>
                 <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 6px; flex-wrap: wrap;">
-                  <span class="module-meta-chip difficulty-chip">● ${mod.difficulty}</span>
+                  <span class="module-diff-pill diff-${mod.difficulty.toLowerCase()}">${mod.difficulty}</span>
+                  <span class="module-points-pill-gold">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="#f59e0b" stroke="#d97706" stroke-width="1.5">
+                      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+                    </svg>
+                    <span>+${mod.points} points</span>
+                  </span>
                   <span class="module-badge-pill ${isAllDone ? 'badge-done' : ''}">
                     <span class="module-badge-dot"></span>
                     ${isAllDone ? '✓ ALL CLEARED' : `${completedCount}/${allModIndices.length} CLEARED`}
@@ -3476,7 +3432,15 @@ class AppController {
 
           <div class="module-progress-wrapper" style="max-width: 580px; margin-bottom: 14px;">
             <div class="module-progress-header">
-              <span>Module Progress</span>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span>Module Progress</span>
+                <span class="module-points-pill-gold" style="font-size: 0.72rem; padding: 2px 8px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="#f59e0b" stroke="#d97706" stroke-width="1.5">
+                    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+                  </svg>
+                  <span>+${mod.points} points</span>
+                </span>
+              </div>
               <span class="module-progress-val">${percent}% (${completedCount}/${allModIndices.length} Completed)</span>
             </div>
             <div class="module-progress-track">
@@ -3512,6 +3476,27 @@ class AppController {
     this.gameMode = mode;
   }
 }
+
+Object.defineProperty(AppController.prototype, "score", {
+  get: function() {
+    return this.getPointsSummary().finalScore;
+  },
+  set: function(val) {
+    this.setScore(val);
+  },
+  configurable: true
+});
+
+Object.defineProperty(AppController.prototype, "currentScore", {
+  get: function() {
+    return this.getPointsSummary().finalScore;
+  },
+  set: function(val) {
+    this.setScore(val);
+  },
+  configurable: true
+});
+
 window.AppController = AppController;
 
 // Global App Initialization

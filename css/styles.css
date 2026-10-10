@@ -3542,11 +3542,11 @@ video.bfs-video-player,
   text-transform: uppercase;
 }
 
-/* 4 Section Cards Grid */
+/* 3 Section Cards Grid: Visualize, Game, Quiz */
 .prog-sections-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
   margin-top: 22px;
 }
 
@@ -3674,7 +3674,7 @@ video.bfs-video-player,
   display: flex;
   flex-direction: column;
   gap: 3px;
-  margin-top: 2px;
+  margin-top: auto;
 }
 
 .prog-subcard-desc {
@@ -3945,10 +3945,10 @@ body.dark-theme .prog-bb-badge.final,
   border: 1px solid rgba(0, 112, 243, 0.35);
 }
 
-/* Responsive layout for 4 cards */
-@media (max-width: 1024px) {
+/* Responsive layout for 3 cards */
+@media (max-width: 992px) {
   .prog-sections-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   }
 }
 
@@ -5030,218 +5030,7 @@ body.dark-theme .pac-badge-pos {
   font-family: monospace;
 }
 
-/* ==========================================================================
-   LEARN TOPIC CHECKPOINT ASSESSMENT CARDS (+3 MARKS)
-   ========================================================================== */
 
-.ch-checkpoint-card {
-  background: var(--bg-card);
-  border: 1.5px solid var(--border-color);
-  border-radius: var(--radius-xl);
-  padding: 24px 28px;
-  margin: 24px 0;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
-  transition: border-color 0.2s ease;
-}
-
-.ch-checkpoint-card.completed {
-  border-color: #10b981;
-  background: rgba(16, 185, 129, 0.02);
-}
-
-body.dark-theme .ch-checkpoint-card.completed {
-  background: rgba(16, 185, 129, 0.05);
-  border-color: #059669;
-}
-
-.ch-chk-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 14px;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.ch-chk-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #2563eb;
-  background: #eff6ff;
-  padding: 4px 12px;
-  border-radius: 999px;
-}
-
-body.dark-theme .ch-chk-tag {
-  background: rgba(37, 99, 235, 0.2);
-  color: #60a5fa;
-}
-
-.ch-chk-status-pill {
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: #f1f5f9;
-  color: #64748b;
-}
-
-.ch-chk-status-pill.done {
-  background: #ecfdf5;
-  color: #059669;
-}
-
-body.dark-theme .ch-chk-status-pill.done {
-  background: rgba(16, 185, 129, 0.2);
-  color: #34d399;
-}
-
-.ch-chk-question {
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: var(--text-main);
-  line-height: 1.45;
-  margin-bottom: 16px;
-}
-
-.ch-chk-options {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 18px;
-}
-
-.ch-chk-opt {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border-radius: 12px;
-  border: 1.5px solid var(--border-color);
-  background: var(--bg-hover, #f8fafc);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  user-select: none;
-}
-
-.ch-chk-opt:hover {
-  border-color: #2563eb;
-  background: #ffffff;
-}
-
-body.dark-theme .ch-chk-opt:hover {
-  background: #242c3d;
-  border-color: #60a5fa;
-}
-
-.ch-chk-opt.selected {
-  border-color: #2563eb;
-  background: #eff6ff;
-}
-
-body.dark-theme .ch-chk-opt.selected {
-  border-color: #3b82f6;
-  background: rgba(37, 99, 235, 0.15);
-}
-
-.ch-chk-opt.correct-answer {
-  border-color: #10b981 !important;
-  background: #ecfdf5 !important;
-}
-
-body.dark-theme .ch-chk-opt.correct-answer {
-  background: rgba(16, 185, 129, 0.15) !important;
-}
-
-.ch-chk-opt-id {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: #ffffff;
-  border: 1.5px solid var(--border-color);
-  font-size: 0.8rem;
-  font-weight: 800;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: var(--text-main);
-}
-
-body.dark-theme .ch-chk-opt-id {
-  background: #1e2433;
-}
-
-.ch-chk-opt.selected .ch-chk-opt-id {
-  background: #2563eb;
-  border-color: #2563eb;
-  color: #ffffff;
-}
-
-.ch-chk-opt.correct-answer .ch-chk-opt-id {
-  background: #10b981;
-  border-color: #10b981;
-  color: #ffffff;
-}
-
-.ch-chk-opt-text {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-main);
-  line-height: 1.4;
-}
-
-.ch-chk-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.ch-chk-feedback {
-  font-size: 0.84rem;
-  font-weight: 700;
-}
-
-.ch-chk-feedback.error {
-  color: #ef4444;
-}
-
-.ch-chk-feedback.success {
-  color: #10b981;
-}
-
-.ch-chk-btn {
-  padding: 10px 22px;
-  border-radius: 10px;
-  font-weight: 800;
-  font-size: 0.86rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: none;
-  background: #2563eb;
-  color: #ffffff;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.ch-chk-btn:hover {
-  background: #1d4ed8;
-  transform: translateY(-1px);
-}
-
-.ch-chk-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
 
 /* ========================================================================= */
 /* MASTER PROMPT — TOPIC SCORING & TIMER STYLES (LIGHT & DARK ADAPTIVE)    */

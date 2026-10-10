@@ -125,8 +125,10 @@ class GameEngine {
 
     this.updateUI();
     this.render();
-    this.renderSpanningTree();
     this.updateStatsUI();
+    if (typeof window.app !== "undefined" && typeof window.app.updateGameScoreboard === "function") {
+      window.app.updateGameScoreboard();
+    }
 
     if (window.soundManager) soundManager.playPop();
     const curSubLevel = this._getSubLevelNumber ? this._getSubLevelNumber(this.currentLevelIndex) : this.currentLevelData.id;
@@ -435,11 +437,18 @@ class GameEngine {
     const streakEl = document.getElementById("streak-value");
     const mistakesEl = document.getElementById("mistakes-value");
     const accuracyEl = document.getElementById("accuracy-value");
+    const liveScoreVal = document.getElementById("game-live-score-val");
 
     const totalActions = this.correctActionsCount + this.mistakesCount;
     const accuracy = totalActions > 0 ? Math.round((this.correctActionsCount / totalActions) * 100) : 100;
 
-    if (scoreEl) scoreEl.textContent = this.score;
+    const currentScore = (typeof window.app !== "undefined" && typeof window.app.getPointsSummary === "function")
+      ? window.app.getPointsSummary().finalScore
+      : this.score;
+
+    this.score = currentScore;
+    if (scoreEl) scoreEl.textContent = currentScore;
+    if (liveScoreVal) liveScoreVal.textContent = currentScore;
     if (streakEl) streakEl.textContent = `${this.streak}x`;
     if (mistakesEl) mistakesEl.textContent = this.mistakesCount;
     if (accuracyEl) accuracyEl.textContent = `${accuracy}%`;

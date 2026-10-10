@@ -13,15 +13,19 @@ class GuidedSolveEngine {
   }
 
   toggle(enable) {
-    this.isActive = typeof enable === "boolean" ? enable : !this.isActive;
-    if (this.isActive) {
-      const lvlNum = this.game ? (this.game.currentLevelIndex !== undefined ? this.game.currentLevelIndex + 1 : 1) : 1;
-      if (typeof window.app !== "undefined" && typeof window.app.recordGuidedPenalty === "function") {
-        window.app.recordGuidedPenalty(lvlNum);
+    if (enable === false || (enable === undefined && this.isActive)) {
+      this.isActive = false;
+      if (this.isAutoPlaying) {
+        this.pauseAutoPlay();
       }
+      return false;
     }
-    if (!this.isActive && this.isAutoPlaying) {
-      this.pauseAutoPlay();
+
+    // Activating Guided Solve triggers penalty deduction (even if user has 0 points, allowing score to go negative)
+    this.isActive = true;
+    const lvlNum = this.game ? (this.game.currentLevelIndex !== undefined ? this.game.currentLevelIndex + 1 : 1) : 1;
+    if (typeof window.app !== "undefined" && typeof window.app.recordGuidedPenalty === "function") {
+      window.app.recordGuidedPenalty(lvlNum);
     }
     return this.isActive;
   }
@@ -224,3 +228,5 @@ class GuidedSolveEngine {
     };
   }
 }
+
+window.GuidedSolveEngine = GuidedSolveEngine;
