@@ -12977,24 +12977,6 @@ body.dark-theme .module-points-pill-gold {
   flex-wrap: wrap;
 }
 
-.btn-quiz-retry {
-  background: #ffffff;
-  border: 1.5px solid #2563eb;
-  color: #2563eb;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 0.92rem;
-  padding: 11px 24px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.18s ease;
-}
-
-.btn-quiz-retry:hover {
-  background: #eff6ff;
-}
 
 .btn-quiz-dashboard {
   background: #2563eb;
@@ -13576,6 +13558,202 @@ body.dark-theme .deduction-notif-close-btn:hover {
   .deduction-notif-close-btn {
     margin-left: 6px;
   }
+}
+
+/* ===========================================================================
+   BFS GAME ERROR & MISTAKE FEEDBACK BANNER (Directly inside Game section)
+   =========================================================================== */
+.game-error-banner {
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+  border-left: 5px solid #ef4444;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin: 12px 18px 0 18px;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.08);
+  animation: errorSlideDown 0.25s ease-out;
+  transition: all 0.2s ease;
+}
+
+@keyframes errorSlideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.game-error-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.game-error-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.game-error-icon {
+  display: flex;
+  align-items: center;
+  color: #ef4444;
+}
+
+.game-error-type {
+  font-size: 0.96rem;
+  font-weight: 800;
+  color: #991b1b;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.game-error-close-btn {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  line-height: 1;
+  color: #991b1b;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.game-error-close-btn:hover {
+  background: #fee2e2;
+}
+
+.game-error-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.86rem;
+  color: #334155;
+  line-height: 1.45;
+}
+
+.game-error-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.game-error-bullet {
+  color: #ef4444;
+  font-weight: 900;
+  line-height: 1.4;
+}
+
+.game-error-highlight {
+  display: inline-block;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-weight: 800;
+  padding: 1px 7px;
+  border-radius: 5px;
+  border: 1px solid #fca5a5;
+}
+
+.game-error-reassurance {
+  margin-top: 3px;
+  color: #059669;
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.game-error-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn-error-continue {
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-error-continue:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+.btn-error-guided {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1.5px solid #fed7aa;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 5px 12px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-error-guided:hover {
+  background: #ffedd5;
+  border-color: #fdba74;
+}
+
+/* Missing Neighbor Ring on Canvas */
+.node-is-missing-neighbor circle {
+  stroke: #ef4444 !important;
+  stroke-width: 3.5px !important;
+}
+
+/* Dark theme overrides */
+body.dark-theme .game-error-banner {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.35);
+  border-left-color: #ef4444;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-theme .game-error-type {
+  color: #fca5a5;
+}
+
+body.dark-theme .game-error-body {
+  color: #e2e8f0;
+}
+
+body.dark-theme .game-error-close-btn {
+  color: #fca5a5;
+}
+
+body.dark-theme .game-error-close-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+body.dark-theme .game-error-highlight {
+  background: rgba(239, 68, 68, 0.25);
+  color: #fecaca;
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+body.dark-theme .game-error-reassurance {
+  color: #34d399;
+}
+
+body.dark-theme .btn-error-guided {
+  background: rgba(234, 88, 12, 0.18);
+  color: #fb923c;
+  border-color: rgba(234, 88, 12, 0.4);
+}
+
+body.dark-theme .btn-error-guided:hover {
+  background: rgba(234, 88, 12, 0.28);
 }
 
 

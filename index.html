@@ -1006,6 +1006,54 @@
                 </div>
               </div>
 
+              <!-- Inline BFS Rule Violation & Error Feedback Card -->
+              <div id="game-error-banner" class="game-error-banner hidden" role="alert" aria-live="polite">
+                <div class="game-error-header">
+                  <div class="game-error-title-wrap">
+                    <span class="game-error-icon" aria-hidden="true">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                      </svg>
+                    </span>
+                    <h4 id="game-error-type" class="game-error-type">Incorrect BFS Operation</h4>
+                  </div>
+                  <button id="game-error-close-btn" class="game-error-close-btn" type="button" title="Dismiss explanation" aria-label="Dismiss">&times;</button>
+                </div>
+                <div class="game-error-body">
+                  <div class="game-error-row">
+                    <span class="game-error-bullet">&bull;</span>
+                    <span id="game-error-what" class="game-error-text">You dequeued before completing the neighbour-enqueueing stage.</span>
+                  </div>
+                  <div id="game-error-missing-row" class="game-error-row">
+                    <span class="game-error-bullet">&bull;</span>
+                    <span class="game-error-text"><strong>Missing neighbour:</strong> <span id="game-error-missing" class="game-error-highlight">None</span></span>
+                  </div>
+                  <div class="game-error-row">
+                    <span class="game-error-bullet">&bull;</span>
+                    <span class="game-error-text"><strong>Required action:</strong> <span id="game-error-action">Enqueue all eligible neighbours before dequeuing.</span></span>
+                  </div>
+                  <div class="game-error-row game-error-reassurance">
+                    <span class="game-error-bullet">&bull;</span>
+                    <span class="game-error-text">Your progress has been preserved. Correct this step to continue.</span>
+                  </div>
+                </div>
+                <div class="game-error-actions">
+                  <button id="game-error-continue-btn" type="button" class="btn btn-sm btn-error-continue">
+                    Continue &amp; Correct Mistake
+                  </button>
+                  <button id="game-error-guided-btn" type="button" class="btn btn-sm btn-error-guided">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7z" fill="#ea580c"/>
+                      <line x1="9" y1="20" x2="15" y2="20" stroke="#ea580c" stroke-width="2" stroke-linecap="round"/>
+                      <line x1="10" y1="22.5" x2="14" y2="22.5" stroke="#ea580c" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <span>Ask Guided Solve</span>
+                  </button>
+                </div>
+              </div>
+
               <!-- Main Interactive Workspace (Side-by-Side Panoramic View) -->
               <main class="main-workspace">
                 <!-- Column 1 (Left): Graph / Tree Workspace -->

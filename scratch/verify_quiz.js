@@ -34,8 +34,8 @@ global.soundManager = {
 };
 
 // Load quiz data
-require('c:/Users/LENOVO/Desktop/bfs/BFS-/js/quiz-data.js');
-const { QuizEngine } = require('c:/Users/LENOVO/Desktop/bfs/BFS-/js/quiz-engine.js');
+require(path.join(__dirname, '../js/quiz-data.js'));
+const { QuizEngine } = require(path.join(__dirname, '../js/quiz-engine.js'));
 
 let passedTests = 0;
 let totalTests = 0;
@@ -178,8 +178,10 @@ const summaryHtml = mockContainer.innerHTML;
 assert(summaryHtml.includes("Quiz Assessment Results"), "Results screen contains heading");
 assert(summaryHtml.includes("quiz-results-hero-card"), "Results screen contains results hero card");
 assert(summaryHtml.includes("FINAL SCORE:"), "Results screen displays FINAL SCORE");
-assert(summaryHtml.includes("Retry Quiz"), "Results screen contains Retry Quiz button");
+assert(!summaryHtml.includes("Retry Quiz"), "Results screen does NOT contain Retry Quiz button");
+assert(!summaryHtml.includes("btn-quiz-retry"), "Results screen does NOT contain btn-quiz-retry class");
 assert(summaryHtml.includes("Return to Dashboard"), "Results screen contains Return to Dashboard button");
+assert(summaryHtml.includes("btn-quiz-dashboard"), "Results screen contains btn-quiz-dashboard button");
 assert(summaryHtml.includes("Question-by-Question Review"), "Results screen contains Question-by-Question Review");
 
 console.log(`\n=== RESULTS: ${passedTests} / ${totalTests} TESTS PASSED ===`);

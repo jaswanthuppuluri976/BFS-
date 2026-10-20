@@ -403,6 +403,35 @@ class AppController {
     if (closeGuidanceBtn) closeGuidanceBtn.addEventListener("click", hideGuidance);
     if (gotGuidanceBtn) gotGuidanceBtn.addEventListener("click", hideGuidance);
 
+    // In-game Error Feedback Banner Actions
+    const errorCloseBtn = document.getElementById("game-error-close-btn");
+    const errorContinueBtn = document.getElementById("game-error-continue-btn");
+    const errorGuidedBtn = document.getElementById("game-error-guided-btn");
+
+    if (errorCloseBtn) {
+      errorCloseBtn.addEventListener("click", () => {
+        if (window.game) window.game.clearErrorFeedback();
+      });
+    }
+    if (errorContinueBtn) {
+      errorContinueBtn.addEventListener("click", () => {
+        if (window.game) window.game.clearErrorFeedback();
+      });
+    }
+    if (errorGuidedBtn) {
+      errorGuidedBtn.addEventListener("click", () => {
+        if (window.game) {
+          window.game.clearErrorFeedback();
+          if (window.game.guidedEngine) {
+            if (!window.game.guidedEngine.isActive) {
+              window.game.guidedEngine.toggle(true);
+            }
+            window.game.updateGuidedSolveUI();
+          }
+        }
+      });
+    }
+
     const openDemoBtn = document.getElementById("open-demo-btn");
     if (openDemoBtn) {
       openDemoBtn.addEventListener("click", () => {

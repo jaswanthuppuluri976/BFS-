@@ -21,11 +21,14 @@ class GuidedSolveEngine {
       return false;
     }
 
-    // Activating Guided Solve triggers penalty deduction (even if user has 0 points, allowing score to go negative)
+    // Activating Guided Solve triggers penalty deduction if level is incomplete
     this.isActive = true;
     const lvlNum = this.game ? (this.game.currentLevelIndex !== undefined ? this.game.currentLevelIndex + 1 : 1) : 1;
-    if (typeof window.app !== "undefined" && typeof window.app.recordGuidedPenalty === "function") {
-      window.app.recordGuidedPenalty(lvlNum);
+    const isCompleted = this.game && (this.game.isLevelCompleted || (this.game.completedLevels && this.game.completedLevels.has(this.game.currentLevelData ? this.game.currentLevelData.id : lvlNum)));
+    if (!isCompleted) {
+      if (typeof window.app !== "undefined" && typeof window.app.recordGuidedPenalty === "function") {
+        window.app.recordGuidedPenalty(lvlNum);
+      }
     }
     return this.isActive;
   }
@@ -71,30 +74,46 @@ class GuidedSolveEngine {
 
     // Case 3: Currently exploring a node -> check for unvisited neighbors
     if (current) {
-      const neighbors = this.game.graphEngine.getNeighbors(current);
-      const unvisitedNeighbors = neighbors.filter(n => !visited.has(n) && !this.game.discovered.has(n) && !queue.includes(n));
+      const allNeighbors = this.game.graphEngine.getNeighbors(current);
+      const eligibleUnvisited = (typeof this.game.getEligibleUnvisitedNeighbors === 'function')
+        ? this.game.getEligibleUnvisitedNeighbors(current)
+        : allNeighbors.filter(n => !visited.has(n) && !this.game.discovered.has(n) && !queue.includes(n));
 
-      if (unvisitedNeighbors.length > 0) {
-        const nextNeighbor = unvisitedNeighbors[0];
+      if (eligibleUnvisited.length > 0) {
+        const nextNeighbor = eligibleUnvisited[0];
         const updatedQueue = [...queue, nextNeighbor];
+        const alreadyQueued = allNeighbors.filter(n => queue.includes(n) && this.game.parent && this.game.parent[n] === current);
+
+        let detailedText = `'${current}' has ${allNeighbors.length === 1 ? 'one' : allNeighbors.length} eligible neighbour${allNeighbors.length > 1 ? 's' : ''}: ${allNeighbors.join(', ')}. `;
+        if (alreadyQueued.length > 0) {
+          detailedText += `${alreadyQueued.join(', ')} is already in the queue, so enqueue '${nextNeighbor}' next. `;
+        } else {
+          detailedText += `'${nextNeighbor}' is unvisited, so add it to the queue. `;
+        }
+        if (queue.length > 0) {
+          detailedText += `Once all neighbours have been enqueued, you can dequeue '${queue[0]}'.`;
+        } else {
+          detailedText += `Enqueue all eligible neighbours before dequeuing the next node.`;
+        }
+
         return {
           actionType: "enqueue_neighbor",
           targetNode: nextNeighbor,
-          buttonText: `Step: Enqueue Neighbor '${nextNeighbor}'`,
-          headline: `Discover neighbor '${nextNeighbor}' from '${current}'`,
-          explanation: `Checking doors from '${current}'. Room '${nextNeighbor}' is unvisited, so we add it to the back of the Queue.`,
+          buttonText: `Step: Enqueue Neighbour '${nextNeighbor}'`,
+          headline: `Discover neighbour '${nextNeighbor}' from '${current}'`,
+          explanation: detailedText,
           queuePreview: `[${updatedQueue.join(", ")}]`
         };
       } else {
-        // All neighbors of current are enqueued/visited -> Dequeue next or complete
+        // All neighbors of current are enqueued! Now allow dequeue
         if (queue.length > 0) {
           const nextNode = queue[0];
           return {
             actionType: "dequeue",
             targetNode: nextNode,
             buttonText: `Step: Finish '${current}' ➔ Dequeue '${nextNode}'`,
-            headline: `All neighbors of '${current}' are discovered.`,
-            explanation: `We finish room '${current}' and DEQUEUE the next waiting node ('${nextNode}') from the front of the Queue.`,
+            headline: `All neighbours of '${current}' are enqueued!`,
+            explanation: `Neighbour-enqueueing stage for '${current}' is complete. Now follow FIFO queue order and DEQUEUE '${nextNode}' from the front of the queue.`,
             queuePreview: `[${queue.slice(1).join(", ")}]`
           };
         } else {
@@ -230,3 +249,7 @@ class GuidedSolveEngine {
 }
 
 window.GuidedSolveEngine = GuidedSolveEngine;
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { GuidedSolveEngine };
+}
